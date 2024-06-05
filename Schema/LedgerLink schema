@@ -1,0 +1,1143 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 16.3
+-- Dumped by pg_dump version 16.3
+
+-- Started on 2024-06-01 22:42:58
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- TOC entry 5 (class 2615 OID 32827)
+-- Name: public; Type: SCHEMA; Schema: -; Owner: postgres
+--
+
+-- *not* creating schema, since initdb creates it
+
+
+ALTER SCHEMA public OWNER TO postgres;
+
+--
+-- TOC entry 5295 (class 0 OID 0)
+-- Dependencies: 5
+-- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: postgres
+--
+
+COMMENT ON SCHEMA public IS '';
+
+
+--
+-- TOC entry 247 (class 1255 OID 32855)
+-- Name: update_updated_at_column(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.update_updated_at_column() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION public.update_updated_at_column() OWNER TO postgres;
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- TOC entry 244 (class 1259 OID 34138)
+-- Name: customer_services; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.customer_services (
+    customer_service_id integer NOT NULL,
+    customer_id integer NOT NULL,
+    service_id integer NOT NULL,
+    unit_price numeric(10,2) NOT NULL,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+ALTER TABLE public.customer_services OWNER TO postgres;
+
+--
+-- TOC entry 243 (class 1259 OID 34137)
+-- Name: customer_services_customer_service_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.customer_services_customer_service_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.customer_services_customer_service_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 5297 (class 0 OID 0)
+-- Dependencies: 243
+-- Name: customer_services_customer_service_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.customer_services_customer_service_id_seq OWNED BY public.customer_services.customer_service_id;
+
+
+--
+-- TOC entry 217 (class 1259 OID 33674)
+-- Name: customers; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.customers (
+    customer_id integer NOT NULL,
+    company_name character varying(100) NOT NULL,
+    legal_business_name character varying(100) NOT NULL,
+    email character varying(100),
+    phone character varying(20),
+    address character varying(200),
+    city character varying(50),
+    state character varying(50),
+    zip character varying(20),
+    country character varying(50),
+    business_type character varying(50),
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+ALTER TABLE public.customers OWNER TO postgres;
+
+--
+-- TOC entry 215 (class 1259 OID 32840)
+-- Name: customers_customer_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.customers_customer_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.customers_customer_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 216 (class 1259 OID 33673)
+-- Name: customers_customer_id_seq1; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.customers_customer_id_seq1
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.customers_customer_id_seq1 OWNER TO postgres;
+
+--
+-- TOC entry 5298 (class 0 OID 0)
+-- Dependencies: 216
+-- Name: customers_customer_id_seq1; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.customers_customer_id_seq1 OWNED BY public.customers.customer_id;
+
+
+--
+-- TOC entry 240 (class 1259 OID 34005)
+-- Name: inserts; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.inserts (
+    insert_id integer NOT NULL,
+    sku character varying(100),
+    customer_id integer,
+    insert_name character varying(100) NOT NULL,
+    insert_quantity integer,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT inserts_insert_quantity_check CHECK ((insert_quantity >= 0))
+);
+
+
+ALTER TABLE public.inserts OWNER TO postgres;
+
+--
+-- TOC entry 239 (class 1259 OID 34004)
+-- Name: inserts_insert_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.inserts_insert_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.inserts_insert_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 5299 (class 0 OID 0)
+-- Dependencies: 239
+-- Name: inserts_insert_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.inserts_insert_id_seq OWNED BY public.inserts.insert_id;
+
+
+--
+-- TOC entry 218 (class 1259 OID 33686)
+-- Name: products; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.products (
+    sku character varying(100) NOT NULL,
+    customer_id integer NOT NULL,
+    labeling_unit_1 character varying(50),
+    labeling_quantity_1 integer,
+    labeling_unit_2 character varying(50),
+    labeling_quantity_2 integer,
+    labeling_unit_3 character varying(50),
+    labeling_quantity_3 integer,
+    labeling_unit_4 character varying(50),
+    labeling_quantity_4 integer,
+    labeling_unit_5 character varying(50),
+    labeling_quantity_5 integer,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT products_labeling_quantity_1_check CHECK ((labeling_quantity_1 >= 0)),
+    CONSTRAINT products_labeling_quantity_2_check CHECK ((labeling_quantity_2 >= 0)),
+    CONSTRAINT products_labeling_quantity_3_check CHECK ((labeling_quantity_3 >= 0)),
+    CONSTRAINT products_labeling_quantity_4_check CHECK ((labeling_quantity_4 >= 0)),
+    CONSTRAINT products_labeling_quantity_5_check CHECK ((labeling_quantity_5 >= 0))
+)
+PARTITION BY HASH (customer_id);
+
+
+ALTER TABLE public.products OWNER TO postgres;
+
+--
+-- TOC entry 219 (class 1259 OID 33703)
+-- Name: products_partition_0; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.products_partition_0 (
+    sku character varying(100) NOT NULL,
+    customer_id integer NOT NULL,
+    labeling_unit_1 character varying(50),
+    labeling_quantity_1 integer,
+    labeling_unit_2 character varying(50),
+    labeling_quantity_2 integer,
+    labeling_unit_3 character varying(50),
+    labeling_quantity_3 integer,
+    labeling_unit_4 character varying(50),
+    labeling_quantity_4 integer,
+    labeling_unit_5 character varying(50),
+    labeling_quantity_5 integer,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT products_labeling_quantity_1_check CHECK ((labeling_quantity_1 >= 0)),
+    CONSTRAINT products_labeling_quantity_2_check CHECK ((labeling_quantity_2 >= 0)),
+    CONSTRAINT products_labeling_quantity_3_check CHECK ((labeling_quantity_3 >= 0)),
+    CONSTRAINT products_labeling_quantity_4_check CHECK ((labeling_quantity_4 >= 0)),
+    CONSTRAINT products_labeling_quantity_5_check CHECK ((labeling_quantity_5 >= 0))
+);
+
+
+ALTER TABLE public.products_partition_0 OWNER TO postgres;
+
+--
+-- TOC entry 220 (class 1259 OID 33718)
+-- Name: products_partition_1; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.products_partition_1 (
+    sku character varying(100) NOT NULL,
+    customer_id integer NOT NULL,
+    labeling_unit_1 character varying(50),
+    labeling_quantity_1 integer,
+    labeling_unit_2 character varying(50),
+    labeling_quantity_2 integer,
+    labeling_unit_3 character varying(50),
+    labeling_quantity_3 integer,
+    labeling_unit_4 character varying(50),
+    labeling_quantity_4 integer,
+    labeling_unit_5 character varying(50),
+    labeling_quantity_5 integer,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT products_labeling_quantity_1_check CHECK ((labeling_quantity_1 >= 0)),
+    CONSTRAINT products_labeling_quantity_2_check CHECK ((labeling_quantity_2 >= 0)),
+    CONSTRAINT products_labeling_quantity_3_check CHECK ((labeling_quantity_3 >= 0)),
+    CONSTRAINT products_labeling_quantity_4_check CHECK ((labeling_quantity_4 >= 0)),
+    CONSTRAINT products_labeling_quantity_5_check CHECK ((labeling_quantity_5 >= 0))
+);
+
+
+ALTER TABLE public.products_partition_1 OWNER TO postgres;
+
+--
+-- TOC entry 229 (class 1259 OID 33853)
+-- Name: products_partition_10; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.products_partition_10 (
+    sku character varying(100) NOT NULL,
+    customer_id integer NOT NULL,
+    labeling_unit_1 character varying(50),
+    labeling_quantity_1 integer,
+    labeling_unit_2 character varying(50),
+    labeling_quantity_2 integer,
+    labeling_unit_3 character varying(50),
+    labeling_quantity_3 integer,
+    labeling_unit_4 character varying(50),
+    labeling_quantity_4 integer,
+    labeling_unit_5 character varying(50),
+    labeling_quantity_5 integer,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT products_labeling_quantity_1_check CHECK ((labeling_quantity_1 >= 0)),
+    CONSTRAINT products_labeling_quantity_2_check CHECK ((labeling_quantity_2 >= 0)),
+    CONSTRAINT products_labeling_quantity_3_check CHECK ((labeling_quantity_3 >= 0)),
+    CONSTRAINT products_labeling_quantity_4_check CHECK ((labeling_quantity_4 >= 0)),
+    CONSTRAINT products_labeling_quantity_5_check CHECK ((labeling_quantity_5 >= 0))
+);
+
+
+ALTER TABLE public.products_partition_10 OWNER TO postgres;
+
+--
+-- TOC entry 230 (class 1259 OID 33868)
+-- Name: products_partition_11; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.products_partition_11 (
+    sku character varying(100) NOT NULL,
+    customer_id integer NOT NULL,
+    labeling_unit_1 character varying(50),
+    labeling_quantity_1 integer,
+    labeling_unit_2 character varying(50),
+    labeling_quantity_2 integer,
+    labeling_unit_3 character varying(50),
+    labeling_quantity_3 integer,
+    labeling_unit_4 character varying(50),
+    labeling_quantity_4 integer,
+    labeling_unit_5 character varying(50),
+    labeling_quantity_5 integer,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT products_labeling_quantity_1_check CHECK ((labeling_quantity_1 >= 0)),
+    CONSTRAINT products_labeling_quantity_2_check CHECK ((labeling_quantity_2 >= 0)),
+    CONSTRAINT products_labeling_quantity_3_check CHECK ((labeling_quantity_3 >= 0)),
+    CONSTRAINT products_labeling_quantity_4_check CHECK ((labeling_quantity_4 >= 0)),
+    CONSTRAINT products_labeling_quantity_5_check CHECK ((labeling_quantity_5 >= 0))
+);
+
+
+ALTER TABLE public.products_partition_11 OWNER TO postgres;
+
+--
+-- TOC entry 231 (class 1259 OID 33883)
+-- Name: products_partition_12; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.products_partition_12 (
+    sku character varying(100) NOT NULL,
+    customer_id integer NOT NULL,
+    labeling_unit_1 character varying(50),
+    labeling_quantity_1 integer,
+    labeling_unit_2 character varying(50),
+    labeling_quantity_2 integer,
+    labeling_unit_3 character varying(50),
+    labeling_quantity_3 integer,
+    labeling_unit_4 character varying(50),
+    labeling_quantity_4 integer,
+    labeling_unit_5 character varying(50),
+    labeling_quantity_5 integer,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT products_labeling_quantity_1_check CHECK ((labeling_quantity_1 >= 0)),
+    CONSTRAINT products_labeling_quantity_2_check CHECK ((labeling_quantity_2 >= 0)),
+    CONSTRAINT products_labeling_quantity_3_check CHECK ((labeling_quantity_3 >= 0)),
+    CONSTRAINT products_labeling_quantity_4_check CHECK ((labeling_quantity_4 >= 0)),
+    CONSTRAINT products_labeling_quantity_5_check CHECK ((labeling_quantity_5 >= 0))
+);
+
+
+ALTER TABLE public.products_partition_12 OWNER TO postgres;
+
+--
+-- TOC entry 232 (class 1259 OID 33898)
+-- Name: products_partition_13; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.products_partition_13 (
+    sku character varying(100) NOT NULL,
+    customer_id integer NOT NULL,
+    labeling_unit_1 character varying(50),
+    labeling_quantity_1 integer,
+    labeling_unit_2 character varying(50),
+    labeling_quantity_2 integer,
+    labeling_unit_3 character varying(50),
+    labeling_quantity_3 integer,
+    labeling_unit_4 character varying(50),
+    labeling_quantity_4 integer,
+    labeling_unit_5 character varying(50),
+    labeling_quantity_5 integer,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT products_labeling_quantity_1_check CHECK ((labeling_quantity_1 >= 0)),
+    CONSTRAINT products_labeling_quantity_2_check CHECK ((labeling_quantity_2 >= 0)),
+    CONSTRAINT products_labeling_quantity_3_check CHECK ((labeling_quantity_3 >= 0)),
+    CONSTRAINT products_labeling_quantity_4_check CHECK ((labeling_quantity_4 >= 0)),
+    CONSTRAINT products_labeling_quantity_5_check CHECK ((labeling_quantity_5 >= 0))
+);
+
+
+ALTER TABLE public.products_partition_13 OWNER TO postgres;
+
+--
+-- TOC entry 233 (class 1259 OID 33913)
+-- Name: products_partition_14; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.products_partition_14 (
+    sku character varying(100) NOT NULL,
+    customer_id integer NOT NULL,
+    labeling_unit_1 character varying(50),
+    labeling_quantity_1 integer,
+    labeling_unit_2 character varying(50),
+    labeling_quantity_2 integer,
+    labeling_unit_3 character varying(50),
+    labeling_quantity_3 integer,
+    labeling_unit_4 character varying(50),
+    labeling_quantity_4 integer,
+    labeling_unit_5 character varying(50),
+    labeling_quantity_5 integer,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT products_labeling_quantity_1_check CHECK ((labeling_quantity_1 >= 0)),
+    CONSTRAINT products_labeling_quantity_2_check CHECK ((labeling_quantity_2 >= 0)),
+    CONSTRAINT products_labeling_quantity_3_check CHECK ((labeling_quantity_3 >= 0)),
+    CONSTRAINT products_labeling_quantity_4_check CHECK ((labeling_quantity_4 >= 0)),
+    CONSTRAINT products_labeling_quantity_5_check CHECK ((labeling_quantity_5 >= 0))
+);
+
+
+ALTER TABLE public.products_partition_14 OWNER TO postgres;
+
+--
+-- TOC entry 234 (class 1259 OID 33928)
+-- Name: products_partition_15; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.products_partition_15 (
+    sku character varying(100) NOT NULL,
+    customer_id integer NOT NULL,
+    labeling_unit_1 character varying(50),
+    labeling_quantity_1 integer,
+    labeling_unit_2 character varying(50),
+    labeling_quantity_2 integer,
+    labeling_unit_3 character varying(50),
+    labeling_quantity_3 integer,
+    labeling_unit_4 character varying(50),
+    labeling_quantity_4 integer,
+    labeling_unit_5 character varying(50),
+    labeling_quantity_5 integer,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT products_labeling_quantity_1_check CHECK ((labeling_quantity_1 >= 0)),
+    CONSTRAINT products_labeling_quantity_2_check CHECK ((labeling_quantity_2 >= 0)),
+    CONSTRAINT products_labeling_quantity_3_check CHECK ((labeling_quantity_3 >= 0)),
+    CONSTRAINT products_labeling_quantity_4_check CHECK ((labeling_quantity_4 >= 0)),
+    CONSTRAINT products_labeling_quantity_5_check CHECK ((labeling_quantity_5 >= 0))
+);
+
+
+ALTER TABLE public.products_partition_15 OWNER TO postgres;
+
+--
+-- TOC entry 235 (class 1259 OID 33943)
+-- Name: products_partition_16; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.products_partition_16 (
+    sku character varying(100) NOT NULL,
+    customer_id integer NOT NULL,
+    labeling_unit_1 character varying(50),
+    labeling_quantity_1 integer,
+    labeling_unit_2 character varying(50),
+    labeling_quantity_2 integer,
+    labeling_unit_3 character varying(50),
+    labeling_quantity_3 integer,
+    labeling_unit_4 character varying(50),
+    labeling_quantity_4 integer,
+    labeling_unit_5 character varying(50),
+    labeling_quantity_5 integer,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT products_labeling_quantity_1_check CHECK ((labeling_quantity_1 >= 0)),
+    CONSTRAINT products_labeling_quantity_2_check CHECK ((labeling_quantity_2 >= 0)),
+    CONSTRAINT products_labeling_quantity_3_check CHECK ((labeling_quantity_3 >= 0)),
+    CONSTRAINT products_labeling_quantity_4_check CHECK ((labeling_quantity_4 >= 0)),
+    CONSTRAINT products_labeling_quantity_5_check CHECK ((labeling_quantity_5 >= 0))
+);
+
+
+ALTER TABLE public.products_partition_16 OWNER TO postgres;
+
+--
+-- TOC entry 236 (class 1259 OID 33958)
+-- Name: products_partition_17; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.products_partition_17 (
+    sku character varying(100) NOT NULL,
+    customer_id integer NOT NULL,
+    labeling_unit_1 character varying(50),
+    labeling_quantity_1 integer,
+    labeling_unit_2 character varying(50),
+    labeling_quantity_2 integer,
+    labeling_unit_3 character varying(50),
+    labeling_quantity_3 integer,
+    labeling_unit_4 character varying(50),
+    labeling_quantity_4 integer,
+    labeling_unit_5 character varying(50),
+    labeling_quantity_5 integer,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT products_labeling_quantity_1_check CHECK ((labeling_quantity_1 >= 0)),
+    CONSTRAINT products_labeling_quantity_2_check CHECK ((labeling_quantity_2 >= 0)),
+    CONSTRAINT products_labeling_quantity_3_check CHECK ((labeling_quantity_3 >= 0)),
+    CONSTRAINT products_labeling_quantity_4_check CHECK ((labeling_quantity_4 >= 0)),
+    CONSTRAINT products_labeling_quantity_5_check CHECK ((labeling_quantity_5 >= 0))
+);
+
+
+ALTER TABLE public.products_partition_17 OWNER TO postgres;
+
+--
+-- TOC entry 237 (class 1259 OID 33973)
+-- Name: products_partition_18; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.products_partition_18 (
+    sku character varying(100) NOT NULL,
+    customer_id integer NOT NULL,
+    labeling_unit_1 character varying(50),
+    labeling_quantity_1 integer,
+    labeling_unit_2 character varying(50),
+    labeling_quantity_2 integer,
+    labeling_unit_3 character varying(50),
+    labeling_quantity_3 integer,
+    labeling_unit_4 character varying(50),
+    labeling_quantity_4 integer,
+    labeling_unit_5 character varying(50),
+    labeling_quantity_5 integer,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT products_labeling_quantity_1_check CHECK ((labeling_quantity_1 >= 0)),
+    CONSTRAINT products_labeling_quantity_2_check CHECK ((labeling_quantity_2 >= 0)),
+    CONSTRAINT products_labeling_quantity_3_check CHECK ((labeling_quantity_3 >= 0)),
+    CONSTRAINT products_labeling_quantity_4_check CHECK ((labeling_quantity_4 >= 0)),
+    CONSTRAINT products_labeling_quantity_5_check CHECK ((labeling_quantity_5 >= 0))
+);
+
+
+ALTER TABLE public.products_partition_18 OWNER TO postgres;
+
+--
+-- TOC entry 238 (class 1259 OID 33988)
+-- Name: products_partition_19; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.products_partition_19 (
+    sku character varying(100) NOT NULL,
+    customer_id integer NOT NULL,
+    labeling_unit_1 character varying(50),
+    labeling_quantity_1 integer,
+    labeling_unit_2 character varying(50),
+    labeling_quantity_2 integer,
+    labeling_unit_3 character varying(50),
+    labeling_quantity_3 integer,
+    labeling_unit_4 character varying(50),
+    labeling_quantity_4 integer,
+    labeling_unit_5 character varying(50),
+    labeling_quantity_5 integer,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT products_labeling_quantity_1_check CHECK ((labeling_quantity_1 >= 0)),
+    CONSTRAINT products_labeling_quantity_2_check CHECK ((labeling_quantity_2 >= 0)),
+    CONSTRAINT products_labeling_quantity_3_check CHECK ((labeling_quantity_3 >= 0)),
+    CONSTRAINT products_labeling_quantity_4_check CHECK ((labeling_quantity_4 >= 0)),
+    CONSTRAINT products_labeling_quantity_5_check CHECK ((labeling_quantity_5 >= 0))
+);
+
+
+ALTER TABLE public.products_partition_19 OWNER TO postgres;
+
+--
+-- TOC entry 221 (class 1259 OID 33733)
+-- Name: products_partition_2; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.products_partition_2 (
+    sku character varying(100) NOT NULL,
+    customer_id integer NOT NULL,
+    labeling_unit_1 character varying(50),
+    labeling_quantity_1 integer,
+    labeling_unit_2 character varying(50),
+    labeling_quantity_2 integer,
+    labeling_unit_3 character varying(50),
+    labeling_quantity_3 integer,
+    labeling_unit_4 character varying(50),
+    labeling_quantity_4 integer,
+    labeling_unit_5 character varying(50),
+    labeling_quantity_5 integer,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT products_labeling_quantity_1_check CHECK ((labeling_quantity_1 >= 0)),
+    CONSTRAINT products_labeling_quantity_2_check CHECK ((labeling_quantity_2 >= 0)),
+    CONSTRAINT products_labeling_quantity_3_check CHECK ((labeling_quantity_3 >= 0)),
+    CONSTRAINT products_labeling_quantity_4_check CHECK ((labeling_quantity_4 >= 0)),
+    CONSTRAINT products_labeling_quantity_5_check CHECK ((labeling_quantity_5 >= 0))
+);
+
+
+ALTER TABLE public.products_partition_2 OWNER TO postgres;
+
+--
+-- TOC entry 222 (class 1259 OID 33748)
+-- Name: products_partition_3; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.products_partition_3 (
+    sku character varying(100) NOT NULL,
+    customer_id integer NOT NULL,
+    labeling_unit_1 character varying(50),
+    labeling_quantity_1 integer,
+    labeling_unit_2 character varying(50),
+    labeling_quantity_2 integer,
+    labeling_unit_3 character varying(50),
+    labeling_quantity_3 integer,
+    labeling_unit_4 character varying(50),
+    labeling_quantity_4 integer,
+    labeling_unit_5 character varying(50),
+    labeling_quantity_5 integer,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT products_labeling_quantity_1_check CHECK ((labeling_quantity_1 >= 0)),
+    CONSTRAINT products_labeling_quantity_2_check CHECK ((labeling_quantity_2 >= 0)),
+    CONSTRAINT products_labeling_quantity_3_check CHECK ((labeling_quantity_3 >= 0)),
+    CONSTRAINT products_labeling_quantity_4_check CHECK ((labeling_quantity_4 >= 0)),
+    CONSTRAINT products_labeling_quantity_5_check CHECK ((labeling_quantity_5 >= 0))
+);
+
+
+ALTER TABLE public.products_partition_3 OWNER TO postgres;
+
+--
+-- TOC entry 223 (class 1259 OID 33763)
+-- Name: products_partition_4; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.products_partition_4 (
+    sku character varying(100) NOT NULL,
+    customer_id integer NOT NULL,
+    labeling_unit_1 character varying(50),
+    labeling_quantity_1 integer,
+    labeling_unit_2 character varying(50),
+    labeling_quantity_2 integer,
+    labeling_unit_3 character varying(50),
+    labeling_quantity_3 integer,
+    labeling_unit_4 character varying(50),
+    labeling_quantity_4 integer,
+    labeling_unit_5 character varying(50),
+    labeling_quantity_5 integer,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT products_labeling_quantity_1_check CHECK ((labeling_quantity_1 >= 0)),
+    CONSTRAINT products_labeling_quantity_2_check CHECK ((labeling_quantity_2 >= 0)),
+    CONSTRAINT products_labeling_quantity_3_check CHECK ((labeling_quantity_3 >= 0)),
+    CONSTRAINT products_labeling_quantity_4_check CHECK ((labeling_quantity_4 >= 0)),
+    CONSTRAINT products_labeling_quantity_5_check CHECK ((labeling_quantity_5 >= 0))
+);
+
+
+ALTER TABLE public.products_partition_4 OWNER TO postgres;
+
+--
+-- TOC entry 224 (class 1259 OID 33778)
+-- Name: products_partition_5; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.products_partition_5 (
+    sku character varying(100) NOT NULL,
+    customer_id integer NOT NULL,
+    labeling_unit_1 character varying(50),
+    labeling_quantity_1 integer,
+    labeling_unit_2 character varying(50),
+    labeling_quantity_2 integer,
+    labeling_unit_3 character varying(50),
+    labeling_quantity_3 integer,
+    labeling_unit_4 character varying(50),
+    labeling_quantity_4 integer,
+    labeling_unit_5 character varying(50),
+    labeling_quantity_5 integer,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT products_labeling_quantity_1_check CHECK ((labeling_quantity_1 >= 0)),
+    CONSTRAINT products_labeling_quantity_2_check CHECK ((labeling_quantity_2 >= 0)),
+    CONSTRAINT products_labeling_quantity_3_check CHECK ((labeling_quantity_3 >= 0)),
+    CONSTRAINT products_labeling_quantity_4_check CHECK ((labeling_quantity_4 >= 0)),
+    CONSTRAINT products_labeling_quantity_5_check CHECK ((labeling_quantity_5 >= 0))
+);
+
+
+ALTER TABLE public.products_partition_5 OWNER TO postgres;
+
+--
+-- TOC entry 225 (class 1259 OID 33793)
+-- Name: products_partition_6; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.products_partition_6 (
+    sku character varying(100) NOT NULL,
+    customer_id integer NOT NULL,
+    labeling_unit_1 character varying(50),
+    labeling_quantity_1 integer,
+    labeling_unit_2 character varying(50),
+    labeling_quantity_2 integer,
+    labeling_unit_3 character varying(50),
+    labeling_quantity_3 integer,
+    labeling_unit_4 character varying(50),
+    labeling_quantity_4 integer,
+    labeling_unit_5 character varying(50),
+    labeling_quantity_5 integer,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT products_labeling_quantity_1_check CHECK ((labeling_quantity_1 >= 0)),
+    CONSTRAINT products_labeling_quantity_2_check CHECK ((labeling_quantity_2 >= 0)),
+    CONSTRAINT products_labeling_quantity_3_check CHECK ((labeling_quantity_3 >= 0)),
+    CONSTRAINT products_labeling_quantity_4_check CHECK ((labeling_quantity_4 >= 0)),
+    CONSTRAINT products_labeling_quantity_5_check CHECK ((labeling_quantity_5 >= 0))
+);
+
+
+ALTER TABLE public.products_partition_6 OWNER TO postgres;
+
+--
+-- TOC entry 226 (class 1259 OID 33808)
+-- Name: products_partition_7; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.products_partition_7 (
+    sku character varying(100) NOT NULL,
+    customer_id integer NOT NULL,
+    labeling_unit_1 character varying(50),
+    labeling_quantity_1 integer,
+    labeling_unit_2 character varying(50),
+    labeling_quantity_2 integer,
+    labeling_unit_3 character varying(50),
+    labeling_quantity_3 integer,
+    labeling_unit_4 character varying(50),
+    labeling_quantity_4 integer,
+    labeling_unit_5 character varying(50),
+    labeling_quantity_5 integer,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT products_labeling_quantity_1_check CHECK ((labeling_quantity_1 >= 0)),
+    CONSTRAINT products_labeling_quantity_2_check CHECK ((labeling_quantity_2 >= 0)),
+    CONSTRAINT products_labeling_quantity_3_check CHECK ((labeling_quantity_3 >= 0)),
+    CONSTRAINT products_labeling_quantity_4_check CHECK ((labeling_quantity_4 >= 0)),
+    CONSTRAINT products_labeling_quantity_5_check CHECK ((labeling_quantity_5 >= 0))
+);
+
+
+ALTER TABLE public.products_partition_7 OWNER TO postgres;
+
+--
+-- TOC entry 227 (class 1259 OID 33823)
+-- Name: products_partition_8; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.products_partition_8 (
+    sku character varying(100) NOT NULL,
+    customer_id integer NOT NULL,
+    labeling_unit_1 character varying(50),
+    labeling_quantity_1 integer,
+    labeling_unit_2 character varying(50),
+    labeling_quantity_2 integer,
+    labeling_unit_3 character varying(50),
+    labeling_quantity_3 integer,
+    labeling_unit_4 character varying(50),
+    labeling_quantity_4 integer,
+    labeling_unit_5 character varying(50),
+    labeling_quantity_5 integer,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT products_labeling_quantity_1_check CHECK ((labeling_quantity_1 >= 0)),
+    CONSTRAINT products_labeling_quantity_2_check CHECK ((labeling_quantity_2 >= 0)),
+    CONSTRAINT products_labeling_quantity_3_check CHECK ((labeling_quantity_3 >= 0)),
+    CONSTRAINT products_labeling_quantity_4_check CHECK ((labeling_quantity_4 >= 0)),
+    CONSTRAINT products_labeling_quantity_5_check CHECK ((labeling_quantity_5 >= 0))
+);
+
+
+ALTER TABLE public.products_partition_8 OWNER TO postgres;
+
+--
+-- TOC entry 228 (class 1259 OID 33838)
+-- Name: products_partition_9; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.products_partition_9 (
+    sku character varying(100) NOT NULL,
+    customer_id integer NOT NULL,
+    labeling_unit_1 character varying(50),
+    labeling_quantity_1 integer,
+    labeling_unit_2 character varying(50),
+    labeling_quantity_2 integer,
+    labeling_unit_3 character varying(50),
+    labeling_quantity_3 integer,
+    labeling_unit_4 character varying(50),
+    labeling_quantity_4 integer,
+    labeling_unit_5 character varying(50),
+    labeling_quantity_5 integer,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT products_labeling_quantity_1_check CHECK ((labeling_quantity_1 >= 0)),
+    CONSTRAINT products_labeling_quantity_2_check CHECK ((labeling_quantity_2 >= 0)),
+    CONSTRAINT products_labeling_quantity_3_check CHECK ((labeling_quantity_3 >= 0)),
+    CONSTRAINT products_labeling_quantity_4_check CHECK ((labeling_quantity_4 >= 0)),
+    CONSTRAINT products_labeling_quantity_5_check CHECK ((labeling_quantity_5 >= 0))
+);
+
+
+ALTER TABLE public.products_partition_9 OWNER TO postgres;
+
+--
+-- TOC entry 246 (class 1259 OID 34159)
+-- Name: service_logs; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.service_logs (
+    log_id integer NOT NULL,
+    customer_id integer NOT NULL,
+    sku character varying(100) NOT NULL,
+    service_id integer NOT NULL,
+    quantity integer NOT NULL,
+    total_cost numeric(10,2) NOT NULL,
+    performed_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT service_logs_quantity_check CHECK ((quantity >= 0))
+);
+
+
+ALTER TABLE public.service_logs OWNER TO postgres;
+
+--
+-- TOC entry 245 (class 1259 OID 34158)
+-- Name: service_logs_log_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.service_logs_log_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.service_logs_log_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 5300 (class 0 OID 0)
+-- Dependencies: 245
+-- Name: service_logs_log_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.service_logs_log_id_seq OWNED BY public.service_logs.log_id;
+
+
+--
+-- TOC entry 242 (class 1259 OID 34124)
+-- Name: services; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.services (
+    service_id integer NOT NULL,
+    service_name character varying(100) NOT NULL,
+    description text,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+ALTER TABLE public.services OWNER TO postgres;
+
+--
+-- TOC entry 241 (class 1259 OID 34123)
+-- Name: services_service_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.services_service_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.services_service_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 5301 (class 0 OID 0)
+-- Dependencies: 241
+-- Name: services_service_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.services_service_id_seq OWNED BY public.services.service_id;
+
+
+--
+-- TOC entry 4794 (class 0 OID 0)
+-- Name: products_partition_0; Type: TABLE ATTACH; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.products ATTACH PARTITION public.products_partition_0 FOR VALUES WITH (modulus 20, remainder 0);
+
+
+--
+-- TOC entry 4795 (class 0 OID 0)
+-- Name: products_partition_1; Type: TABLE ATTACH; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.products ATTACH PARTITION public.products_partition_1 FOR VALUES WITH (modulus 20, remainder 1);
+
+
+--
+-- TOC entry 4804 (class 0 OID 0)
+-- Name: products_partition_10; Type: TABLE ATTACH; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.products ATTACH PARTITION public.products_partition_10 FOR VALUES WITH (modulus 20, remainder 10);
+
+
+--
+-- TOC entry 4805 (class 0 OID 0)
+-- Name: products_partition_11; Type: TABLE ATTACH; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.products ATTACH PARTITION public.products_partition_11 FOR VALUES WITH (modulus 20, remainder 11);
+
+
+--
+-- TOC entry 4806 (class 0 OID 0)
+-- Name: products_partition_12; Type: TABLE ATTACH; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.products ATTACH PARTITION public.products_partition_12 FOR VALUES WITH (modulus 20, remainder 12);
+
+
+--
+-- TOC entry 4807 (class 0 OID 0)
+-- Name: products_partition_13; Type: TABLE ATTACH; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.products ATTACH PARTITION public.products_partition_13 FOR VALUES WITH (modulus 20, remainder 13);
+
+
+--
+-- TOC entry 4808 (class 0 OID 0)
+-- Name: products_partition_14; Type: TABLE ATTACH; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.products ATTACH PARTITION public.products_partition_14 FOR VALUES WITH (modulus 20, remainder 14);
+
+
+--
+-- TOC entry 4809 (class 0 OID 0)
+-- Name: products_partition_15; Type: TABLE ATTACH; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.products ATTACH PARTITION public.products_partition_15 FOR VALUES WITH (modulus 20, remainder 15);
+
+
+--
+-- TOC entry 4810 (class 0 OID 0)
+-- Name: products_partition_16; Type: TABLE ATTACH; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.products ATTACH PARTITION public.products_partition_16 FOR VALUES WITH (modulus 20, remainder 16);
+
+
+--
+-- TOC entry 4811 (class 0 OID 0)
+-- Name: products_partition_17; Type: TABLE ATTACH; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.products ATTACH PARTITION public.products_partition_17 FOR VALUES WITH (modulus 20, remainder 17);
+
+
+--
+-- TOC entry 4812 (class 0 OID 0)
+-- Name: products_partition_18; Type: TABLE ATTACH; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.products ATTACH PARTITION public.products_partition_18 FOR VALUES WITH (modulus 20, remainder 18);
+
+
+--
+-- TOC entry 4813 (class 0 OID 0)
+-- Name: products_partition_19; Type: TABLE ATTACH; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.products ATTACH PARTITION public.products_partition_19 FOR VALUES WITH (modulus 20, remainder 19);
+
+
+--
+-- TOC entry 4796 (class 0 OID 0)
+-- Name: products_partition_2; Type: TABLE ATTACH; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.products ATTACH PARTITION public.products_partition_2 FOR VALUES WITH (modulus 20, remainder 2);
+
+
+--
+-- TOC entry 4797 (class 0 OID 0)
+-- Name: products_partition_3; Type: TABLE ATTACH; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.products ATTACH PARTITION public.products_partition_3 FOR VALUES WITH (modulus 20, remainder 3);
+
+
+--
+-- TOC entry 4798 (class 0 OID 0)
+-- Name: products_partition_4; Type: TABLE ATTACH; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.products ATTACH PARTITION public.products_partition_4 FOR VALUES WITH (modulus 20, remainder 4);
+
+
+--
+-- TOC entry 4799 (class 0 OID 0)
+-- Name: products_partition_5; Type: TABLE ATTACH; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.products ATTACH PARTITION public.products_partition_5 FOR VALUES WITH (modulus 20, remainder 5);
+
+
+--
+-- TOC entry 4800 (class 0 OID 0)
+-- Name: products_partition_6; Type: TABLE ATTACH; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.products ATTACH PARTITION public.products_partition_6 FOR VALUES WITH (modulus 20, remainder 6);
+
+
+--
+-- TOC entry 4801 (class 0 OID 0)
+-- Name: products_partition_7; Type: TABLE ATTACH; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.products ATTACH PARTITION public.products_partition_7 FOR VALUES WITH (modulus 20, remainder 7);
+
+
+--
+-- TOC entry 4802 (class 0 OID 0)
+-- Name: products_partition_8; Type: TABLE ATTACH; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.products ATTACH PARTITION public.products_partition_8 FOR VALUES WITH (modulus 20, remainder 8);
+
+
+--
+-- TOC entry 4803 (class 0 OID 0)
+-- Name: products_partition_9; Type: TABLE ATTACH; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.products ATTACH PARTITION public.products_partition_9 FOR VALUES WITH (modulus 20, remainder 9);
+
+
+--
+-- TOC entry 4865 (class 2604 OID 34141)
+-- Name: customer_services customer_service_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.customer_services ALTER COLUMN customer_service_id SET DEFAULT nextval('public.customer_services_customer_service_id_seq'::regclass);
+
+
+--
+-- TOC entry 4814 (class 2604 OID 33677)
+-- Name: customers customer_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.customers ALTER COLUMN customer_id SET DEFAULT nextval('public.customers_customer_id_seq1'::regclass);
+
+
+--
+-- TOC entry 4859 (class 2604 OID 34008)
+-- Name: inserts insert_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.inserts ALTER COLUMN insert_id SET DEFAULT nextval('public.inserts_insert_id_seq'::regclass);
+
+
+--
+-- TOC entry 4868 (class 2604 OID 34162)
+-- Name: service_logs log_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.service_logs ALTER COLUMN log_id SET DEFAULT nextval('public.service_logs_log_id_seq'::regclass);
+
+
+--
+-- TOC entry 4862 (class 2604 OID 34127)
+-- Name: services service_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.services ALTER COLUMN service_id SET DEFAULT nextval('public.services_service_id_seq'::regclass);
+
+
+--
+-- TOC entry 5296 (class 0 OID 0)
+-- Dependencies: 5
+-- Name: SCHEMA public; Type: ACL; Schema: -; Owner: postgres
+--
+
+REVOKE USAGE ON SCHEMA public FROM PUBLIC;
+
+
+-- Completed on 2024-06-01 22:42:58
+
+--
+-- PostgreSQL database dump complete
+--
+
