@@ -30,6 +30,8 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
+# backend/ledgerlink/settings.py
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -37,7 +39,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'corsheaders',
+    'billing',
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -75,10 +81,15 @@ WSGI_APPLICATION = 'ledgerlink.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'billingapp_test',  # Replace with your database name
+        'USER': 'postgres',  # Replace with your database user
+        'PASSWORD': '',  # Leave this empty if you have no password
+        'HOST': 'localhost',  # Replace with your database host, typically 'localhost'
+        'PORT': '5432',  # Replace with your database port, typically '5432'
     }
 }
+
 
 
 # Password validation
