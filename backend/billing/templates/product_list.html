@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Product List</title>
+</head>
+<body>
+    <h1>Product List</h1>
+    <ul>
+        {% for product in products %}
+            <li>{{ product.sku }} - {{ product.customer_id }}</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'upload_file' %}">Upload New Products</a>
+    <a href="{% url 'download_template' %}">Download Template</a>
+    <a href="{% url 'export_products' %}">Export Products</a>
+</body>
+</html>

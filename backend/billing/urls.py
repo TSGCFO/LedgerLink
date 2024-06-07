@@ -1,6 +1,10 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import CustomerViewSet, ServiceViewSet, CustomerServiceViewSet, InsertViewSet, ProductViewSet, ServiceLogViewSet, OrdersViewSet
+from .views import (
+    CustomerViewSet, ServiceViewSet, CustomerServiceViewSet, 
+    InsertViewSet, ProductViewSet, ServiceLogViewSet, OrdersViewSet,
+    upload_file, download_template, export_products, product_list
+)
 
 router = DefaultRouter()
 router.register(r'customers', CustomerViewSet)
@@ -13,4 +17,8 @@ router.register(r'orders', OrdersViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('upload/', upload_file, name='upload_file'),
+    path('download-template/', download_template, name='download_template'),
+    path('export-products/', export_products, name='export_products'),
+    path('products/', product_list, name='product_list'),
 ]

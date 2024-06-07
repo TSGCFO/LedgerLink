@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload File</title>
+</head>
+<body>
+    <h1>Upload File</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Upload</button>
+    </form>
+    <a href="{% url 'download_template' %}">Download Template</a>
+    <a href="{% url 'export_products' %}">Export Products</a>
+    <a href="{% url 'product_list' %}">View Products</a>
+</body>
+</html>
