@@ -48,15 +48,15 @@ def upload_file(request):
                     sku=row['SKU'],
                     customer_id=row['Customer ID'],
                     labeling_unit_1=row.get('Labeling Unit 1', ''),
-                    labeling_quantity_1=row.get('Labeling Quantity 1', 0),
+                    labeling_quantity_1=int(row.get('Labeling Quantity 1', 0) or 0),
                     labeling_unit_2=row.get('Labeling Unit 2', ''),
-                    labeling_quantity_2=row.get('Labeling Quantity 2', 0),
+                    labeling_quantity_2=int(row.get('Labeling Quantity 2', 0) or 0),
                     labeling_unit_3=row.get('Labeling Unit 3', ''),
-                    labeling_quantity_3=row.get('Labeling Quantity 3', 0),
+                    labeling_quantity_3=int(row.get('Labeling Quantity 3', 0) or 0),
                     labeling_unit_4=row.get('Labeling Unit 4', ''),
-                    labeling_quantity_4=row.get('Labeling Quantity 4', 0),
+                    labeling_quantity_4=int(row.get('Labeling Quantity 4', 0) or 0),
                     labeling_unit_5=row.get('Labeling Unit 5', ''),
-                    labeling_quantity_5=row.get('Labeling Quantity 5', 0),
+                    labeling_quantity_5=int(row.get('Labeling Quantity 5', 0) or 0),
                 )
             return redirect('product_list')
     else:
