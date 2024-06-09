@@ -85,3 +85,6 @@ def export_products(request):
 def product_list(request):
     products = Product.objects.all()
     return render(request, 'product_list.html', {'products': products})
+
+def home(request):
+    return render(request, 'home.html')

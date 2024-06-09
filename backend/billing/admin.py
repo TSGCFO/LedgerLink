@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Customer, Order, Service, CustomerService, Insert, Product, ServiceLog
+from .models import Customer, Order, Service, CustomerService, Insert, Product, ServiceLog, Material, Box, BoxPrice
 from .forms import InsertForm
 
 class InsertAdmin(admin.ModelAdmin):
@@ -13,3 +13,6 @@ admin.site.register(Insert, InsertAdmin)  # Use the custom admin class for Inser
 admin.site.register(Product)
 admin.site.register(ServiceLog)
 admin.site.register(Order)
+admin.site.register(Material)
+admin.site.register(Box)
+admin.site.register(BoxPrice)

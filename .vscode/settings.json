@@ -1,5 +1,17 @@
 {
     "python.analysis.typeCheckingMode": "basic",
     "python.createEnvironment.contentButton": "show",
-    "python.analysis.autoImportCompletions": true
+    "python.analysis.autoImportCompletions": true,
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "Ledger",
+            "database": "billingapp_test",
+            "username": "postgres",
+            "password": ""
+        }
+    ]
 }
