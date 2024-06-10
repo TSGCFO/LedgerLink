@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     CustomerViewSet, ServiceViewSet, CustomerServiceViewSet, 
     InsertViewSet, ProductViewSet, ServiceLogViewSet, OrdersViewSet,
-    upload_file, download_template, export_products, product_list
+    upload_file, download_template, export_products, product_list, OrderImportView
 )
 
 router = DefaultRouter()
@@ -21,4 +21,5 @@ urlpatterns = [
     path('download-template/', download_template, name='download_template'),
     path('export-products/', export_products, name='export_products'),
     path('products/', product_list, name='product_list'),
+    path('import-orders/', OrderImportView.as_view(), name='import-orders'),
 ]

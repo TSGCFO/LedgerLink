@@ -1,4 +1,7 @@
 from rest_framework import viewsets
+from rest_framework.views import APIView  # Import APIView
+from rest_framework.response import Response  # Import Response
+from rest_framework import status  # Import status
 from .models import Customer, Service, CustomerService, Insert, Product, ServiceLog, Order
 from .serializers import CustomerSerializer, ServiceSerializer, CustomerServiceSerializer, InsertSerializer, ProductSerializer, ServiceLogSerializer, OrdersSerializer
 from django.shortcuts import render, redirect
@@ -33,6 +36,15 @@ class ServiceLogViewSet(viewsets.ModelViewSet):
 class OrdersViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrdersSerializer
+
+class OrderImportView(APIView):  # Add this class
+    def post(self, request, format=None):
+        serializer = OrdersSerializer(data=request.data, many=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"status": "success", "data": serializer.data}, status=status.HTTP_201_CREATED)
+        return Response({"status": "error", "data": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
 
 # New views for file upload and export
 

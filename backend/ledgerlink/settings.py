@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+from celery.schedules import crontab  # Add this import
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -42,6 +43,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'billing',
+    'django_celery_beat', 
+    'django_celery_results',
 ]
 
 
@@ -132,3 +135,25 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Azure Blob Storage settings
+AZURE_STORAGE_ACCOUNT_NAME = 'tsgdatanumber2'
+AZURE_STORAGE_ACCOUNT_KEY = 'ENhDkO8cYvmyFX2XoygropxDNHpkC6Wcra0Sb2qQ/V8FDMNNthYojwSjQ+E+2vbGyWr1Wl5bThvV+AStZYpQNg=='
+AZURE_CONTAINER_NAME = 'orders'
+
+# Celery settings
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+
+# Celery beat schedule
+CELERY_BEAT_SCHEDULE = {
+    'check-blob-for-orders-every-minute': {
+        'task': 'billing.tasks.check_blob_for_orders',
+        'schedule': crontab(minute='*/1'),  # Every minute
+    },
+}

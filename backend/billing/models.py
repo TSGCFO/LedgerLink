@@ -37,7 +37,7 @@ class Service(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['service_name'], name='billing_service_service_name_key'),
-            models.UniqueConstraint(fields=['service_name'], name='services_service_name_key'),  # Added constraint
+            #models.UniqueConstraint(fields=['service_name'], name='services_service_name_key'),  Added constraint
         ]
         indexes = [
             models.Index(fields=['service_name'], name='billing_svc_name_idx', opclasses=['varchar_pattern_ops']),
