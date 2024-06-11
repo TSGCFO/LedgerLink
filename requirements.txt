@@ -12,3 +12,4 @@ celery==5.2.7
 django-celery-beat
 django-celery-results
 redis==4.5.1
+django-storages

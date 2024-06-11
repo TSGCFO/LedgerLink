@@ -6,7 +6,7 @@ from .models import Customer, Service, CustomerService, Insert, Product, Service
 from .serializers import CustomerSerializer, ServiceSerializer, CustomerServiceSerializer, InsertSerializer, ProductSerializer, ServiceLogSerializer, OrdersSerializer
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .forms import ProductUploadForm
+from .forms import ProductUploadForm, InsertForm  # Import InsertForm
 import pandas as pd
 
 class CustomerViewSet(viewsets.ModelViewSet):

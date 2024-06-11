@@ -21,9 +21,8 @@ class Customer(models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=['email'], name='billing_customer_email_ce101ff3_like', opclasses=['varchar_pattern_ops'])
+            models.Index(fields=['email'], name='billing_customer_email_idx')
         ]
-    class Meta:
         unique_together = ('email',)
 
 
@@ -37,10 +36,9 @@ class Service(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['service_name'], name='billing_service_service_name_key'),
-            #models.UniqueConstraint(fields=['service_name'], name='services_service_name_key'),  Added constraint
         ]
         indexes = [
-            models.Index(fields=['service_name'], name='billing_svc_name_idx', opclasses=['varchar_pattern_ops']),
+            models.Index(fields=['service_name'], name='billing_svc_name_idx'),
         ]
 
     def __str__(self):
@@ -106,7 +104,7 @@ class Product(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['sku', 'customer_id'], name='billing_product_sku_customer_id_uniq'),
+            models.UniqueConstraint(fields=['sku', 'customer'], name='billing_product_sku_customer_id_uniq'),
             models.CheckConstraint(check=models.Q(labeling_quantity_1__gte=0), name='billing_product_labeling_quantity_1_check'),
             models.CheckConstraint(check=models.Q(labeling_quantity_2__gte=0), name='billing_product_labeling_quantity_2_check'),
             models.CheckConstraint(check=models.Q(labeling_quantity_3__gte=0), name='billing_product_labeling_quantity_3_check'),
@@ -114,12 +112,11 @@ class Product(models.Model):
             models.CheckConstraint(check=models.Q(labeling_quantity_5__gte=0), name='billing_product_labeling_quantity_5_check')
         ]
         indexes = [
-            models.Index(fields=['customer_id'], name='product_cust_id_idx'),
+            models.Index(fields=['customer'], name='product_cust_id_idx'),
         ]
 
     def __str__(self):
         return f'{self.sku} - {self.customer_id}'
-
 
 class ServiceLog(models.Model):
     log_id = models.AutoField(primary_key=True)
@@ -135,13 +132,10 @@ class ServiceLog(models.Model):
     def __str__(self):
         return f'{self.customer.company_name} - {self.service.service_name} - {self.sku}'
 
-
-
 class Order(models.Model):
     transaction_id = models.AutoField(primary_key=True)
     create_date = models.DateTimeField(default=timezone.now)
-    customer = models.ForeignKey('Customer', on_delete=models.CASCADE)
-    customer_name = models.CharField(max_length=100)
+    customer = models.ForeignKey('Customer', on_delete=models.CASCADE)  # ForeignKey field for Customer
     close_date = models.DateTimeField(blank=True, null=True)
     reference_number = models.CharField(max_length=50)
     ship_to_name = models.CharField(max_length=100)
@@ -215,15 +209,13 @@ class Order(models.Model):
             models.CheckConstraint(check=models.Q(volume_m3__gte=0), name='orders_volume_m3_check'),
         ]
         indexes = [
-            models.Index(fields=['customer_id'], name='order_cust_id_idx'),
+            models.Index(fields=['customer'], name='order_cust_id_idx'),
             models.Index(fields=['create_date'], name='orders_create_date_idx'),
-            models.Index(fields=['customer_id'], name='orders_customer_id_idx'),
             models.Index(fields=['reference_number'], name='orders_ref_num_idx'),
             models.Index(fields=['status'], name='orders_status_idx'),
             models.Index(fields=['tracking_number'], name='orders_track_num_idx'),
             models.Index(fields=['transaction_id'], name='orders_trans_id_idx'),
         ]
-
 
 class Material(models.Model):
     material_id = models.AutoField(primary_key=True)
