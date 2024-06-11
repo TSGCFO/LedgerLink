@@ -116,7 +116,7 @@ class Product(models.Model):
         ]
 
     def __str__(self):
-        return f'{self.sku} - {self.customer_id}'
+        return f'{self.sku} - {self.customer}'
 
 class ServiceLog(models.Model):
     log_id = models.AutoField(primary_key=True)
