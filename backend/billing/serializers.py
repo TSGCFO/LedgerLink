@@ -31,7 +31,7 @@ class ServiceLogSerializer(serializers.ModelSerializer):
         model = ServiceLog
         fields = '__all__'
 
-class OrdersSerializer(serializers.ModelSerializer):
+class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = '__all__'

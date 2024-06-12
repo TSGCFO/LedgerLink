@@ -1,12 +1,12 @@
 from rest_framework import viewsets
-from rest_framework.views import APIView  # Import APIView
-from rest_framework.response import Response  # Import Response
-from rest_framework import status  # Import status
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 from .models import Customer, Service, CustomerService, Insert, Product, ServiceLog, Order
-from .serializers import CustomerSerializer, ServiceSerializer, CustomerServiceSerializer, InsertSerializer, ProductSerializer, ServiceLogSerializer, OrdersSerializer
+from .serializers import CustomerSerializer, ServiceSerializer, CustomerServiceSerializer, InsertSerializer, ProductSerializer, ServiceLogSerializer, OrderSerializer
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .forms import ProductUploadForm, InsertForm  # Import InsertForm
+from .forms import ProductUploadForm, InsertForm
 import pandas as pd
 
 class CustomerViewSet(viewsets.ModelViewSet):
@@ -33,18 +33,17 @@ class ServiceLogViewSet(viewsets.ModelViewSet):
     queryset = ServiceLog.objects.all()
     serializer_class = ServiceLogSerializer
 
-class OrdersViewSet(viewsets.ModelViewSet):
+class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
-    serializer_class = OrdersSerializer
+    serializer_class = OrderSerializer
 
-class OrderImportView(APIView):  # Add this class
+class OrderImportView(APIView):
     def post(self, request, format=None):
-        serializer = OrdersSerializer(data=request.data, many=True)
+        serializer = OrderSerializer(data=request.data, many=True)
         if serializer.is_valid():
             serializer.save()
             return Response({"status": "success", "data": serializer.data}, status=status.HTTP_201_CREATED)
         return Response({"status": "error", "data": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-
 
 # New views for file upload and export
 

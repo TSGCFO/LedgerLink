@@ -133,9 +133,9 @@ class ServiceLog(models.Model):
         return f'{self.customer.company_name} - {self.service.service_name} - {self.sku}'
 
 class Order(models.Model):
-    transaction_id = models.AutoField(primary_key=True)
-    create_date = models.DateTimeField(default=timezone.now)
-    customer = models.ForeignKey('Customer', on_delete=models.CASCADE)  # ForeignKey field for Customer
+    transaction_id = models.IntegerField(primary_key=True)
+    customer_id = models.IntegerField()
+    customer = models.CharField(max_length=100)
     close_date = models.DateTimeField(blank=True, null=True)
     reference_number = models.CharField(max_length=50)
     ship_to_name = models.CharField(max_length=100)
@@ -146,76 +146,15 @@ class Order(models.Model):
     ship_to_state = models.CharField(max_length=50)
     ship_to_zip = models.CharField(max_length=20)
     ship_to_country = models.CharField(max_length=50)
-    carrier = models.CharField(max_length=100, blank=True, null=True)
-    total_weight_lb = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    line_items = models.IntegerField()
-    sku_quantity = models.JSONField()
-    total_item_qty = models.IntegerField()
-    volume_cuft = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    packages = models.IntegerField()
-    markfor_lists = models.TextField(blank=True, null=True)
-    ship_service = models.CharField(max_length=100, blank=True, null=True)
-    warehouse_instructions = models.TextField(blank=True, null=True)
-    allocation_status = models.CharField(max_length=50, blank=True, null=True)
-    asn_sent_date = models.DateTimeField(blank=True, null=True)
-    batch_id = models.CharField(max_length=50, blank=True, null=True)
-    batch_name = models.CharField(max_length=100, blank=True, null=True)
-    bill_of_lading = models.CharField(max_length=100, blank=True, null=True)
-    billing_type = models.CharField(max_length=50, blank=True, null=True)
-    cancel_date = models.DateTimeField(blank=True, null=True)
-    confirm_asn_sent_date = models.DateTimeField(blank=True, null=True)
-    earliest_ship_date = models.DateTimeField(blank=True, null=True)
-    end_of_day_request_date = models.DateTimeField(blank=True, null=True)
-    load_number = models.CharField(max_length=50, blank=True, null=True)
-    load_out_percent = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
-    load_out_date = models.DateTimeField(blank=True, null=True)
-    markfor_name_id = models.CharField(max_length=100, blank=True, null=True)
-    master_bill_of_lading = models.CharField(max_length=100, blank=True, null=True)
-    pack_done_date = models.DateTimeField(blank=True, null=True)
-    parcel_label_type = models.CharField(max_length=50, blank=True, null=True)
-    pick_done_date = models.DateTimeField(blank=True, null=True)
-    pick_job_assignee = models.CharField(max_length=50, blank=True, null=True)
-    pick_job_id = models.CharField(max_length=50, blank=True, null=True)
-    pick_ticket_print_date = models.DateTimeField(blank=True, null=True)
-    pickup_date = models.DateTimeField(blank=True, null=True)
-    purchase_order = models.CharField(max_length=100, blank=True, null=True)
-    retailer_id = models.CharField(max_length=50, blank=True, null=True)
-    ship_to_email = models.CharField(max_length=100, blank=True, null=True)
-    ship_to_phone = models.CharField(max_length=20, blank=True, null=True)
-    small_parcel_ship_date = models.DateTimeField(blank=True, null=True)
-    status = models.CharField(max_length=50, blank=True, null=True)
-    time_zone = models.CharField(max_length=50, blank=True, null=True)
-    tracking_number = models.CharField(max_length=100, blank=True, null=True)
-    volume_m3 = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    warehouse = models.CharField(max_length=100, blank=True, null=True)
-    total_weight_kg = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    created_by = models.CharField(max_length=50, blank=True, null=True)
-    updated_by = models.CharField(max_length=50, blank=True, null=True)
-    create_source = models.CharField(max_length=50, blank=True, null=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f'Order {self.transaction_id} for {self.customer.company_name}'
+        return f'Order {self.transaction_id} for {self.customer}'
 
     class Meta:
-        constraints = [
-            models.CheckConstraint(check=models.Q(line_items__gte=0), name='orders_line_items_check'),
-            models.CheckConstraint(check=models.Q(load_out_percent__gte=0) & models.Q(load_out_percent__lte=100), name='orders_load_out_percent_check'),
-            models.CheckConstraint(check=models.Q(packages__gte=0), name='orders_packages_check'),
-            models.CheckConstraint(check=models.Q(total_item_qty__gte=0), name='orders_total_item_qty_check'),
-            models.CheckConstraint(check=models.Q(total_weight_kg__gte=0), name='orders_total_weight_kg_check'),
-            models.CheckConstraint(check=models.Q(total_weight_lb__gte=0), name='orders_total_weight_lb_check'),
-            models.CheckConstraint(check=models.Q(volume_cuft__gte=0), name='orders_volume_cuft_check'),
-            models.CheckConstraint(check=models.Q(volume_m3__gte=0), name='orders_volume_m3_check'),
-        ]
         indexes = [
-            models.Index(fields=['customer'], name='order_cust_id_idx'),
-            models.Index(fields=['create_date'], name='orders_create_date_idx'),
-            models.Index(fields=['reference_number'], name='orders_ref_num_idx'),
-            models.Index(fields=['status'], name='orders_status_idx'),
-            models.Index(fields=['tracking_number'], name='orders_track_num_idx'),
-            models.Index(fields=['transaction_id'], name='orders_trans_id_idx'),
+            models.Index(fields=['customer_id'], name='order_cust_id_idx'),
         ]
+
 
 class Material(models.Model):
     material_id = models.AutoField(primary_key=True)

@@ -1,0 +1,6 @@
+/* custom_admin.css */
+.model-billing-order .results {
+    overflow-x: auto;
+    display: block;
+    white-space: nowrap;
+}

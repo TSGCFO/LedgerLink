@@ -13,5 +13,7 @@
             "username": "postgres",
             "password": ""
         }
-    ]
+    ],
+    "CodeGPT.apiKey": "CodeGPT Plus Beta",
+    "CodeGPT.Autocomplete.suggestionDelay": 4300
 }

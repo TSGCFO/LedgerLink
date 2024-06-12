@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
     CustomerViewSet, ServiceViewSet, CustomerServiceViewSet, 
-    InsertViewSet, ProductViewSet, ServiceLogViewSet, OrdersViewSet,
+    InsertViewSet, ProductViewSet, ServiceLogViewSet, OrderViewSet,
     upload_file, download_template, export_products, product_list, OrderImportView
 )
 
@@ -13,7 +13,7 @@ router.register(r'customer-services', CustomerServiceViewSet)
 router.register(r'inserts', InsertViewSet)
 router.register(r'products', ProductViewSet)
 router.register(r'service-logs', ServiceLogViewSet)
-router.register(r'orders', OrdersViewSet)
+router.register(r'orders', OrderViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
