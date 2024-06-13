@@ -1,4 +1,5 @@
 from django.db import models
+import json
 from django.utils import timezone
 
 class Customer(models.Model):
@@ -134,8 +135,8 @@ class ServiceLog(models.Model):
 
 class Order(models.Model):
     transaction_id = models.IntegerField(primary_key=True)
-    customer_id = models.IntegerField()
-    customer = models.CharField(max_length=100)
+    customer_id = models.IntegerField(null=False)
+    customer = models.CharField(max_length=100, null=False)
     close_date = models.DateTimeField(blank=True, null=True)
     reference_number = models.CharField(max_length=50)
     ship_to_name = models.CharField(max_length=100)
@@ -146,6 +147,17 @@ class Order(models.Model):
     ship_to_state = models.CharField(max_length=50)
     ship_to_zip = models.CharField(max_length=20)
     ship_to_country = models.CharField(max_length=50)
+    weight_lb = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    line_items = models.IntegerField()
+    sku_quantity = models.JSONField()
+    total_item_qty = models.IntegerField()
+    volume_cuft = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    packages = models.IntegerField()
+
+    def save(self, *args, **kwargs):
+        if isinstance(self.sku_quantity, list):
+            self.sku_quantity = json.dumps(self.sku_quantity)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f'Order {self.transaction_id} for {self.customer}'

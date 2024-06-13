@@ -1,0 +1,23 @@
+
+/**
+ * This script is used to import Excel data into a PostgreSQL table.
+ * 
+ * Usage:
+ * psql -U your_username -d your_database
+ * 
+ * Replace "your_username" with your PostgreSQL username and "your_database" with the name of your PostgreSQL database.
+ * This command will open the PostgreSQL command-line interface, allowing you to execute SQL queries and import data into the specified database.
+ */
+
+/**
+ * This code snippet demonstrates how to import data from a CSV file into a PostgreSQL table using the \copy command.
+ * 
+ * Usage:
+ * - Replace 'your_table_name_here' with the name of the target table.
+ * - Replace 'path_to_the_file' with the actual path to the CSV file.
+ * - Ensure that the CSV file has a header row.
+ * 
+ * Example:
+ * \copy your_table_name_here FROM 'path_to_the_file' WITH (FORMAT csv, HEADER true);
+ */
+

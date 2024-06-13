@@ -5,7 +5,7 @@ import pandas as pd
 from celery import shared_task
 from django.conf import settings
 from .models import Order, Customer
-from .serializers import OrdersSerializer  # Ensure this matches the actual name of your serializer
+from .serializers import OrderSerializer  # Ensure this matches the actual name of your serializer
 
 # Initialize the BlobServiceClient
 blob_service_client = BlobServiceClient(
@@ -97,7 +97,7 @@ def check_blob_for_orders():
             order['customer'] = customer.pk  # Use the customer primary key
 
             # Serialize and save the orders
-            serializer = OrdersSerializer(data=order)
+            serializer = OrderSerializer(data=order)
             if serializer.is_valid():
                 serializer.save()
                 print(f"Successfully imported order with reference number {order['reference_number']} from {blob.name}")
