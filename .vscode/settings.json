@@ -15,5 +15,5 @@
         }
     ],
     "CodeGPT.apiKey": "CodeGPT Plus Beta",
-    "CodeGPT.Autocomplete.suggestionDelay": 4300
+    "CodeGPT.Autocomplete.suggestionDelay": 2400
 }

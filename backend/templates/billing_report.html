@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing Report</title>
+</head>
+<body>
+    <h1>Billing Report for Customer ID: {{ customer_id }}</h1>
+    <p>Total Cost: {{ total_cost }}</p>
+    <a href="{% url 'admin:index' %}">Back to admin</a>
+</body>
+</html>
