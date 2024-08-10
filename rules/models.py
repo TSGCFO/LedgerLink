@@ -63,3 +63,7 @@ class Rule(models.Model):
 
     def __str__(self):
         return f"{self.get_field_display()} {self.get_operator_display()} {self.value} -> {self.adjustment_amount}"
+
+    def get_values_as_list(self):
+        # Utility method to return the value field as a list of individual items
+        return [v.strip() for v in self.value.split(';') if v.strip()]
