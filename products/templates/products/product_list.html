@@ -1,10 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+   <title>Product List</title>
 </head>
 <body>
-$END$
+    <h1>Products</h1>
+    <form method="GET" action="">
+        <input type="text" name="q" placeholder="Search...">
+        <button type="submit">Search</button>
+    </form>
+    <ul>
+        {% for product in products %}
+            <li>
+                <a href="{% url 'product_detail' product.pk %}">{{ product.sku }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'product_add' %}">Add New Product</a>
 </body>
 </html>

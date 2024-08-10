@@ -37,7 +37,20 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "customers.apps.CustomersConfig",
+    "products.apps.ProductsConfig",
+    "services.apps.ServicesConfig",
+    "customer_services.apps.CustomerServicesConfig",
+    "orders.apps.OrdersConfig",
+    "inserts.apps.InsertsConfig",
+    "materials.apps.MaterialsConfig",
+    "shipping.apps.ShippingConfig",
+    "rules.apps.BillingConfig",
+    "crispy_forms",
 ]
+
+# Specify the template pack to use
+CRISPY_TEMPLATE_PACK = 'bootstrap4'  # or 'bootstrap5', 'uni_form', etc.
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -75,8 +88,12 @@ WSGI_APPLICATION = 'LedgerLink.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'pycharm_django',
+        'USER': 'postgres',
+        'PASSWORD': 'hassan',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
@@ -115,8 +132,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = 'static/'
-
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 

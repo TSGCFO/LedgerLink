@@ -1,10 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <title>Customer Detail</title>
 </head>
 <body>
-$END$
+    <h1>{{ customer.company_name }}</h1>
+    <p><strong>id:</strong> {{ customer.id }}</p>
+    <p><strong>Legal Business Name:</strong> {{ customer.legal_business_name }}</p>
+    <p><strong>Email:</strong> {{ customer.email }}</p>
+    <p><strong>Phone:</strong> {{ customer.phone }}</p>
+    <p><strong>Address:</strong> {{ customer.address }}</p>
+    <p><strong>City:</strong> {{ customer.city }}</p>
+    <p><strong>State:</strong> {{ customer.state }}</p>
+    <p><strong>ZIP:</strong> {{ customer.zip }}</p>
+    <p><strong>Country:</strong> {{ customer.country }}</p>
+    <p><strong>Business Type:</strong> {{ customer.business_type }}</p>
+    <p><strong>Created At:</strong> {{ customer.created_at }}</p>
+    <p><strong>Updated At:</strong> {{ customer.updated_at }}</p>
+    <a href="{% url 'customer_edit' customer.pk %}">Edit Customer</a>
 </body>
 </html>
