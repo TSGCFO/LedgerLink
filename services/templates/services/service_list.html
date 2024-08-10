@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Service List</title>
+</head>
+<body>
+    <h1>Service List</h1>
+    <a href="{% url 'service_create' %}">Add New Service</a>
+    <ul>
+        {% for service in services %}
+            <li>
+                <a href="{% url 'service_detail' service.pk %}">{{ service.service_name }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

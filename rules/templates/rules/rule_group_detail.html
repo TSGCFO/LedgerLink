@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rule Group Details</title>
+    <!-- Include any CSS files here -->
+</head>
+<body>
+    <header>
+        <h1>Rule Group Details</h1>
+        <nav>
+            <a href="/">Home</a>
+            <a href="{% url 'rule_group_list' %}">Rule Groups</a>
+            <a href="{% url 'create_rule' rule_group.id %}">Add New Rule</a>
+            <!-- Add more navigation links as needed -->
+        </nav>
+    </header>
+
+    <main>
+        <h2>Details for Rule Group: {{ rule_group.customer_service }}</h2>
+        <p>Logic Operator: {{ rule_group.get_logic_operator_display }}</p>
+
+        <h3>Rules in this Group:</h3>
+        <ul>
+            {% for rule in rules %}
+                <li>{{ rule.get_field_display }} {{ rule.get_operator_display }} {{ rule.value }} (Adjustment: {{ rule.adjustment_amount }})</li>
+            {% endfor %}
+        </ul>
+
+        <a href="{% url 'create_rule' rule_group.id %}">Add New Rule</a>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Your Company</p>
+    </footer>
+
+    <!-- Include any JavaScript files here -->
+</body>
+</html>

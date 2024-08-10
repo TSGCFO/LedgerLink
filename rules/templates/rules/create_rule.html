@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Rule</title>
+    <!-- Include any CSS files here -->
+</head>
+<body>
+    <header>
+        <h1>Add Rule to {{ group.customer_service }}</h1>
+        <nav>
+            <a href="/">Home</a>
+            <a href="{% url 'rule_group_list' %}">Rule Groups</a>
+            <a href="{% url 'rule_group_detail' group.id %}">Back to Rule Group</a>
+            <!-- Add more navigation links as needed -->
+        </nav>
+    </header>
+
+    <main>
+        <h2>Add Rule to Rule Group: {{ group }}</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Save Rule</button>
+        </form>
+        <a href="{% url 'rule_group_detail' group.id %}">Cancel</a>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Your Company</p>
+    </footer>
+
+    <!-- Include any JavaScript files here -->
+</body>
+</html>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Detail</title>
+</head>
+<body>
+    <h1>{{ order }}</h1>
+    <p><strong>Transaction ID:</strong> {{ order.transaction_id }}</p>
+    <p><strong>Customer:</strong> {{ order.customer }}</p>
+    <p><strong>Reference Number:</strong> {{ order.reference_number }}</p>
+    <p><strong>Close Date:</strong> {{ order.close_date }}</p>
+    <p><strong>Ship To Name:</strong> {{ order.ship_to_name }}</p>
+    <p><strong>Ship To Company:</strong> {{ order.ship_to_company }}</p>
+    <p><strong>Ship To Address:</strong> {{ order.ship_to_address }}</p>
+    <p><strong>Ship To Address 2:</strong> {{ order.ship_to_address2 }}</p>
+    <p><strong>Ship To City:</strong> {{ order.ship_to_city }}</p>
+    <p><strong>Ship To State:</strong> {{ order.ship_to_state }}</p>
+    <p><strong>Ship To ZIP:</strong> {{ order.ship_to_zip }}</p>
+    <p><strong>Ship To Country:</strong> {{ order.ship_to_country }}</p>
+    <p><strong>Weight (lb):</strong> {{ order.weight_lb }}</p>
+    <p><strong>Line Items:</strong> {{ order.line_items }}</p>
+    <p><strong>SKU Quantity:</strong> {{ order.sku_quantity }}</p>
+    <p><strong>Total Item Quantity:</strong> {{ order.total_item_qty }}</p>
+    <p><strong>Volume (cu ft):</strong> {{ order.volume_cuft }}</p>
+    <p><strong>Packages:</strong> {{ order.packages }}</p>
+    <p><strong>Notes:</strong> {{ order.notes }}</p>
+    <p><strong>Carrier:</strong> {{ order.carrier }}</p>
+    <a href="{% url 'order_update' order.pk %}">Edit</a> |
+    <a href="{% url 'order_delete' order.pk %}">Delete</a>
+    <br>
+    <a href="{% url 'order_list' %}">Back to Order List</a>
+</body>
+</html>

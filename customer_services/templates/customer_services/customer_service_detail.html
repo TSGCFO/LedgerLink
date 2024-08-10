@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Customer Service Detail</title>
+</head>
+<body>
+    <h1>{{ customer_service }}</h1>
+    <p><strong>Customer:</strong> {{ customer_service.customer }}</p>
+    <p><strong>Service:</strong> {{ customer_service.service }}</p>
+    <p><strong>Unit Price:</strong> {{ customer_service.unit_price }}</p>
+    <p><strong>Created At:</strong> {{ customer_service.created_at }}</p>
+    <p><strong>Updated At:</strong> {{ customer_service.updated_at }}</p>
+    <a href="{% url 'customer_service_update' customer_service.pk %}">Edit</a> |
+    <a href="{% url 'customer_service_delete' customer_service.pk %}">Delete</a>
+    <br>
+    <a href="{% url 'customer_service_list' %}">Back to Customer Service List</a>
+</body>
+</html>

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Customer Service List</title>
+</head>
+<body>
+    <h1>Customer Service List</h1>
+    <a href="{% url 'customer_service_create' %}">Add New Customer Service</a>
+    <ul>
+        {% for customer_service in customer_services %}
+            <li>
+                <a href="{% url 'customer_service_detail' customer_service.pk %}">{{ customer_service }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

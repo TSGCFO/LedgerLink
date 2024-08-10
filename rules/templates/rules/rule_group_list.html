@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rule Groups</title>
+    <!-- Include any CSS files here -->
+</head>
+<body>
+    <header>
+        <h1>Your Application Name</h1>
+        <nav>
+            <a href="/">Home</a>
+            <a href="{% url 'rule_group_list' %}">Rule Groups</a>
+            <!-- Add more navigation links as needed -->
+        </nav>
+    </header>
+
+    <main>
+        <h2>Rule Groups</h2>
+        <ul>
+            {% for group in rule_groups %}
+                <li><a href="{% url 'rule_group_detail' group.id %}">{{ group }}</a></li>
+            {% endfor %}
+        </ul>
+        <a href="{% url 'create_rule_group' %}">Create New Rule Group</a>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Your Company</p>
+    </footer>
+
+    <!-- Include any JavaScript files here -->
+</body>
+</html>

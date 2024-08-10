@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{% block title %}Customer Service Form{% endblock %}</title>
+</head>
+<body>
+    <h1>{% block heading %}Customer Service Form{% endblock %}</h1>
+    <form method="post">
+        {% csrf_token %}
+        { form.as_p }
+        <button type="submit">Save</button>
+    </form>
+    <a href="{% url 'customer_service_list' %}">Back to Customer Service List</a>
+</body>
+</html>
