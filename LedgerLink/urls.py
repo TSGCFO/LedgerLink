@@ -29,4 +29,5 @@ urlpatterns = [
     path('inserts/', include('inserts.urls')),
     path('rules/', include('rules.urls')),
     path('rules/', include('rules.urls')),
+    path('billing/', include('billing.urls')),
 ]

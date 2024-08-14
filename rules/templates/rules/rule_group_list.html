@@ -4,32 +4,86 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rule Groups</title>
-    <!-- Include any CSS files here -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            line-height: 1.6;
+            background-color: #f4f4f4;
+        }
+        header, footer {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 20px;
+            text-align: center;
+        }
+        header nav a, footer a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        main {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 20px auto;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background: #eee;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        a {
+            text-decoration: none;
+            color: #007BFF;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 <body>
     <header>
-        <h1>Your Application Name</h1>
+        <h1>Rule Groups</h1>
         <nav>
             <a href="/">Home</a>
             <a href="{% url 'rule_group_list' %}">Rule Groups</a>
-            <!-- Add more navigation links as needed -->
         </nav>
     </header>
 
     <main>
-        <h2>Rule Groups</h2>
+        <h2>Available Rule Groups</h2>
         <ul>
             {% for group in rule_groups %}
                 <li><a href="{% url 'rule_group_detail' group.id %}">{{ group }}</a></li>
             {% endfor %}
         </ul>
-        <a href="{% url 'create_rule_group' %}">Create New Rule Group</a>
+        <a href="{% url 'create_rule_group' %}">
+            <button>Create New Rule Group</button>
+        </a>
     </main>
 
     <footer>
         <p>&copy; 2024 Your Company</p>
     </footer>
-
-    <!-- Include any JavaScript files here -->
 </body>
 </html>

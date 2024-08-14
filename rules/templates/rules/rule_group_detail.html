@@ -4,7 +4,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rule Group Details</title>
-    <!-- Include any CSS files here -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            line-height: 1.6;
+            background-color: #f4f4f4;
+        }
+        header, footer {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 20px;
+            text-align: center;
+        }
+        header nav a, footer a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        main {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 20px auto;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background: #eee;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        a {
+            text-decoration: none;
+            color: #007BFF;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -13,7 +68,6 @@
             <a href="/">Home</a>
             <a href="{% url 'rule_group_list' %}">Rule Groups</a>
             <a href="{% url 'create_rule' rule_group.id %}">Add New Rule</a>
-            <!-- Add more navigation links as needed -->
         </nav>
     </header>
 
@@ -28,13 +82,13 @@
             {% endfor %}
         </ul>
 
-        <a href="{% url 'create_rule' rule_group.id %}">Add New Rule</a>
+        <a href="{% url 'create_rule' rule_group.id %}">
+            <button>Add New Rule</button>
+        </a>
     </main>
 
     <footer>
         <p>&copy; 2024 Your Company</p>
     </footer>
-
-    <!-- Include any JavaScript files here -->
 </body>
 </html>
