@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Charge Details</title>
+</head>
+<body>
+    <h1>Charge Details</h1>
+    <p>Service: {{ charge.service.name }}</p>
+    <p>Amount: {{ charge.amount }} {{ charge.currency }}</p>
+    <p>Order: {{ charge.order.transaction_id }}</p>
+</body>
+</html>

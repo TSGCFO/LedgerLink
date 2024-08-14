@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice Details</title>
+</head>
+<body>
+    <h1>Invoice Details</h1>
+    <p>Invoice ID: {{ invoice.id }}</p>
+    <p>Customer: {{ invoice.customer.company_name }}</p>
+    <p>Total Amount: {{ invoice.total_amount }} {{ invoice.currency }}</p>
+
+    <h2>Charges</h2>
+    <ul>
+        {% for charge in charges %}
+            <li>
+                Service: {{ charge.service.name }} - Amount: {{ charge.amount }} {{ charge.currency }}
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
