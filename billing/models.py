@@ -17,7 +17,7 @@ class Invoice(models.Model):
         return f"Invoice {self.id} for {self.customer.company_name} - Order {self.order.transaction_id}"
 
 class Charge(models.Model):
-    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, related_name='charges')  # Links to the Invoice model
+    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, related_name='charges', blank=True, null=True)  # Links to the Invoice model
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='charges')  # Links to the Order model
     service = models.ForeignKey(CustomerService, on_delete=models.CASCADE)  # Links to the CustomerService model
     transaction_id = models.IntegerField()  # Order's transaction ID
@@ -42,10 +42,11 @@ class Charge(models.Model):
     carrier = models.CharField(max_length=50, blank=True, null=True)  # Carrier information
     amount = models.DecimalField(max_digits=10, decimal_places=2)  # Charge amount for this service
     currency = models.CharField(max_length=3, choices=[('USD', 'US Dollar'), ('CAD', 'Canadian Dollar')])  # Currency of the charge
+    invoiced = models.BooleanField(default=False)  # New field to track if the charge is invoiced
 
     def __str__(self):
         # Returns a string representation showing the customer name, order transaction ID, and service name
-        return f"Charge for {self.customer.company_name} - Order {self.order.transaction_id} - Service: {self.service.name}"
+        return f"Charge for {self.customer.company_name} - Order {self.order.transaction_id} - Service: {self.service.service.service_name}"
 
     @property
     def total_for_service(self):

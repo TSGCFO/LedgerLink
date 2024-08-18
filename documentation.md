@@ -24,20 +24,16 @@ I have been able to achieve certain milestones in the project:
 
 
 here is my project directory so far
-
-C:\Users\Hassan\PycharmProjects\LedgerLink
-├── LedgerLink
+    
+```markdown
+LedgerLink/
+├── LedgerLink/
 │   ├── __init__.py
 │   ├── asgi.py
 │   ├── settings.py
 │   ├── urls.py
 │   ├── wsgi.py
-│   └── __pycache__
-│       ├── __init__.cpython-312.pyc
-│       ├── settings.cpython-312.pyc
-│       ├── urls.cpython-312.pyc
-│       └── wsgi.cpython-312.pyc
-├── customers
+├── billing/
 │   ├── __init__.py
 │   ├── admin.py
 │   ├── apps.py
@@ -46,13 +42,29 @@ C:\Users\Hassan\PycharmProjects\LedgerLink
 │   ├── tests.py
 │   ├── urls.py
 │   ├── views.py
-│   └── templates
-│       └── customers
+│   ├── templates/
+│       └── billing/
+│           ├── charge_detail.html
+│           ├── invoice_detail.html
+│           ├── invoice_form.html
+│           ├── invoice_list.html
+│           ├── uninvoiced_charge_list.html
+├── customers/
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── forms.py
+│   ├── models.py
+│   ├── tests.py
+│   ├── urls.py
+│   ├── views.py
+│   ├── templates/
+│       └── customers/
 │           ├── customer_confirm_delete.html
 │           ├── customer_detail.html
 │           ├── customer_form.html
-│           └── customer_list.html
-├── customer_services
+│           ├── customer_list.html
+├── customer_services/
 │   ├── __init__.py
 │   ├── admin.py
 │   ├── apps.py
@@ -61,13 +73,13 @@ C:\Users\Hassan\PycharmProjects\LedgerLink
 │   ├── tests.py
 │   ├── urls.py
 │   ├── views.py
-│   └── templates
-│       └── customer_services
+│   ├── templates/
+│       └── customer_services/
 │           ├── customer_service_confirm_delete.html
 │           ├── customer_service_detail.html
 │           ├── customer_service_form.html
-│           └── customer_service_list.html
-├── inserts
+│           ├── customer_service_list.html
+├── inserts/
 │   ├── __init__.py
 │   ├── admin.py
 │   ├── apps.py
@@ -76,13 +88,14 @@ C:\Users\Hassan\PycharmProjects\LedgerLink
 │   ├── tests.py
 │   ├── urls.py
 │   ├── views.py
-│   └── templates
-│       └── inserts
+│   ├── templates/
+│       └── inserts/
 │           ├── insert_confirm_delete.html
 │           ├── insert_detail.html
 │           ├── insert_form.html
-│           └── insert_list.html
-├── materials
+│           ├── insert_list.html
+├── manage.py
+├── materials/
 │   ├── __init__.py
 │   ├── admin.py
 │   ├── apps.py
@@ -91,8 +104,8 @@ C:\Users\Hassan\PycharmProjects\LedgerLink
 │   ├── tests.py
 │   ├── urls.py
 │   ├── views.py
-│   └── templates
-│       └── materials
+│   ├── templates/
+│       └── materials/
 │           ├── boxprice_confirm_delete.html
 │           ├── boxprice_detail.html
 │           ├── boxprice_form.html
@@ -100,8 +113,8 @@ C:\Users\Hassan\PycharmProjects\LedgerLink
 │           ├── material_confirm_delete.html
 │           ├── material_detail.html
 │           ├── material_form.html
-│           └── material_list.html
-├── orders
+│           ├── material_list.html
+├── orders/
 │   ├── __init__.py
 │   ├── admin.py
 │   ├── apps.py
@@ -110,13 +123,13 @@ C:\Users\Hassan\PycharmProjects\LedgerLink
 │   ├── tests.py
 │   ├── urls.py
 │   ├── views.py
-│   └── templates
-│       └── orders
+│   ├── templates/
+│       └── orders/
 │           ├── order_confirm_delete.html
 │           ├── order_detail.html
 │           ├── order_form.html
-│           └── order_list.html
-├── products
+│           ├── order_list.html
+├── products/
 │   ├── __init__.py
 │   ├── admin.py
 │   ├── apps.py
@@ -125,13 +138,13 @@ C:\Users\Hassan\PycharmProjects\LedgerLink
 │   ├── tests.py
 │   ├── urls.py
 │   ├── views.py
-│   └── templates
-│       └── products
+│   ├── templates/
+│       └── products/
 │           ├── product_detail.html
 │           ├── product_form.html
 │           ├── product_list.html
-│           └── product_upload.html
-├── services
+│           ├── product_upload.html
+├── rules/
 │   ├── __init__.py
 │   ├── admin.py
 │   ├── apps.py
@@ -140,13 +153,28 @@ C:\Users\Hassan\PycharmProjects\LedgerLink
 │   ├── tests.py
 │   ├── urls.py
 │   ├── views.py
-│   └── templates
-│       └── services
+│   ├── templates/
+│       └── rules/
+│           ├── create_rule.html
+│           ├── create_rule_group.html
+│           ├── rule_group_detail.html
+│           ├── rule_group_list.html
+├── services/
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── forms.py
+│   ├── models.py
+│   ├── tests.py
+│   ├── urls.py
+│   ├── views.py
+│   ├── templates/
+│       └── services/
 │           ├── service_confirm_delete.html
 │           ├── service_detail.html
 │           ├── service_form.html
-│           └── service_list.html
-├── shipping
+│           ├── service_list.html
+├── shipping/
 │   ├── __init__.py
 │   ├── admin.py
 │   ├── apps.py
@@ -155,8 +183,8 @@ C:\Users\Hassan\PycharmProjects\LedgerLink
 │   ├── tests.py
 │   ├── urls.py
 │   ├── views.py
-│   └── templates
-│       └── shipping
+│   ├── templates/
+│       └── shipping/
 │           ├── cadshipping_confirm_delete.html
 │           ├── cadshipping_detail.html
 │           ├── cadshipping_form.html
@@ -164,10 +192,9 @@ C:\Users\Hassan\PycharmProjects\LedgerLink
 │           ├── usshipping_confirm_delete.html
 │           ├── usshipping_detail.html
 │           ├── usshipping_form.html
-│           └── usshipping_list.html
-└── static
-    ├── product_template.csv
-    └── product_template.xlsx
+│           ├── usshipping_list.html
+```
+
 
 
 

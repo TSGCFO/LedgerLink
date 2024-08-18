@@ -1,0 +1,44 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice List</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}"> <!-- Assuming you have a CSS file for styling -->
+</head>
+<body>
+    <h1>Invoice List</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Invoice ID</th>
+                <th>Customer</th>
+                <th>Order</th>
+                <th>Total Amount</th>
+                <th>Currency</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for invoice in invoices %}
+                <tr>
+                    <td>{{ invoice.id }}</td>
+                    <td>{{ invoice.customer.company_name }}</td>
+                    <td>{{ invoice.order.transaction_id }}</td>
+                    <td>{{ invoice.total_amount }}</td>
+                    <td>{{ invoice.currency }}</td>
+                    <td>{{ invoice.status }}</td>
+                    <td>
+                        <a href="{% url 'invoice_detail' invoice.id %}">View</a>
+                        <!-- Add more actions like edit or delete if needed -->
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{% url 'invoice_create' %}">Create New Invoice</a> <!-- Link to create a new invoice -->
+</body>
+</html>

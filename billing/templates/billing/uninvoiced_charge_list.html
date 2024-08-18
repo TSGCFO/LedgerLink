@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Uninvoiced Charges</title>
+</head>
+<body>
+    <h1>Uninvoiced Charges</h1>
+    <ul>
+        {% for charge in charges %}
+            <li>
+                Service: {{ charge.service.name }} - Amount: {{ charge.amount }} {{ charge.currency }}
+                <form method="post" action="{% url 'add_charge_to_invoice' charge.id %}">
+                    {% csrf_token %}
+                    <button type="submit">Add to Invoice</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

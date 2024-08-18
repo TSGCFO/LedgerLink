@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Invoice</title>
+</head>
+<body>
+    <h1>Create Invoice</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <h2>Uninvoiced Charges</h2>
+        <ul>
+            {% for charge in uninvoiced_charges %}
+                <li>
+                    <input type="checkbox" name="charges" value="{{ charge.id }}">
+                    Service: {{ charge.service.name }} - Amount: {{ charge.amount }} {{ charge.currency }}
+                </li>
+            {% endfor %}
+        </ul>
+        <button type="submit">Create Invoice</button>
+    </form>
+</body>
+</html>
