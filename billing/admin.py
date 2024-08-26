@@ -1,20 +1,25 @@
 from django.contrib import admin
-
-from billing.models import Charge, Invoice
-
+from .models import Invoice, BillingLog, BillingConfiguration
 
 # Register your models here.
-@admin.register(Charge)
-class ChargeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'order', 'service', 'amount', 'currency', 'invoiced')
-    list_filter = ('currency', 'invoiced')
-    search_fields = ('order__transaction_id', 'service__name')
-    list_per_page = 10
+# billing/admin.py
 
 
 @admin.register(Invoice)
 class InvoiceAdmin(admin.ModelAdmin):
-    list_display = ('id', 'order', 'total_amount', 'currency', 'status')
-    list_filter = ('currency', 'status')
-    search_fields = ('order__transaction_id',)
-    list_per_page = 10
+    list_display = ('id', 'customer', 'invoice_date', 'total_amount')
+    search_fields = ('customer__name', 'invoice_date')
+    list_filter = ('invoice_date',)
+    readonly_fields = ('invoice_date',)
+
+@admin.register(BillingLog)
+class BillingLogAdmin(admin.ModelAdmin):
+    list_display = ('id', 'customer', 'order', 'log_date', 'status')
+    search_fields = ('customer__name', 'order__reference_number', 'status')
+    list_filter = ('log_date', 'status')
+    readonly_fields = ('log_date',)
+
+@admin.register(BillingConfiguration)
+class BillingConfigurationAdmin(admin.ModelAdmin):
+    list_display = ('name', 'value', 'description')
+    search_fields = ('name', 'value')

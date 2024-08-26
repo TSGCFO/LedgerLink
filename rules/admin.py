@@ -14,12 +14,28 @@ class RuleInline(admin.TabularInline):
         formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
         if db_field.name == 'value' and 'field' in request.GET:
             field_value = request.GET.get('field')
-            if field_value == 'sku':
-                formfield = forms.ChoiceField(choices=[('SKU1', 'SKU1'), ('SKU2', 'SKU2')], help_text='Select the SKU')
-            elif field_value in ['quantity', 'case_picks']:
-                formfield = forms.IntegerField(min_value=1, help_text='Enter the quantity or number of case picks')
+            operator_value = request.GET.get('operator')
+
+            # Handle dynamic adjustments based on both field and operator
+            if field_value == 'sku_quantity':
+                if operator_value in ['contains', 'in', 'ni']:
+                    formfield = forms.CharField(
+                        widget=forms.Textarea,
+                        help_text='Enter the SKUs in a list format, separated by semicolons.'
+                    )
+                elif operator_value in ['eq', 'ne']:
+                    formfield = forms.CharField(
+                        help_text='Enter the SKU in a JSON format.'
+                    )
+            elif field_value in ['weight_lb', 'line_items', 'total_item_qty', 'volume_cuft', 'packages']:
+                formfield = forms.DecimalField(
+                    help_text='Enter a numeric value.',
+                    min_value=0
+                )
             else:
-                formfield = forms.CharField(help_text='Enter the condition value')
+                formfield = forms.CharField(
+                    help_text='Enter the condition value.'
+                )
         return formfield
 
 class RuleGroupAdmin(admin.ModelAdmin):

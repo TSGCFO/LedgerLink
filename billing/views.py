@@ -1,76 +1,48 @@
+# billing/views.py
+
 from django.shortcuts import render, get_object_or_404, redirect
-from django.views import View
-from django.views.generic import ListView, DetailView, CreateView
-from .models import Invoice, Charge
-from .forms import InvoiceForm
+from customers.models import Customer
+from orders.models import Order
+from .services.billing_calculator import BillingCalculator
+from .services.invoice_generator import InvoiceGenerator
+from .services.report_exporter import ReportExporter
+from .forms import BillingForm
+from .models import Invoice
 
+def generate_billing_view(request):
+    if request.method == 'POST':
+        form = BillingForm(request.POST)
+        if form.is_valid():
+            customer = form.cleaned_data['customer']
+            orders = form.cleaned_data['orders']
 
-# ListView for Invoices
-class InvoiceListView(ListView):
-    model = Invoice
-    template_name = 'billing/invoice_list.html'
-    context_object_name = 'invoices'
+            invoice_generator = InvoiceGenerator(customer, orders)
+            invoice_data = invoice_generator.generate_invoice()
 
-    def get_queryset(self):
-        # Optionally filter invoices by customer
-        customer_id = self.request.GET.get('customer_id')
-        if customer_id:
-            return Invoice.objects.filter(customer_id=customer_id)
-        return Invoice.objects.all()
+            # Optional: Save the invoice to the database
+            invoice = invoice_generator.save_invoice(invoice_data)
 
+            return redirect('invoice_detail', invoice_id=invoice.id)
+    else:
+        form = BillingForm()
 
-class InvoiceDetailView(DetailView):
-    model = Invoice
-    template_name = 'billing/invoice_detail.html'
-    context_object_name = 'invoice'
+    return render(request, 'billing/invoice_form.html', {'form': form})
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['charges'] = self.object.charges.all()
-        return context
+def invoice_detail_view(request, invoice_id):
+    invoice = get_object_or_404(Invoice, id=invoice_id)
+    return render(request, 'billing/invoice_detail.html', {'invoice': invoice})
 
+def invoice_list_view(request):
+    invoices = Invoice.objects.all()
+    return render(request, 'billing/invoice_list.html', {'invoices': invoices})
 
-# Optional: DetailView for a specific Charge
-class ChargeDetailView(DetailView):
-    model = Charge
-    template_name = 'billing/charge_detail.html'
-    context_object_name = 'charge'
+def export_report_view(request):
+    report_exporter = ReportExporter()
+    if request.GET.get('format') == 'pdf':
+        pdf_file = report_exporter.export_to_pdf(report_data={})
+        return pdf_file  # Assumes `report_data` is provided as needed
+    elif request.GET.get('format') == 'excel':
+        excel_file = report_exporter.export_to_excel(report_data={})
+        return excel_file  # Assumes `report_data` is provided as needed
 
-
-class UninvoicedChargeListView(ListView):
-    model = Charge
-    template_name = 'billing/uninvoiced_charge_list.html'
-    context_object_name = 'charges'
-
-    def get_queryset(self):
-        return Charge.objects.filter(invoiced=False)
-
-class AddChargeToInvoiceView(View):
-    def post(self, request, charge_id):
-        charge = Charge.objects.get(id=charge_id)
-        invoice_id = request.POST.get('invoice_id')
-        invoice = Invoice.objects.get(id=invoice_id)
-        charge.invoice = invoice
-        charge.invoiced = True
-        charge.save()
-        return redirect('uninvoiced_charge_list')
-
-class InvoiceCreateView(CreateView):
-    model = Invoice
-    form_class = InvoiceForm
-    template_name = 'billing/invoice_form.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['uninvoiced_charges'] = Charge.objects.filter(invoiced=False)
-        return context
-
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        charges_ids = self.request.POST.getlist('charges')
-        for charge_id in charges_ids:
-            charge = Charge.objects.get(id=charge_id)
-            charge.invoice = self.object
-            charge.invoiced = True
-            charge.save()
-        return response
+    return redirect('invoice_list')  # Fallback if no format is provided
