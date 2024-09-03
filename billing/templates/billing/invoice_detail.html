@@ -14,15 +14,49 @@
 <table class="table table-striped">
     <thead>
     <tr>
-        <th>Service</th>
-        <th>Cost</th>
+        <th>Transaction ID</th>
+        <th>Close Date</th>
+        <th>Reference Number</th>
+        <th>Ship To Name</th>
+        <th>Ship To Company</th>
+        <th>Ship To Address</th>
+        <th>Ship To Address2</th>
+        <th>Ship To City</th>
+        <th>Ship To State</th>
+        <th>Ship To Zip</th>
+        <th>Ship To Country</th>
+        <th>Weight (lb)</th>
+        <th>Line Items</th>
+        <th>SKU Quantity</th>
+        <th>Total Item Qty</th>
+        <th>Volume (cuft)</th>
+        <th>Packages</th>
+        <th>Notes</th>
+        <th>Carrier</th>
     </tr>
     </thead>
     <tbody>
     {% for detail in invoice.details %}
         <tr>
-            <td>{{ detail.service }}</td>
-            <td>${{ detail.cost }}</td>
+            <td>{{ detail.transaction_id }}</td>
+            <td>{{ detail.close_date }}</td>
+            <td>{{ detail.reference_number }}</td>
+            <td>{{ detail.ship_to_name }}</td>
+            <td>{{ detail.ship_to_company }}</td>
+            <td>{{ detail.ship_to_address }}</td>
+            <td>{{ detail.ship_to_address2 }}</td>
+            <td>{{ detail.ship_to_city }}</td>
+            <td>{{ detail.ship_to_state }}</td>
+            <td>{{ detail.ship_to_zip }}</td>
+            <td>{{ detail.ship_to_country }}</td>
+            <td>{{ detail.weight_lb }}</td>
+            <td>{{ detail.line_items }}</td>
+            <td>{{ detail.sku_quantity }}</td>
+            <td>{{ detail.total_item_qty }}</td>
+            <td>{{ detail.volume_cuft }}</td>
+            <td>{{ detail.packages }}</td>
+            <td>{{ detail.notes }}</td>
+            <td>{{ detail.carrier }}</td>
         </tr>
     {% endfor %}
     </tbody>

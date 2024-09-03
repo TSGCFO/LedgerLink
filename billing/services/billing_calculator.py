@@ -85,28 +85,34 @@ class BillingCalculator:
         return False
 
     def calculate_order_cost(self, order):
-        """Calculate the total cost for a specific order."""
-        order_total = Decimal('0.00')
-        services = CustomerService.objects.filter(customer=self.customer)
-
-        for service_entry in services:
-            service = service_entry.service
-            if self.apply_rules(service, order):
-                service_cost = service_entry.unit_price
-                order_total += service_cost
-                self.order_details.append({
-                    'order_id': order.transaction_id,  # Using transaction_id from Order model
-                    'reference_number': order.reference_number,  # Order reference number
-                    'service': service.service_name,  # Service name
-                    'cost': str(service_cost),  # Ensure the cost is converted to string for JSON serialization
-                })
-
-        return order_total
+        # Calculate cost for a single order
+        order_detail = {
+            "transaction_id": order.transaction_id,
+            "service": order.service_name,  # Replace with actual service attribute
+            "cost": order.total_cost,  # Replace with actual cost attribute
+            "close_date": order.close_date,
+            "reference_number": order.reference_number,
+            "ship_to_name": order.ship_to_name,
+            "ship_to_company": order.ship_to_company,
+            "ship_to_address": order.ship_to_address,
+            "ship_to_address2": order.ship_to_address2,
+            "ship_to_city": order.ship_to_city,
+            "ship_to_state": order.ship_to_state,
+            "ship_to_zip": order.ship_to_zip,
+            "ship_to_country": order.ship_to_country,
+            "weight_lb": order.weight_lb,
+            "line_items": order.line_items,
+            "sku_quantity": order.sku_quantity,
+            "total_item_qty": order.total_item_qty,
+            "volume_cuft": order.volume_cuft,
+            "packages": order.packages,
+            "notes": order.notes,
+            "carrier": order.carrier,
+        }
+        self.order_details.append(order_detail)
+        self.total_cost += order.total_cost
 
     def calculate_total_billing(self):
-        """Calculate the billing for all orders of a customer."""
         for order in self.orders:
-            order_cost = self.calculate_order_cost(order)
-            self.total_cost += order_cost
-
+            self.calculate_order_cost(order)
         return self.total_cost, self.order_details

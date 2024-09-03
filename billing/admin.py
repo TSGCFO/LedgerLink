@@ -8,14 +8,14 @@ from .models import Invoice, BillingLog, BillingConfiguration
 @admin.register(Invoice)
 class InvoiceAdmin(admin.ModelAdmin):
     list_display = ('id', 'customer', 'invoice_date', 'total_amount')
-    search_fields = ('customer__name', 'invoice_date')
+    search_fields = ('customer__company_name', 'invoice_date')
     list_filter = ('invoice_date',)
     readonly_fields = ('invoice_date',)
 
 @admin.register(BillingLog)
 class BillingLogAdmin(admin.ModelAdmin):
     list_display = ('id', 'customer', 'order', 'log_date', 'status')
-    search_fields = ('customer__name', 'order__reference_number', 'status')
+    search_fields = ('customer__company_name', 'order__reference_number', 'status')
     list_filter = ('log_date', 'status')
     readonly_fields = ('log_date',)
 

@@ -1,8 +1,11 @@
+{% load static %}
+<!-- templates/billing/invoice_form.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Generate Invoice</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
 </head>
 <body>
 
@@ -16,6 +19,16 @@
     </div>
 
     <div class="form-group">
+        <label for="id_start_date">Start Date:</label>
+        {{ form.start_date }}
+    </div>
+
+    <div class="form-group">
+        <label for="id_end_date">End Date:</label>
+        {{ form.end_date }}
+    </div>
+
+    <div class="form-group">
         <label for="id_orders">Orders:</label>
         {{ form.orders }}
     </div>
@@ -23,5 +36,15 @@
     <button type="submit" class="btn btn-primary">Generate Invoice</button>
 </form>
 
+{% if orders %}
+    <h2>Orders</h2>
+    <ul>
+        {% for order in orders %}
+            <li>{{ order }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+<script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
 </body>
 </html>
