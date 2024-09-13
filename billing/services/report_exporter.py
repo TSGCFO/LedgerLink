@@ -3,7 +3,7 @@
 import pandas as pd
 from io import BytesIO
 from django.http import HttpResponse
-from ..utils.pdf_exporter import PDFExporter
+from ..utils.rule_applier import PDFExporter
 
 class ReportExporter:
 

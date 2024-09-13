@@ -47,7 +47,8 @@ INSTALLED_APPS = [
     "shipping.apps.ShippingConfig",
     "rules.apps.BillingConfig",
     "crispy_forms",
-    "billing.apps.BillingConfig"
+    "billing.apps.BillingConfig",
+    'Main.apps.MainConfig'
 ]
 
 # Specify the template pack to use

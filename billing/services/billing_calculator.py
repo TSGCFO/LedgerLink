@@ -1,118 +1,73 @@
-# billing/services/billing_calculator.py
-
-from rules.models import RuleGroup
-from orders.models import Order
+from ..utils.order_fetcher import fetch_orders, get_order_details
+from ..utils.rule_applier import apply_rules
 from customer_services.models import CustomerService
 from decimal import Decimal
 
+
+def calculate_service_cost(customer_service, order, adjustment_amount):
+    # Basic calculation: unit price * quantity + adjustment
+    # This may need to be adjusted based on your specific pricing logic
+    base_price = customer_service.unit_price * order.total_item_qty
+    return base_price + Decimal(str(adjustment_amount))
+
+
 class BillingCalculator:
-
-    def __init__(self, customer, orders):
+    def __init__(self, customer, start_date, end_date):
         self.customer = customer
-        self.orders = orders
-        self.total_cost = Decimal('0.00')
-        self.order_details = []
+        self.start_date = start_date
+        self.end_date = end_date
 
-    def apply_rules(self, service, order):
-        """Apply rules to determine if a service should be charged for an order."""
-        rule_groups = RuleGroup.objects.filter(customer_service__service=service, customer_service__customer=self.customer)
-        for rule_group in rule_groups:
-            rules = rule_group.rules.all()
-            if rule_group.logic_operator == 'AND':
-                if all(self.evaluate_rule(rule, order) for rule in rules):
-                    return True
-            elif rule_group.logic_operator == 'OR':
-                if any(self.evaluate_rule(rule, order) for rule in rules):
-                    return True
-            elif rule_group.logic_operator == 'NOT':
-                if not any(self.evaluate_rule(rule, order) for rule in rules):
-                    return True
-        return False
+    def calculate_billing(self):
+        orders = fetch_orders(self.customer, self.start_date, self.end_date)
+        total_bill = Decimal('0.00')
+        billing_details = []
 
-    def evaluate_rule(self, rule, order):
-        """Evaluate a single rule against an order with context-specific validation."""
-        order_value = getattr(order, rule.field, None)
+        for order in orders:
+            order_details = get_order_details(order)
+            applicable_services = apply_rules(order, self.customer)
+            order_total = Decimal('0.00')
+            order_services = []
 
-        # Context-specific validation and interpretation
-        if rule.field == 'sku_quantity' and isinstance(order_value, dict):
-            if rule.operator == 'contains':
-                return rule.value in order_value.keys()
-            elif rule.operator == 'eq':
-                try:
-                    return order_value == eval(rule.value)
-                except (SyntaxError, ValueError):
-                    return False
-            elif rule.operator == 'in':
-                return any(item in order_value.keys() for item in rule.get_values_as_list())
-            elif rule.operator == 'ni':
-                return all(item not in order_value.keys() for item in rule.get_values_as_list())
+            for customer_service, adjustment_amount in applicable_services:
+                service_cost = calculate_service_cost(customer_service, order, adjustment_amount)
+                order_total += service_cost
+                order_services.append({
+                    'service_name': customer_service.service.service_name,
+                    'cost': service_cost
+                })
 
-        elif isinstance(order_value, str):
-            # Handle string-based operators for string fields
-            if rule.operator == 'contains' and rule.value in order_value:
-                return True
-            elif rule.operator == 'eq' and order_value == rule.value:
-                return True
-            elif rule.operator == 'startswith' and order_value.startswith(rule.value):
-                return True
-            elif rule.operator == 'endswith' and order_value.endswith(rule.value):
-                return True
-            elif rule.operator == 'in' and any(item in order_value for item in rule.get_values_as_list()):
-                return True
-            elif rule.operator == 'ni' and all(item not in order_value for item in rule.get_values_as_list()):
-                return True
+            billing_details.append({
+                'order': order_details,
+                'services': order_services,
+                'total': order_total
+            })
+            total_bill += order_total
 
-        elif isinstance(order_value, (int, float, Decimal)):
-            # Handle numeric operators for numeric fields
-            try:
-                numeric_value = float(rule.value)
-                if rule.operator == 'gt' and order_value > numeric_value:
-                    return True
-                elif rule.operator == 'lt' and order_value < numeric_value:
-                    return True
-                elif rule.operator == 'ge' and order_value >= numeric_value:
-                    return True
-                elif rule.operator == 'le' and order_value <= numeric_value:
-                    return True
-                elif rule.operator == 'eq' and order_value == numeric_value:
-                    return True
-                elif rule.operator == 'ne' and order_value != numeric_value:
-                    return True
-            except ValueError:
-                return False
-
-        # Default return False if no conditions are met
-        return False
-
-    def calculate_order_cost(self, order):
-        # Calculate cost for a single order
-        order_detail = {
-            "transaction_id": order.transaction_id,
-            "service": order.service_name,  # Replace with actual service attribute
-            "cost": order.total_cost,  # Replace with actual cost attribute
-            "close_date": order.close_date,
-            "reference_number": order.reference_number,
-            "ship_to_name": order.ship_to_name,
-            "ship_to_company": order.ship_to_company,
-            "ship_to_address": order.ship_to_address,
-            "ship_to_address2": order.ship_to_address2,
-            "ship_to_city": order.ship_to_city,
-            "ship_to_state": order.ship_to_state,
-            "ship_to_zip": order.ship_to_zip,
-            "ship_to_country": order.ship_to_country,
-            "weight_lb": order.weight_lb,
-            "line_items": order.line_items,
-            "sku_quantity": order.sku_quantity,
-            "total_item_qty": order.total_item_qty,
-            "volume_cuft": order.volume_cuft,
-            "packages": order.packages,
-            "notes": order.notes,
-            "carrier": order.carrier,
+        return {
+            'customer': self.customer.company_name,
+            'start_date': self.start_date,
+            'end_date': self.end_date,
+            'total_bill': total_bill,
+            'billing_details': billing_details
         }
-        self.order_details.append(order_detail)
-        self.total_cost += order.total_cost
 
-    def calculate_total_billing(self):
-        for order in self.orders:
-            self.calculate_order_cost(order)
-        return self.total_cost, self.order_details
+    def generate_invoice_data(self):
+        billing_result = self.calculate_billing()
+
+        invoice_data = {
+            'customer_name': billing_result['customer'],
+            'billing_period': f"{billing_result['start_date']} to {billing_result['end_date']}",
+            'total_amount': billing_result['total_bill'],
+            'line_items': []
+        }
+
+        for detail in billing_result['billing_details']:
+            for service in detail['services']:
+                invoice_data['line_items'].append({
+                    'description': f"{service['service_name']} for Order {detail['order']['transaction_id']}",
+                    'quantity': detail['order']['total_item_qty'],
+                    'unit_price': service['cost'] / detail['order']['total_item_qty'],
+                    'total': service['cost']
+                })
+
+        return invoice_data

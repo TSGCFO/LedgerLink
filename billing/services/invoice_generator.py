@@ -1,7 +1,7 @@
 from .billing_calculator import BillingCalculator
 from billing.models import Invoice
 from django.utils import timezone
-from ..utils.pdf_exporter import PDFExporter
+from ..utils.rule_applier import PDFExporter
 
 
 class InvoiceGenerator:
@@ -21,7 +21,8 @@ class InvoiceGenerator:
         }
         return invoice_data
 
-    def save_invoice(self, invoice_data):
+    @staticmethod
+    def save_invoice(invoice_data):
         """(Optional) Save the generated invoice to the database."""
         invoice = Invoice(
             customer=invoice_data["customer"],
@@ -31,7 +32,8 @@ class InvoiceGenerator:
         invoice.save()
         return invoice
 
-    def generate_pdf_invoice(self, invoice_data):
+    @staticmethod
+    def generate_pdf_invoice(invoice_data):
         """(Optional) Generate a PDF version of the invoice."""
         pdf_exporter = PDFExporter()
         pdf_file = pdf_exporter.generate_pdf(invoice_data)

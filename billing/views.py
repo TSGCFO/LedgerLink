@@ -1,57 +1,73 @@
-# billing/views.py
-
-from django.shortcuts import render, get_object_or_404, redirect
-from customers.models import Customer
-from orders.models import Order
-from .services.billing_calculator import BillingCalculator
-from .services.invoice_generator import InvoiceGenerator
-from .services.report_exporter import ReportExporter
+from django.shortcuts import render
+from django.views import View
 from .forms import BillingForm
-from .models import Invoice
+from .services.billing_calculator import BillingCalculator
+from django.http import HttpResponse
+import csv
+import json
 
+class GenerateBillingView(View):
+    template_name = 'billing/generate_billing.html'
 
-def generate_billing_view(request):
-    customer = None
-    start_date = None
-    end_date = None
-    orders_queryset = Order.objects.none()
+    def get(self, request):
+        form = BillingForm()
+        return render(request, self.template_name, {'form': form})
 
-    if request.method == "POST":
+    def post(self, request):
         form = BillingForm(request.POST)
         if form.is_valid():
-            customer = form.cleaned_data["customer"]
-            start_date = form.cleaned_data["start_date"]
-            end_date = form.cleaned_data["end_date"]
-            orders_queryset = Order.objects.filter(customer=customer)
-            if start_date and end_date:
-                orders_queryset = orders_queryset.filter(order_date__range=(start_date, end_date))
-            form = BillingForm(customer=customer, start_date=start_date, end_date=end_date)
-            form.fields['orders'].queryset = orders_queryset
-            # Return the rendered template with the updated form
-            return render(request, "billing/generate_billing.html", {"form": form})
-    else:
-        form = BillingForm()
+            customer = form.cleaned_data['customer']
+            start_date = form.cleaned_data['start_date']
+            end_date = form.cleaned_data['end_date']
 
-    return render(request, "billing/generate_billing.html", {"form": form})
+            calculator = BillingCalculator(customer, start_date, end_date)
+            billing_result = calculator.calculate_billing()
 
+            return render(request, 'billing/billing_result.html', {'result': billing_result})
+        return render(request, self.template_name, {'form': form})
 
-def invoice_detail_view(request, invoice_id):
-    invoice = get_object_or_404(Invoice, id=invoice_id)
-    return render(request, "billing/invoice_detail.html", {"invoice": invoice})
+class ExportBillingView(View):
+    def get(self, request):
+        # Assume we're storing the last billing result in the session
+        billing_result = request.session.get('last_billing_result')
+        if not billing_result:
+            return HttpResponse("No billing data available for export.")
 
+        export_format = request.GET.get('format', 'csv')
 
-def invoice_list_view(request):
-    invoices = Invoice.objects.all()
-    return render(request, "billing/invoice_list.html", {"invoices": invoices})
+        if export_format == 'csv':
+            return self.export_csv(billing_result)
+        elif export_format == 'json':
+            return self.export_json(billing_result)
+        else:
+            return HttpResponse("Unsupported export format.")
 
+    def export_csv(self, billing_result):
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="billing_export.csv"'
 
-def export_report_view(request):
-    report_exporter = ReportExporter()
-    if request.GET.get("format") == "pdf":
-        pdf_file = report_exporter.export_to_pdf(report_data={})
-        return pdf_file  # Assumes `report_data` is provided as needed
-    elif request.GET.get("format") == "excel":
-        excel_file = report_exporter.export_to_excel(report_data={})
-        return excel_file  # Assumes `report_data` is provided as needed
+        writer = csv.writer(response)
+        writer.writerow(['Customer', 'Start Date', 'End Date', 'Total Bill'])
+        writer.writerow([
+            billing_result['customer'],
+            billing_result['start_date'],
+            billing_result['end_date'],
+            billing_result['total_bill']
+        ])
 
-    return redirect("invoice_list")  # Fallback if no format is provided
+        writer.writerow(['Order ID', 'Service', 'Cost'])
+        for detail in billing_result['billing_details']:
+            for service in detail['services']:
+                writer.writerow([
+                    detail['order']['transaction_id'],
+                    service['service_name'],
+                    service['cost']
+                ])
+
+        return response
+
+    def export_json(self, billing_result):
+        response = HttpResponse(content_type='application/json')
+        response['Content-Disposition'] = 'attachment; filename="billing_export.json"'
+        json.dump(billing_result, response, indent=2)
+        return response
