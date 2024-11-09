@@ -1,0 +1,27 @@
+<!-- Main/templates/components/navbar.html -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-transparent position-absolute w-100">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'main:home' %}">LedgerLink</a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav" aria-controls="navbarNav"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <!-- Navigation links will be added later -->
+            </ul>
+
+            <div class="navbar-nav">
+                {% if user.is_authenticated %}
+                    <span class="nav-item nav-link">{{ user.email }}</span>
+                    <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                {% else %}
+                    <a class="nav-link" href="{% url 'login' %}">Login</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>

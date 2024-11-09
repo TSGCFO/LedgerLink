@@ -16,11 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
-from Main.views import home_view  # Import the home view from views.py
+from django.conf import settings
+from django.conf.urls.static import static  # Add this
+from django.contrib.auth import views as auth_views
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', home_view, name='home'),  # Add the home view to the URL patterns
     path('customers/', include('customers.urls')),
     path('products/', include('products.urls')),
     path('orders/', include('orders.urls')),
@@ -30,6 +32,8 @@ urlpatterns = [
     path('customer_services/', include('customer_services.urls')),
     path('inserts/', include('inserts.urls')),
     path('rules/', include('rules.urls')),
-    path('rules/', include('rules.urls')),
     path('billing/', include('billing.urls')),
-]
+    path('', include('Main.urls')),  # Include the Main app urls
+                  path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
+                  path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) 

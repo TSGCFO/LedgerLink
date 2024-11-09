@@ -47,12 +47,18 @@ INSTALLED_APPS = [
     "shipping.apps.ShippingConfig",
     "rules.apps.BillingConfig",
     "crispy_forms",
+    "crispy_bootstrap5",
     "billing.apps.BillingConfig",
     'Main.apps.MainConfig'
 ]
 
-# Specify the template pack to use
-CRISPY_TEMPLATE_PACK = 'bootstrap4'  # or 'bootstrap5', 'uni_form', etc.
+# Add LOGIN_REDIRECT_URL and LOGOUT_REDIRECT_URL
+LOGIN_REDIRECT_URL = 'main:home'
+LOGOUT_REDIRECT_URL = 'main:home'
+
+# Update crispy forms to use Bootstrap 5
+CRISPY_TEMPLATE_PACK = 'bootstrap5'  # Change from bootstrap4
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -69,7 +75,9 @@ ROOT_URLCONF = 'LedgerLink.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            BASE_DIR / 'Main' / 'templates',  # Add this line
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -133,6 +141,9 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
+
+# Add STATIC_ROOT
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
