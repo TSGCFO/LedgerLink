@@ -1,9 +1,9 @@
 from django.urls import path
-from .views import GenerateBillingView, ExportBillingView
+from .views import BillingReportView, GenerateReportAPIView
 
 app_name = 'billing'
 
 urlpatterns = [
-    path('generate/', GenerateBillingView.as_view(), name='generate_billing'),
-    path('export/', ExportBillingView.as_view(), name='export_billing'),
+    path('report/', BillingReportView.as_view(), name='report'),
+    path('api/generate-report/', GenerateReportAPIView.as_view(), name='generate_report'),
 ]

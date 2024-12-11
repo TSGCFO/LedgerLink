@@ -48,8 +48,9 @@ INSTALLED_APPS = [
     "rules.apps.BillingConfig",
     "crispy_forms",
     "crispy_bootstrap5",
-    "billing.apps.BillingConfig",
-    'Main.apps.MainConfig'
+    "rest_framework",
+    'Main.apps.MainConfig',
+    'billing.apps.BillingConfig'
 ]
 
 # Add LOGIN_REDIRECT_URL and LOGOUT_REDIRECT_URL
@@ -68,6 +69,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'LedgerLink.urls'
@@ -142,13 +144,30 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-# Add STATIC_ROOT
+# URL prefix for static files
+STATIC_URL = '/static/'
+
+# Directory where Django will collect all static files
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-STATIC_URL = '/static/'
+# Additional locations of static files
 STATICFILES_DIRS = [
-    BASE_DIR / "static",
+    BASE_DIR / 'static',
+    ]
+
+# The finders Django uses to locate static files
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 ]
+
+# Simplified static file serving
+# https://warehouse.python.org/project/whitenoise/
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
+# Media files (User uploaded files)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
