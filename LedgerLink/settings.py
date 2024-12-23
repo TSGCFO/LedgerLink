@@ -54,8 +54,9 @@ INSTALLED_APPS = [
 ]
 
 # Add LOGIN_REDIRECT_URL and LOGOUT_REDIRECT_URL
-LOGIN_REDIRECT_URL = 'main:home'
-LOGOUT_REDIRECT_URL = 'main:home'
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'main:dashboard'
+LOGOUT_REDIRECT_URL = 'login'
 
 # Update crispy forms to use Bootstrap 5
 CRISPY_TEMPLATE_PACK = 'bootstrap5'  # Change from bootstrap4

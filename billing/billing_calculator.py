@@ -38,6 +38,55 @@ class BillingReport:
     service_totals: Dict[int, Decimal] = field(default_factory=dict)
     total_amount: Decimal = Decimal('0')
 
+def convert_sku_format(sku_data) -> Dict:
+    """
+    Convert SKU data from JSON array format to dictionary format
+    Input format: [{"sku": "ABO-022", "quantity": 720}]
+    Output format: {'ABO-022': 720}
+    """
+    try:
+        if isinstance(sku_data, str):
+            sku_data = json.loads(sku_data)
+
+        if not isinstance(sku_data, list):
+            return {}
+
+        return {item['sku']: item['quantity'] for item in sku_data if 'sku' in item and 'quantity' in item}
+    except (json.JSONDecodeError, TypeError, KeyError) as e:
+        logger.error(f"Error converting SKU format: {str(e)}")
+        return {}
+
+def validate_sku_quantity(sku_data) -> bool:
+    """Validate SKU quantity data format and content."""
+    try:
+        if isinstance(sku_data, str):
+            sku_data = json.loads(sku_data)
+
+        if not isinstance(sku_data, list):
+            return False
+
+        # Convert to dictionary
+        sku_dict = convert_sku_format(sku_data)
+        if not sku_dict:
+            return False
+
+        # Validate the converted dictionary
+        for sku, quantity in sku_dict.items():
+            if not isinstance(sku, str) or not sku.strip():
+                return False
+
+            try:
+                qty = float(quantity)
+                if qty <= 0:
+                    return False
+            except (TypeError, ValueError):
+                return False
+
+        return True
+    except Exception as e:
+        logger.error(f"Error validating SKU quantity: {str(e)}")
+        return False
+
 class RuleEvaluator:
     @staticmethod
     def evaluate_rule(rule: Rule, order: Order) -> bool:
@@ -96,7 +145,7 @@ class RuleEvaluator:
                 elif rule.operator == 'endswith':
                     return any(field_value.endswith(v) for v in values)
 
-            # Handle SKU quantity (JSON field)
+            # Handle SKU quantity
             if rule.field == 'sku_quantity':
                 if field_value is None:
                     return False
@@ -105,16 +154,23 @@ class RuleEvaluator:
                     if isinstance(field_value, str):
                         field_value = json.loads(field_value)
 
+                    if not validate_sku_quantity(field_value):
+                        return False
+
+                    # Extract SKUs for comparison
+                    sku_dict = convert_sku_format(field_value)
+                    skus = list(sku_dict.keys())
+
                     if rule.operator == 'contains':
-                        return any(v in field_value.keys() for v in values)
+                        return any(v in skus for v in values)
                     elif rule.operator == 'ncontains':
-                        return not any(v in field_value.keys() for v in values)
+                        return not any(v in skus for v in values)
                     elif rule.operator == 'in':
-                        return any(v in str(field_value) for v in values)
+                        return any(v in str(sku_dict) for v in values)
                     elif rule.operator == 'ni':
-                        return not any(v in str(field_value) for v in values)
+                        return not any(v in str(sku_dict) for v in values)
                 except (json.JSONDecodeError, AttributeError):
-                    logger.error(f"Error processing SKU quantity: {field_value}")
+                    logger.error(f"Error processing SKU quantity")
                     return False
 
             logger.warning(f"Unhandled field {rule.field} or operator {rule.operator}")
@@ -154,6 +210,7 @@ class RuleEvaluator:
             logger.error(f"Error evaluating rule group: {str(e)}")
             return False
 
+
 class BillingCalculator:
     def __init__(self, customer_id: int, start_date: datetime, end_date: datetime):
         self.customer_id = customer_id
@@ -164,17 +221,14 @@ class BillingCalculator:
     def validate_input(self) -> None:
         """Validate input parameters"""
         try:
-            # Check customer exists
             try:
                 customer = Customer.objects.get(id=self.customer_id)
             except Customer.DoesNotExist:
                 raise ValidationError(f"Customer with ID {self.customer_id} not found")
 
-            # Check date range
             if self.start_date > self.end_date:
                 raise ValidationError("Start date must be before or equal to end date")
 
-            # Check if customer has any services
             if not CustomerService.objects.filter(customer_id=self.customer_id).exists():
                 raise ValidationError(f"No services found for customer {self.customer_id}")
 
@@ -182,30 +236,60 @@ class BillingCalculator:
             logger.error(f"Validation error: {str(e)}")
             raise
 
-    def calculate_service_cost(self, service: Service, order: Order, rule: Rule, customer_service: CustomerService) -> Decimal:
-        """Calculate the cost for a service based on the rule, order, and customer service pricing"""
+    # UPDATED: Modified SKU Cost calculation to use number of unique SKUs
+    def calculate_service_cost(self, customer_service: CustomerService, order: Order) -> Decimal:
+        """Calculate the cost for a service"""
         try:
             if not customer_service.unit_price:
                 logger.warning(f"No unit price set for customer service {customer_service}")
                 return Decimal('0')
 
-            # Get the base price from customer service
             base_price = customer_service.unit_price
 
-            # Apply any rule adjustments if present
-            adjustment = rule.adjustment_amount if rule.adjustment_amount else Decimal('0')
+            if customer_service.service.charge_type == 'single':
+                return base_price
+            elif customer_service.service.charge_type == 'quantity':
+                # Special handling for SKU Cost service
+                if customer_service.service.service_name == 'SKU Cost':
+                    try:
+                        sku_quantity = getattr(order, 'sku_quantity', None)
+                        if sku_quantity is None:
+                            logger.warning(f"No sku_quantity found for order {order.transaction_id}")
+                            return Decimal('0')
 
-            # Calculate total cost based on service type
-            if service.charge_type == 'single':
-                return base_price + adjustment
-            elif service.charge_type == 'quantity':
-                quantity = getattr(order, 'total_item_qty', 1)
-                if quantity is None:
-                    quantity = 1
-                quantity = Decimal(str(quantity))
-                return (base_price + adjustment) * quantity
+                        # Convert to dictionary format
+                        sku_dict = convert_sku_format(sku_quantity)
+                        if not sku_dict:
+                            logger.error(f"Invalid SKU quantity format for order {order.transaction_id}")
+                            return Decimal('0')
 
-            logger.warning(f"Unknown charge type {service.charge_type} for service {service.id}")
+                        # Count unique SKUs (number of dictionary keys)
+                        unique_sku_count = len(sku_dict.keys())  # Only count unique SKUs
+                        total_cost = base_price * Decimal(str(unique_sku_count))  # Multiply base price by number of unique SKUs
+
+                        logger.info(
+                            f"SKU Cost calculation details for order {order.transaction_id}:\n"
+                            f"- Original SKU data: {sku_quantity}\n"
+                            f"- Converted format: {sku_dict}\n"
+                            f"- Unique SKUs: {list(sku_dict.keys())}\n"
+                            f"- Number of unique SKUs: {unique_sku_count}\n"
+                            f"- Base price per unique SKU: ${base_price}\n"
+                            f"- Total cost ({unique_sku_count} SKUs × ${base_price}): ${total_cost}"
+                        )
+                        return total_cost
+
+                    except Exception as e:
+                        logger.error(f"Error processing SKU quantity for order {order.transaction_id}: {str(e)}")
+                        return Decimal('0')
+                else:
+                    # Regular quantity-based service
+                    quantity = getattr(order, 'total_item_qty', 1)
+                    if quantity is None:
+                        quantity = 1
+                    quantity = Decimal(str(quantity))
+                    return base_price * quantity
+
+            logger.warning(f"Unknown charge type {customer_service.service.charge_type} for service {customer_service.service.id}")
             return Decimal('0')
 
         except Exception as e:
@@ -217,7 +301,6 @@ class BillingCalculator:
         try:
             self.validate_input()
 
-            # Fetch orders
             orders = Order.objects.filter(
                 customer_id=self.customer_id,
                 close_date__range=(self.start_date, self.end_date)
@@ -227,43 +310,44 @@ class BillingCalculator:
                 logger.info(f"No orders found for customer {self.customer_id} in date range")
                 return self.report
 
-            # Fetch customer services and their rules
             customer_services = CustomerService.objects.filter(
                 customer_id=self.customer_id
             ).select_related('service')
 
-            # Process each order
             for order in orders:
                 try:
                     order_cost = OrderCost(order_id=order.transaction_id)
+                    applied_single_services = set()
 
                     for cs in customer_services:
-                        rule_groups = RuleGroup.objects.filter(customer_service=cs)
+                        if cs.service.charge_type == 'single' and cs.service.id in applied_single_services:
+                            continue
 
-                        # Check if any rule group applies
+                        rule_groups = RuleGroup.objects.filter(customer_service=cs)
+                        service_applies = False
+
                         for rule_group in rule_groups:
                             if RuleEvaluator.evaluate_rule_group(rule_group, order):
-                                # Calculate costs for applicable rules
-                                for rule in rule_group.rules.all():
-                                    cost = self.calculate_service_cost(
-                                        service=cs.service,
-                                        order=order,
-                                        rule=rule,
-                                        customer_service=cs
-                                    )
+                                service_applies = True
+                                break
 
-                                    service_cost = ServiceCost(
-                                        service_id=cs.service.id,
-                                        service_name=cs.service.service_name,
-                                        amount=cost
-                                    )
-                                    order_cost.service_costs.append(service_cost)
-                                    order_cost.total_amount += cost
+                        if service_applies:
+                            cost = self.calculate_service_cost(cs, order)
 
-                                    # Update service totals
-                                    self.report.service_totals[cs.service.id] = (
-                                            self.report.service_totals.get(cs.service.id, Decimal('0')) + cost
-                                    )
+                            service_cost = ServiceCost(
+                                service_id=cs.service.id,
+                                service_name=cs.service.service_name,
+                                amount=cost
+                            )
+                            order_cost.service_costs.append(service_cost)
+                            order_cost.total_amount += cost
+
+                            self.report.service_totals[cs.service.id] = (
+                                    self.report.service_totals.get(cs.service.id, Decimal('0')) + cost
+                            )
+
+                            if cs.service.charge_type == 'single':
+                                applied_single_services.add(cs.service.id)
 
                     self.report.order_costs.append(order_cost)
                     self.report.total_amount += order_cost.total_amount
@@ -339,31 +423,17 @@ class BillingCalculator:
             logger.error(f"Error converting report to CSV: {str(e)}")
             raise
 
+
 def generate_billing_report(
         customer_id: int,
         start_date: Union[datetime, str],
         end_date: Union[datetime, str],
         output_format: str = 'json'
 ) -> str:
-    """
-    Generate a billing report for the specified customer and date range.
-    
-    Args:
-        customer_id: The ID of the customer
-        start_date: Start date (datetime or ISO format string)
-        end_date: End date (datetime or ISO format string)
-        output_format: Output format ('json' or 'csv')
-    
-    Returns:
-        str: The formatted report
-    
-    Raises:
-        ValidationError: If input parameters are invalid
-    """
+    """Generate a billing report for the specified customer and date range."""
     try:
         logger.info(f"Generating report for customer {customer_id} from {start_date} to {end_date}")
 
-        # Convert string dates to datetime if necessary
         if isinstance(start_date, str):
             start_date = datetime.fromisoformat(start_date.replace('Z', '+00:00'))
         if isinstance(end_date, str):
