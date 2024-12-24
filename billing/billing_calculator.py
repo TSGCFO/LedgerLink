@@ -49,9 +49,37 @@ def convert_sku_format(sku_data) -> Dict:
             sku_data = json.loads(sku_data)
 
         if not isinstance(sku_data, list):
+            logger.error(f"SKU data must be a list, got {type(sku_data)}")
             return {}
 
-        return {item['sku']: item['quantity'] for item in sku_data if 'sku' in item and 'quantity' in item}
+        sku_dict = {}
+        for item in sku_data:
+            if not isinstance(item, dict):
+                logger.error(f"Each SKU item must be a dictionary, got {type(item)}")
+                continue
+
+            if 'sku' not in item or 'quantity' not in item:
+                logger.error("SKU item missing required fields 'sku' or 'quantity'")
+                continue
+
+            sku = str(item['sku']).strip().upper()  # Normalize SKU format
+            try:
+                quantity = float(item['quantity'])
+            except (TypeError, ValueError):
+                logger.error(f"Invalid quantity for SKU {sku}: {item['quantity']}")
+                continue
+
+            if not sku:
+                logger.error("SKU cannot be empty")
+                continue
+
+            if quantity <= 0:
+                logger.error(f"Invalid quantity {quantity} for SKU {sku}")
+                continue
+
+            sku_dict[sku] = quantity
+
+        return sku_dict
     except (json.JSONDecodeError, TypeError, KeyError) as e:
         logger.error(f"Error converting SKU format: {str(e)}")
         return {}
@@ -236,7 +264,6 @@ class BillingCalculator:
             logger.error(f"Validation error: {str(e)}")
             raise
 
-    # UPDATED: Modified SKU Cost calculation to use number of unique SKUs
     def calculate_service_cost(self, customer_service: CustomerService, order: Order) -> Decimal:
         """Calculate the cost for a service"""
         try:
@@ -245,27 +272,26 @@ class BillingCalculator:
                 return Decimal('0')
 
             base_price = customer_service.unit_price
+            service_name = customer_service.service.service_name.lower()
 
             if customer_service.service.charge_type == 'single':
                 return base_price
             elif customer_service.service.charge_type == 'quantity':
                 # Special handling for SKU Cost service
-                if customer_service.service.service_name == 'SKU Cost':
+                if service_name == 'sku cost':
                     try:
                         sku_quantity = getattr(order, 'sku_quantity', None)
                         if sku_quantity is None:
                             logger.warning(f"No sku_quantity found for order {order.transaction_id}")
                             return Decimal('0')
 
-                        # Convert to dictionary format
                         sku_dict = convert_sku_format(sku_quantity)
                         if not sku_dict:
                             logger.error(f"Invalid SKU quantity format for order {order.transaction_id}")
                             return Decimal('0')
 
-                        # Count unique SKUs (number of dictionary keys)
-                        unique_sku_count = len(sku_dict.keys())  # Only count unique SKUs
-                        total_cost = base_price * Decimal(str(unique_sku_count))  # Multiply base price by number of unique SKUs
+                        unique_sku_count = len(sku_dict.keys())
+                        total_cost = base_price * Decimal(str(unique_sku_count))
 
                         logger.info(
                             f"SKU Cost calculation details for order {order.transaction_id}:\n"
@@ -281,6 +307,133 @@ class BillingCalculator:
                     except Exception as e:
                         logger.error(f"Error processing SKU quantity for order {order.transaction_id}: {str(e)}")
                         return Decimal('0')
+
+                # Special handling for Pick Cost and Case Pick services
+                elif service_name in ['pick cost', 'case pick']:
+                    try:
+                        from products.models import Product
+
+                        sku_quantity = getattr(order, 'sku_quantity', None)
+                        if sku_quantity is None:
+                            logger.warning(f"No sku_quantity found for order {order.transaction_id}")
+                            return Decimal('0')
+
+                        sku_dict = convert_sku_format(sku_quantity)
+                        if not sku_dict:
+                            logger.error(f"Invalid SKU quantity format for order {order.transaction_id}")
+                            return Decimal('0')
+
+                        total_cost = Decimal('0')
+                        calculation_details = []
+                        error_details = []
+
+                        for sku, quantity in sku_dict.items():
+                            try:
+                                # Get product details from database
+                                try:
+                                    product = Product.objects.get(
+                                        sku=sku,
+                                        customer_id=order.customer_id
+                                    )
+                                except Product.DoesNotExist:
+                                    error_msg = f"Product not found for SKU {sku} and customer {order.customer_id}"
+                                    logger.error(error_msg)
+                                    error_details.append(error_msg)
+                                    continue
+
+                                # Check if product has case quantity defined in labeling_unit_1
+                                case_size = None
+                                if (product.labeling_unit_1 and
+                                        product.labeling_unit_1.lower() == 'case' and
+                                        product.labeling_quantity_1):
+                                    case_size = product.labeling_quantity_1
+                                    logger.debug(
+                                        f"Found case size for SKU {sku}: "
+                                        f"{case_size} units per case"
+                                    )
+
+                                # Process based on service type
+                                if service_name == 'case pick':
+                                    if case_size:
+                                        # Calculate number of full cases
+                                        cases = quantity // case_size
+                                        if cases > 0:
+                                            case_cost = base_price * Decimal(str(cases))
+                                            total_cost += case_cost
+                                            calculation_details.append(
+                                                f"SKU {sku}:\n"
+                                                f"  - Total quantity: {quantity}\n"
+                                                f"  - Case size: {case_size} units per case\n"
+                                                f"  - Full cases: {cases}\n"
+                                                f"  - Cost: {cases} cases × ${base_price} = ${case_cost}"
+                                            )
+                                        else:
+                                            calculation_details.append(
+                                                f"SKU {sku}: No full cases (quantity {quantity} < case size {case_size})"
+                                            )
+                                    else:
+                                        calculation_details.append(
+                                            f"SKU {sku}: No case size defined, skipping case pick calculation"
+                                        )
+                                else:  # pick cost
+                                    if case_size:
+                                        # Calculate remaining units that don't make a full case
+                                        remaining_units = quantity % case_size
+                                        if remaining_units > 0:
+                                            unit_cost = base_price * Decimal(str(remaining_units))
+                                            total_cost += unit_cost
+                                            calculation_details.append(
+                                                f"SKU {sku}:\n"
+                                                f"  - Total quantity: {quantity}\n"
+                                                f"  - Case size: {case_size} units per case\n"
+                                                f"  - Remaining units: {remaining_units}\n"
+                                                f"  - Cost: {remaining_units} units × ${base_price} = ${unit_cost}"
+                                            )
+                                    else:
+                                        # If no case size defined or not a case unit, charge for all units
+                                        unit_cost = base_price * Decimal(str(quantity))
+                                        total_cost += unit_cost
+                                        calculation_details.append(
+                                            f"SKU {sku}:\n"
+                                            f"  - Quantity: {quantity} units\n"
+                                            f"  - Base unit: {product.labeling_unit_1}\n"
+                                            f"  - Cost: {quantity} units × ${base_price} = ${unit_cost}"
+                                        )
+
+                            except Exception as e:
+                                error_msg = f"Error processing SKU {sku}: {str(e)}"
+                                logger.error(error_msg)
+                                error_details.append(error_msg)
+                                continue
+
+                        # Log comprehensive calculation details
+                        log_message = [
+                            f"\n{service_name.upper()} calculation details for order {order.transaction_id}:",
+                            f"Original SKU data: {sku_quantity}",
+                            f"Converted format: {sku_dict}",
+                            "\nCalculations:",
+                            *calculation_details
+                        ]
+
+                        if error_details:
+                            log_message.extend(["\nErrors encountered:", *error_details])
+
+                        log_message.extend([
+                            f"\nFinal Results:",
+                            f"- Base price: ${base_price}",
+                            f"- Total cost: ${total_cost}"
+                        ])
+
+                        logger.info("\n".join(log_message))
+                        return total_cost
+
+                    except Exception as e:
+                        logger.error(
+                            f"Error processing {service_name} for order {order.transaction_id}:\n"
+                            f"Error: {str(e)}\n"
+                            f"SKU data: {getattr(order, 'sku_quantity', 'N/A')}"
+                        )
+                        return Decimal('0')
                 else:
                     # Regular quantity-based service
                     quantity = getattr(order, 'total_item_qty', 1)
@@ -293,7 +446,7 @@ class BillingCalculator:
             return Decimal('0')
 
         except Exception as e:
-            logger.error(f"Error calculating service cost: {str(e)}")
+            logger.error(f"Error calculating service cost for service {customer_service.service.service_name}: {str(e)}")
             return Decimal('0')
 
     def generate_report(self) -> BillingReport:
@@ -326,10 +479,13 @@ class BillingCalculator:
                         rule_groups = RuleGroup.objects.filter(customer_service=cs)
                         service_applies = False
 
-                        for rule_group in rule_groups:
-                            if RuleEvaluator.evaluate_rule_group(rule_group, order):
-                                service_applies = True
-                                break
+                        if not rule_groups.exists():
+                            service_applies = True  # If no rules, service always applies
+                        else:
+                            for rule_group in rule_groups:
+                                if RuleEvaluator.evaluate_rule_group(rule_group, order):
+                                    service_applies = True
+                                    break
 
                         if service_applies:
                             cost = self.calculate_service_cost(cs, order)
