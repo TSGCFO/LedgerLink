@@ -7,10 +7,10 @@
             Dashboard
         </a>
 
-        <a href="{% url 'customers:list' %}"
-           class="mt-1 group flex items-center px-2 py-2 text-base font-medium rounded-md {% if 'customers' in request.path %}bg-gray-100 text-gray-900{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
-            <i class="bi bi-people me-2"></i>
-            Customers
+        <a href="{% url 'products:product_list' %}"
+           class="mt-1 group flex items-center px-2 py-2 text-base font-medium rounded-md {% if 'products' in request.path %}bg-gray-100 text-gray-900{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
+            <i class="bi bi-box me-2"></i>
+            Products
         </a>
 
         <a href="{% url 'orders:order_list' %}"

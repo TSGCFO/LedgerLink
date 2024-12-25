@@ -605,3 +605,4 @@ def generate_billing_report(
     except Exception as e:
         logger.error(f"Error in generate_billing_report: {str(e)}")
         raise
+

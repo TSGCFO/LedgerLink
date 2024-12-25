@@ -45,3 +45,4 @@ class BillingReportForm(forms.Form):
             raise forms.ValidationError("Start date must be before end date")
 
         return cleaned_data
+    

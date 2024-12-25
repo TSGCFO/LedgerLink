@@ -14,3 +14,4 @@ class BillingReportDetailAdmin(admin.ModelAdmin):
     list_display = ('report', 'order', 'total_amount')
     list_filter = ('report__customer',)
     search_fields = ('report__customer__company_name', 'order__transaction_id')
+    
