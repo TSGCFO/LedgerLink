@@ -327,7 +327,7 @@
 
 {% block extra_js %}
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Initialize variables
             let selectedRows = new Set();
 
@@ -345,7 +345,7 @@
 
             // Select all checkbox
             const selectAllCheckbox = document.getElementById('selectAll');
-            selectAllCheckbox?.addEventListener('change', function() {
+            selectAllCheckbox?.addEventListener('change', function () {
                 const checkboxes = document.querySelectorAll('.row-selector');
                 checkboxes.forEach(checkbox => {
                     checkbox.checked = this.checked;
@@ -355,7 +355,7 @@
 
             // Individual row checkboxes
             document.querySelectorAll('.row-selector').forEach(checkbox => {
-                checkbox.addEventListener('change', function() {
+                checkbox.addEventListener('change', function () {
                     toggleRowSelection(this.closest('tr'), this.checked);
 
                     // Update select all checkbox
@@ -368,7 +368,7 @@
             document.querySelectorAll('th.column-header').forEach(header => {
                 if (!header.querySelector('.sort-indicator')) return;
 
-                header.addEventListener('click', function() {
+                header.addEventListener('click', function () {
                     const field = this.dataset.field;
                     const currentDirection = '{{ current_sort.direction }}';
                     const currentField = '{{ current_sort.field }}';
@@ -402,7 +402,7 @@
 
             // Column selection
             const applyColumnsButton = document.getElementById('applyColumns');
-            applyColumnsButton?.addEventListener('click', function() {
+            applyColumnsButton?.addEventListener('click', function () {
                 const form = document.getElementById('searchForm');
                 const selectedColumns = Array.from(document.querySelectorAll('.column-checkbox:checked'))
                     .map(cb => cb.value);
@@ -435,7 +435,7 @@
             }
 
             // Update operators when field changes
-            filterField?.addEventListener('change', function() {
+            filterField?.addEventListener('change', function () {
                 const fieldType = this.options[this.selectedIndex].dataset.type;
                 const operators = {{ filter_operators|safe }}[fieldType];
 
@@ -467,7 +467,7 @@
 
             // Apply filter
             const applyFilterButton = document.getElementById('applyFilter');
-            applyFilterButton?.addEventListener('click', function() {
+            applyFilterButton?.addEventListener('click', function () {
                 const form = document.getElementById('searchForm');
                 const value1 = filterValue.value;
                 const value2 = filterValue2.value;
@@ -512,7 +512,7 @@
 
             // Remove filter
             document.querySelectorAll('.remove-filter').forEach(button => {
-                button.addEventListener('click', function() {
+                button.addEventListener('click', function () {
                     const index = this.dataset.filterIndex;
                     const form = document.getElementById('searchForm');
                     const filters = Array.from(form.querySelectorAll('input[name="filter"]'));
@@ -525,21 +525,40 @@
                 });
             });
 
-            // Preserve filters in pagination links
+            // Update pagination link handling
             document.querySelectorAll('.pagination .page-link').forEach(link => {
-                link.addEventListener('click', function(e) {
+                link.addEventListener('click', function (e) {
                     e.preventDefault();
                     const form = document.getElementById('searchForm');
-                    const pageNumber = new URL(this.href).searchParams.get('page');
 
-                    // Add page number to form
-                    const pageInput = document.createElement('input');
-                    pageInput.type = 'hidden';
-                    pageInput.name = 'page';
-                    pageInput.value = pageNumber;
-                    form.appendChild(pageInput);
+                    // Get all current parameters
+                    const currentParams = new URLSearchParams(window.location.search);
 
-                    form.submit();
+                    // Update the page number
+                    currentParams.set('page', new URL(this.href).searchParams.get('page'));
+
+                    // Preserve all filters
+                    const existingFilters = form.querySelectorAll('input[name="filter"]');
+                    existingFilters.forEach((filter, index) => {
+                        currentParams.append('filter', filter.value);
+                    });
+
+                    // Preserve sorting
+                    const sortInput = form.querySelector('input[name="sort"]');
+                    const directionInput = form.querySelector('input[name="direction"]');
+                    if (sortInput && directionInput) {
+                        currentParams.set('sort', sortInput.value);
+                        currentParams.set('direction', directionInput.value);
+                    }
+
+                    // Preserve column selection
+                    const columnInputs = form.querySelectorAll('input[name="columns"]');
+                    columnInputs.forEach(input => {
+                        currentParams.append('columns', input.value);
+                    });
+
+                    // Navigate to the new URL
+                    window.location.href = `${window.location.pathname}?${currentParams.toString()}`;
                 });
             });
         });

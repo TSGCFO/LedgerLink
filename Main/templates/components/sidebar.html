@@ -19,6 +19,12 @@
             Orders
         </a>
 
+        <a href="{% url 'customer_services:customer_service_list' %}"
+           class="mt-1 group flex items-center px-2 py-2 text-base font-medium rounded-md {% if 'customer_services' in request.path %}bg-gray-100 text-gray-900{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
+            <i class="bi bi-gear-fill me-2"></i>
+            Customer Services
+        </a>
+
         {% comment %}
         <!-- Temporarily comment out until services views are implemented -->
         <a href="{% url 'services:service_list' %}"

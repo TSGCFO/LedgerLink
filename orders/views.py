@@ -15,7 +15,7 @@ class OrderListView(ListView):
     context_object_name = 'orders'
     model = Order
     paginate_by = 10
-    
+
     # Define available columns and their properties
     COLUMN_DEFINITIONS = {
         'transaction_id': {
@@ -133,7 +133,7 @@ class OrderListView(ListView):
             'default_visible': False
         }
     }
-    
+
     # Define filter operators for each data type
     FILTER_OPERATORS = {
         'text': [
@@ -153,6 +153,7 @@ class OrderListView(ListView):
             {'value': 'less_than', 'label': 'Less than'},
             {'value': 'greater_equal', 'label': 'Greater than or equal'},
             {'value': 'less_equal', 'label': 'Less than or equal'},
+            {'value': 'between', 'label': 'Between'},
             {'value': 'is_empty', 'label': 'Is empty'},
             {'value': 'is_not_empty', 'label': 'Is not empty'}
         ],
@@ -163,23 +164,24 @@ class OrderListView(ListView):
             {'value': 'less_than', 'label': 'Less than'},
             {'value': 'greater_equal', 'label': 'Greater than or equal'},
             {'value': 'less_equal', 'label': 'Less than or equal'},
+            {'value': 'between', 'label': 'Between'},
             {'value': 'is_empty', 'label': 'Is empty'},
             {'value': 'is_not_empty', 'label': 'Is not empty'}
         ],
         'datetime': [
             {'value': 'equals', 'label': 'Equals'},
             {'value': 'not_equals', 'label': 'Does not equal'},
-            {'value': 'after', 'label': 'After'},
             {'value': 'before', 'label': 'Before'},
+            {'value': 'after', 'label': 'After'},
             {'value': 'between', 'label': 'Between'},
             {'value': 'is_empty', 'label': 'Is empty'},
             {'value': 'is_not_empty', 'label': 'Is not empty'}
         ]
     }
-    
+
     def get_queryset(self):
         queryset = Order.objects.select_related('customer')
-    
+
         # Apply sorting
         sort_field = self.request.GET.get('sort')
         sort_direction = self.request.GET.get('direction', 'asc')
@@ -187,39 +189,41 @@ class OrderListView(ListView):
             if sort_direction == 'desc':
                 sort_field = f'-{sort_field}'
             queryset = queryset.order_by(sort_field)
-    
+
         # Apply filters
         filters = self.request.GET.getlist('filter')
         if filters:
-            filter_conditions = []
-            filter_logic = self.request.GET.get('filter_logic', 'and')
-    
+            combined_filter = None
+            previous_logic = 'and'  # Default logic
+
             for filter_data in filters:
                 try:
                     filter_dict = json.loads(filter_data)
                     field = filter_dict.get('field')
                     operator = filter_dict.get('operator')
                     value = filter_dict.get('value')
-    
+                    value2 = filter_dict.get('value2')
+                    logic = filter_dict.get('logic', 'and').lower()
+
                     if field and operator:
-                        q_object = self.build_filter_condition(field, operator, value)
-                        if q_object:
-                            filter_conditions.append(q_object)
-                except json.JSONDecodeError:
+                        current_filter = self._build_filter_condition(field, operator, value, value2)
+                        if current_filter:
+                            if combined_filter is None:
+                                combined_filter = current_filter
+                            else:
+                                if previous_logic == 'or':
+                                    combined_filter = combined_filter | current_filter
+                                else:
+                                    combined_filter = combined_filter & current_filter
+
+                            previous_logic = logic
+
+                except (json.JSONDecodeError, KeyError):
                     continue
-    
-            if filter_conditions:
-                if filter_logic == 'or':
-                    final_filter = filter_conditions[0]
-                    for condition in filter_conditions[1:]:
-                        final_filter |= condition
-                else:  # 'and'
-                    final_filter = filter_conditions[0]
-                    for condition in filter_conditions[1:]:
-                        final_filter &= condition
-    
-                queryset = queryset.filter(final_filter)
-    
+
+            if combined_filter:
+                queryset = queryset.filter(combined_filter)
+
         # Apply search
         search_query = self.request.GET.get('q')
         if search_query:
@@ -235,12 +239,12 @@ class OrderListView(ListView):
             for field in search_fields:
                 search_filter |= Q(**{field: search_query})
             queryset = queryset.filter(search_filter)
-    
+
         # Apply customer filter
         customer_id = self.request.GET.get('customer')
         if customer_id:
             queryset = queryset.filter(customer_id=customer_id)
-    
+
         # Apply date range filter
         date_from = self.request.GET.get('date_from')
         date_to = self.request.GET.get('date_to')
@@ -248,35 +252,38 @@ class OrderListView(ListView):
             queryset = queryset.filter(close_date__gte=date_from)
         if date_to:
             queryset = queryset.filter(close_date__lte=date_to)
-    
+
         return queryset.distinct()
-    
-    def build_filter_condition(self, field, operator, value):
+
+    def _build_filter_condition(self, field, operator, value, value2=None):
         """Build Q object for filtering based on field type and operator."""
         if field not in self.COLUMN_DEFINITIONS:
             return None
-    
+
         field_type = self.COLUMN_DEFINITIONS[field]['type']
-    
+
         # Handle empty/not empty operators for all types
         if operator == 'is_empty':
             return Q(**{f"{field}__isnull": True}) | Q(**{field: ''})
         elif operator == 'is_not_empty':
             return ~Q(**{f"{field}__isnull": True}) & ~Q(**{field: ''})
-    
-        # Skip other operators if no value provided (except is_empty/is_not_empty)
-        if not value and operator not in ['is_empty', 'is_not_empty']:
+
+        # Skip other operators if no value provided
+        if not value:
             return None
-    
-        if field_type in ['text', 'number', 'decimal']:
-            return self._build_basic_filter(field, operator, value)
+
+        # Handle different field types
+        if field_type in ['text', 'string']:
+            return self._build_text_filter(field, operator, value, value2)
+        elif field_type in ['number', 'decimal']:
+            return self._build_numeric_filter(field, operator, value, value2)
         elif field_type == 'datetime':
-            return self._build_datetime_filter(field, operator, value)
-    
+            return self._build_datetime_filter(field, operator, value, value2)
+
         return None
-    
-    def _build_basic_filter(self, field, operator, value):
-        """Build filter for text, number, and decimal fields."""
+
+    def _build_text_filter(self, field, operator, value, value2=None):
+        """Build filter for text fields."""
         if operator == 'contains':
             return Q(**{f"{field}__icontains": value})
         elif operator == 'not_contains':
@@ -289,64 +296,107 @@ class OrderListView(ListView):
             return Q(**{f"{field}__istartswith": value})
         elif operator == 'ends_with':
             return Q(**{f"{field}__iendswith": value})
-        elif operator == 'greater_than':
-            return Q(**{f"{field}__gt": value})
-        elif operator == 'less_than':
-            return Q(**{f"{field}__lt": value})
-        elif operator == 'greater_equal':
-            return Q(**{f"{field}__gte": value})
-        elif operator == 'less_equal':
-            return Q(**{f"{field}__lte": value})
+        elif operator == 'between' and value2:
+            return Q(**{f"{field}__gte": value}) & Q(**{f"{field}__lte": value2})
         return None
 
-    def _build_datetime_filter(self, field, operator, value):
-        """Build filter for datetime fields."""
+    def _build_numeric_filter(self, field, operator, value, value2=None):
+        """Build filter for numeric fields."""
         try:
-            if operator == 'between':
-                if ',' in value:
-                    start_date, end_date = value.split(',')
-                    return Q(**{f"{field}__range": [start_date.strip(), end_date.strip()]})
-            elif operator == 'equals':
+            value = float(value)
+            value2 = float(value2) if value2 else None
+
+            if operator == 'equals':
                 return Q(**{field: value})
             elif operator == 'not_equals':
                 return ~Q(**{field: value})
-            elif operator == 'after':
+            elif operator == 'greater_than':
                 return Q(**{f"{field}__gt": value})
-            elif operator == 'before':
+            elif operator == 'less_than':
                 return Q(**{f"{field}__lt": value})
-        except (ValueError, AttributeError):
+            elif operator == 'greater_equal':
+                return Q(**{f"{field}__gte": value})
+            elif operator == 'less_equal':
+                return Q(**{f"{field}__lte": value})
+            elif operator == 'between' and value2 is not None:
+                return Q(**{f"{field}__gte": value}) & Q(**{f"{field}__lte": value2})
+        except (ValueError, TypeError):
             return None
         return None
-    
+
+    def _build_datetime_filter(self, field, operator, value, value2=None):
+        """Build filter for datetime fields."""
+        try:
+            if operator == 'equals':
+                return Q(**{field: value})
+            elif operator == 'not_equals':
+                return ~Q(**{field: value})
+            elif operator == 'before':
+                return Q(**{f"{field}__lt": value})
+            elif operator == 'after':
+                return Q(**{f"{field}__gt": value})
+            elif operator == 'between' and value2:
+                return Q(**{f"{field}__gte": value}) & Q(**{f"{field}__lte": value2})
+        except (ValueError, TypeError):
+            return None
+        return None
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-    
+
         # Add column definitions
         context['columns'] = self.COLUMN_DEFINITIONS
-    
+
         # Add filter operators
         context['filter_operators'] = self.FILTER_OPERATORS
-    
+
         # Add customers for dropdown
         context['customers'] = Customer.objects.all()
-    
-        # Get selected columns (default to those marked as default_visible if not specified)
+
+        # Get selected columns
         default_columns = [
             col for col, props in self.COLUMN_DEFINITIONS.items()
             if props.get('default_visible', False)
         ]
         context['selected_columns'] = self.request.GET.getlist('columns', default_columns)
-    
+
         # Add current sort information
         context['current_sort'] = {
             'field': self.request.GET.get('sort', ''),
             'direction': self.request.GET.get('direction', 'asc')
         }
-    
+
         # Add current filters
-        context['current_filters'] = self.request.GET.getlist('filter', [])
-        context['filter_logic'] = self.request.GET.get('filter_logic', 'and')
-    
+        context['current_filters'] = []
+        for filter_data in self.request.GET.getlist('filter'):
+            try:
+                filter_dict = json.loads(filter_data)
+                field = filter_dict.get('field')
+                if field in self.COLUMN_DEFINITIONS:
+                    field_label = self.COLUMN_DEFINITIONS[field]['label']
+                    field_type = self.COLUMN_DEFINITIONS[field]['type']
+                    operator = filter_dict.get('operator')
+                    operator_label = next(
+                        (op['label'] for op in self.FILTER_OPERATORS[field_type]
+                         if op['value'] == operator),
+                        operator
+                    )
+                    value = filter_dict.get('value')
+                    value2 = filter_dict.get('value2')
+
+                    filter_display = {
+                        'field_label': field_label,
+                        'operator_label': operator_label,
+                        'value': value
+                    }
+
+                    if value2 and operator == 'between':
+                        filter_display['value'] = f"{value} - {value2}"
+
+                    context['current_filters'].append(filter_display)
+            except (json.JSONDecodeError, KeyError):
+                continue
+
         return context
 
 
