@@ -30,8 +30,10 @@ class OrderForm(forms.ModelForm):
         sku_quantity = self.cleaned_data.get('sku_quantity')
         if sku_quantity:
             try:
-                # Validate JSON format
+                # Handle already parsed JSON or string input
                 if isinstance(sku_quantity, str):
+                    # Remove any escaped quotes
+                    sku_quantity = sku_quantity.replace('\\"', '"')
                     data = json.loads(sku_quantity)
                 else:
                     data = sku_quantity
@@ -40,16 +42,37 @@ class OrderForm(forms.ModelForm):
                 if not isinstance(data, list):
                     raise forms.ValidationError("SKU quantity must be a list of items")
 
+                # Clean and validate each item
+                cleaned_data = []
                 for item in data:
                     if not isinstance(item, dict):
                         raise forms.ValidationError("Each SKU item must be an object")
                     if 'sku' not in item or 'quantity' not in item:
                         raise forms.ValidationError("Each SKU item must have 'sku' and 'quantity' fields")
-                    if not isinstance(item['quantity'], (int, float)) or item['quantity'] <= 0:
-                        raise forms.ValidationError("Quantity must be a positive number")
 
-                # Format JSON string
-                return json.dumps(data, indent=2)
+                    # Clean and validate SKU
+                    sku = str(item['sku']).strip()
+                    if not sku:
+                        raise forms.ValidationError("SKU cannot be empty")
+
+                    # Clean and validate quantity
+                    try:
+                        quantity = float(item['quantity'])
+                        if quantity <= 0:
+                            raise forms.ValidationError("Quantity must be a positive number")
+                    except (TypeError, ValueError):
+                        raise forms.ValidationError("Invalid quantity value")
+
+                    cleaned_data.append({
+                        'sku': sku,
+                        'quantity': quantity
+                    })
+
+                # Store as a clean JSON string
+                return json.dumps(cleaned_data)
+
             except json.JSONDecodeError:
                 raise forms.ValidationError("Invalid JSON format")
+            except Exception as e:
+                raise forms.ValidationError(f"Invalid data format: {str(e)}")
         return sku_quantity

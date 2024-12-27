@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load custom_filters %}
+{#{% load order_filters %}#}
 
 {% block title %}Order {{ order.transaction_id }} - LedgerLink{% endblock %}
 
@@ -171,7 +173,7 @@
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table class="table table-sm">
+                                <table class="table table-sm" id="sku-table">
                                     <thead>
                                     <tr>
                                         <th>SKU</th>
@@ -179,12 +181,14 @@
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    {% for sku in order.sku_quantity %}
-                                        <tr>
-                                            <td>{{ sku.sku }}</td>
-                                            <td>{{ sku.quantity }}</td>
-                                        </tr>
-                                    {% endfor %}
+                                    {% with skus=order.sku_quantity|parse_json %}
+                                        {% for item in skus %}
+                                            <tr>
+                                                <td>{{ item.sku }}</td>
+                                                <td>{{ item.quantity }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    {% endwith %}
                                     </tbody>
                                 </table>
                             </div>
@@ -202,9 +206,9 @@
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                        <span class="badge {% if order.close_date %}bg-success{% else %}bg-warning{% endif %}">
-                            {% if order.close_date %}Closed{% else %}Open{% endif %}
-                        </span>
+                            <span class="badge {% if order.close_date %}bg-success{% else %}bg-warning{% endif %}">
+                                {% if order.close_date %}Closed{% else %}Open{% endif %}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -225,6 +229,9 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">

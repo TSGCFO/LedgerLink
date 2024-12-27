@@ -1,4 +1,5 @@
 from django import template
+import json
 
 register = template.Library()
 
@@ -43,3 +44,13 @@ def get_field(obj, field):
             current = current()
 
     return current
+
+@register.filter
+def parse_json(value):
+    """Parse JSON string into Python object"""
+    try:
+        if isinstance(value, str):
+            return json.loads(value)
+        return value
+    except (json.JSONDecodeError, TypeError):
+        return []
