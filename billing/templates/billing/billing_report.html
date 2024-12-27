@@ -1,3 +1,4 @@
+<!-- C:/Users/Hassan/PycharmProjects/LedgerLink/billing/templates/billing/billing_report.html -->
 {% extends 'base.html' %}
 {% load static %}
 
@@ -29,12 +30,6 @@
 
             const form = e.target;
             const formData = new FormData(form);
-
-            // Log form data
-            console.log('Form data:');
-            for (let pair of formData.entries()) {
-                console.log(pair[0] + ': ' + pair[1]);
-            }
 
             showLoading(true);
             hideError();
@@ -94,16 +89,16 @@
             const serviceTotalsBody = document.getElementById('serviceTotalsBody');
             serviceTotalsBody.innerHTML = '';
 
-            Object.entries(reportData.service_totals).forEach(([serviceId, amount]) => {
+            Object.entries(reportData.service_totals).forEach(([serviceId, serviceData]) => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                ${reportData.services?.[serviceId]?.name || `Service ${serviceId}`}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900">
-                ${formatCurrency(amount)}
-            </td>
-        `;
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        ${serviceData.name}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900">
+                        ${formatCurrency(serviceData.amount)}
+                    </td>
+                `;
                 serviceTotalsBody.appendChild(row);
             });
 
@@ -114,20 +109,25 @@
             reportData.orders.forEach(order => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                ${order.order_id}
-            </td>
-            <td class="px-6 py-4 text-sm text-gray-900">
-                <ul class="list-disc pl-5">
-                    ${order.services.map(service =>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <a href="/orders/${order.order_id}/" 
+                           class="text-blue-600 hover:text-blue-800 hover:underline"
+                           target="_blank"
+                           title="View order details">
+                            ${order.order_id}
+                        </a>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-900">
+                        <ul class="list-disc pl-5">
+                            ${order.services.map(service =>
                     `<li>${service.service_name}: ${formatCurrency(service.amount)}</li>`
                 ).join('')}
-                </ul>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900">
-                ${formatCurrency(order.total_amount)}
-            </td>
-        `;
+                        </ul>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900">
+                        ${formatCurrency(order.total_amount)}
+                    </td>
+                `;
                 orderDetailsBody.appendChild(row);
             });
 

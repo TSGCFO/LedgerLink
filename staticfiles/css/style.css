@@ -328,7 +328,6 @@ main {
         background-color: #fff !important;
     }
 }
-
 /* Print Styles */
 @media print {
     .navbar,
@@ -382,4 +381,30 @@ main {
     .table-responsive {
         page-break-inside: avoid;
     }
+}
+
+/* Rule-specific styles */
+.rule-group-card {
+    transition: all 0.3s ease;
+}
+
+.rule-group-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.rule-status {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 5px;
+}
+
+.rule-status.active {
+    background-color: #28a745;
+}
+
+.rule-status.inactive {
+    background-color: #dc3545;
 }

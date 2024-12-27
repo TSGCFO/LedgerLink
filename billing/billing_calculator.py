@@ -579,9 +579,15 @@ class BillingCalculator:
             logger.error(f"Error generating report: {str(e)}")
             raise
 
+    # In billing_calculator.py, update the to_dict method
     def to_dict(self) -> dict:
         """Convert the report to a dictionary format"""
         try:
+            service_names = {}  # Create a mapping of service IDs to names
+            for oc in self.report.order_costs:
+                for sc in oc.service_costs:
+                    service_names[sc.service_id] = sc.service_name
+    
             return {
                 'customer_id': self.report.customer_id,
                 'start_date': self.report.start_date.isoformat(),
@@ -602,7 +608,10 @@ class BillingCalculator:
                     for oc in self.report.order_costs
                 ],
                 'service_totals': {
-                    service_id: str(amount)
+                    service_id: {
+                        'name': service_names.get(service_id, f'Service {service_id}'),
+                        'amount': str(amount)
+                    }
                     for service_id, amount in self.report.service_totals.items()
                 },
                 'total_amount': str(self.report.total_amount)

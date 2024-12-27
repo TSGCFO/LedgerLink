@@ -25,6 +25,14 @@
             Customer Services
         </a>
 
+        <!-- Add this section to your existing sidebar navigation -->
+        <div class="nav-item">
+            <a href="{% url 'rules:rule_group_list' %}" class="nav-link {% if request.resolver_match.namespace == 'rules' %}active{% endif %}">
+                <i class="bi bi-diagram-3"></i>
+                <span>Rules</span>
+            </a>
+        </div>
+
         {% comment %}
         <!-- Temporarily comment out until services views are implemented -->
         <a href="{% url 'services:service_list' %}"
