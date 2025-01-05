@@ -22059,3 +22059,1326 @@ INFO 2024-12-28 22:00:01,122 billing_calculator No matching SKUs found for servi
 INFO 2024-12-28 22:00:01,123 views Report generated successfully
 INFO 2024-12-29 23:07:30,632 autoreload Watching for file changes with StatReloader
 WARNING 2024-12-29 23:07:34,093 log Not Found: /favicon.ico
+INFO 2025-01-04 17:03:56,345 autoreload Watching for file changes with StatReloader
+WARNING 2025-01-04 17:04:14,569 log Not Found: /favicon.ico
+INFO 2025-01-04 17:09:53,765 autoreload C:\Users\Hassan\PycharmProjects\LedgerLink\rules\urls.py changed, reloading.
+INFO 2025-01-04 17:09:54,426 autoreload Watching for file changes with StatReloader
+INFO 2025-01-04 17:53:11,231 autoreload Watching for file changes with StatReloader
+INFO 2025-01-04 17:56:12,795 autoreload C:\Users\Hassan\PycharmProjects\LedgerLink\rules\views.py changed, reloading.
+INFO 2025-01-04 17:56:13,917 autoreload Watching for file changes with StatReloader
+INFO 2025-01-04 17:58:14,336 autoreload C:\Users\Hassan\PycharmProjects\LedgerLink\rules\urls.py changed, reloading.
+INFO 2025-01-04 17:58:14,990 autoreload Watching for file changes with StatReloader
+INFO 2025-01-04 17:59:11,438 autoreload Watching for file changes with StatReloader
+INFO 2025-01-04 18:01:21,842 views Received data: {'customer_id': '1', 'start_date': '2024-02-29', 'end_date': '2024-03-03', 'output_format': 'json'}
+INFO 2025-01-04 18:01:21,842 billing_calculator Generating report for customer 1 from 2024-02-29 to 2024-03-03
+INFO 2025-01-04 18:01:21,869 billing_calculator No applicable SKUs for case pick after filtering
+INFO 2025-01-04 18:01:21,871 billing_calculator SKU-specific service calculation for matcha tea (Service ID: 13):
+- Customer Service ID: 43
+- Base Price: $0.26
+- Assigned SKUs (normalized): ['ABO-312', 'ABO-322', 'ABO-323', 'ABO-324', 'ABO-325', 'ABO-331', 'ABO-341', 'ABO-351']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  No match: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:21,871 billing_calculator No matching SKUs found for service matcha tea in order 158685
+INFO 2025-01-04 18:01:21,876 billing_calculator No applicable SKUs for pick cost after filtering
+WARNING 2025-01-04 18:01:21,878 billing_calculator Field notes not found in order 158685
+WARNING 2025-01-04 18:01:21,880 billing_calculator No rules found in rule group 7
+INFO 2025-01-04 18:01:21,883 billing_calculator SKU-specific service calculation for costco pick (Service ID: 26):
+- Customer Service ID: 45
+- Base Price: $0.22
+- Assigned SKUs (normalized): ['ABO-017', 'ABO-072']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  Matched: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {'ABO-072': 1.0}
+- Original SKU formats: {'ABO-072': 'ABO-072'}
+- Total Quantity: 1.0
+- Calculated Cost: $0.220
+INFO 2025-01-04 18:01:21,887 billing_calculator No applicable SKUs for case pick after filtering
+INFO 2025-01-04 18:01:21,888 billing_calculator SKU-specific service calculation for matcha tea (Service ID: 13):
+- Customer Service ID: 43
+- Base Price: $0.26
+- Assigned SKUs (normalized): ['ABO-312', 'ABO-322', 'ABO-323', 'ABO-324', 'ABO-325', 'ABO-331', 'ABO-341', 'ABO-351']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  No match: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:21,888 billing_calculator No matching SKUs found for service matcha tea in order 158633
+INFO 2025-01-04 18:01:21,892 billing_calculator No applicable SKUs for pick cost after filtering
+WARNING 2025-01-04 18:01:21,893 billing_calculator Field notes not found in order 158633
+WARNING 2025-01-04 18:01:21,896 billing_calculator No rules found in rule group 7
+INFO 2025-01-04 18:01:21,898 billing_calculator SKU-specific service calculation for costco pick (Service ID: 26):
+- Customer Service ID: 45
+- Base Price: $0.22
+- Assigned SKUs (normalized): ['ABO-017', 'ABO-072']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  Matched: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {'ABO-072': 1.0}
+- Original SKU formats: {'ABO-072': 'ABO-072'}
+- Total Quantity: 1.0
+- Calculated Cost: $0.220
+INFO 2025-01-04 18:01:21,902 billing_calculator No applicable SKUs for case pick after filtering
+INFO 2025-01-04 18:01:21,903 billing_calculator SKU-specific service calculation for matcha tea (Service ID: 13):
+- Customer Service ID: 43
+- Base Price: $0.26
+- Assigned SKUs (normalized): ['ABO-312', 'ABO-322', 'ABO-323', 'ABO-324', 'ABO-325', 'ABO-331', 'ABO-341', 'ABO-351']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  No match: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:21,903 billing_calculator No matching SKUs found for service matcha tea in order 158634
+INFO 2025-01-04 18:01:21,907 billing_calculator No applicable SKUs for pick cost after filtering
+WARNING 2025-01-04 18:01:21,909 billing_calculator Field notes not found in order 158634
+WARNING 2025-01-04 18:01:21,911 billing_calculator No rules found in rule group 7
+INFO 2025-01-04 18:01:21,913 billing_calculator SKU-specific service calculation for costco pick (Service ID: 26):
+- Customer Service ID: 45
+- Base Price: $0.22
+- Assigned SKUs (normalized): ['ABO-017', 'ABO-072']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  Matched: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {'ABO-072': 1.0}
+- Original SKU formats: {'ABO-072': 'ABO-072'}
+- Total Quantity: 1.0
+- Calculated Cost: $0.220
+INFO 2025-01-04 18:01:21,918 billing_calculator No applicable SKUs for case pick after filtering
+INFO 2025-01-04 18:01:21,919 billing_calculator SKU-specific service calculation for matcha tea (Service ID: 13):
+- Customer Service ID: 43
+- Base Price: $0.26
+- Assigned SKUs (normalized): ['ABO-312', 'ABO-322', 'ABO-323', 'ABO-324', 'ABO-325', 'ABO-331', 'ABO-341', 'ABO-351']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  No match: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:21,919 billing_calculator No matching SKUs found for service matcha tea in order 158642
+INFO 2025-01-04 18:01:21,923 billing_calculator No applicable SKUs for pick cost after filtering
+WARNING 2025-01-04 18:01:21,925 billing_calculator Field notes not found in order 158642
+WARNING 2025-01-04 18:01:21,927 billing_calculator No rules found in rule group 7
+INFO 2025-01-04 18:01:21,929 billing_calculator SKU-specific service calculation for costco pick (Service ID: 26):
+- Customer Service ID: 45
+- Base Price: $0.22
+- Assigned SKUs (normalized): ['ABO-017', 'ABO-072']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  Matched: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {'ABO-072': 1.0}
+- Original SKU formats: {'ABO-072': 'ABO-072'}
+- Total Quantity: 1.0
+- Calculated Cost: $0.220
+INFO 2025-01-04 18:01:21,933 billing_calculator No applicable SKUs for case pick after filtering
+INFO 2025-01-04 18:01:21,934 billing_calculator SKU-specific service calculation for matcha tea (Service ID: 13):
+- Customer Service ID: 43
+- Base Price: $0.26
+- Assigned SKUs (normalized): ['ABO-312', 'ABO-322', 'ABO-323', 'ABO-324', 'ABO-325', 'ABO-331', 'ABO-341', 'ABO-351']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  No match: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:21,934 billing_calculator No matching SKUs found for service matcha tea in order 158650
+INFO 2025-01-04 18:01:21,939 billing_calculator No applicable SKUs for pick cost after filtering
+WARNING 2025-01-04 18:01:21,939 billing_calculator Field notes not found in order 158650
+WARNING 2025-01-04 18:01:21,942 billing_calculator No rules found in rule group 7
+INFO 2025-01-04 18:01:21,944 billing_calculator SKU-specific service calculation for costco pick (Service ID: 26):
+- Customer Service ID: 45
+- Base Price: $0.22
+- Assigned SKUs (normalized): ['ABO-017', 'ABO-072']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  Matched: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {'ABO-072': 1.0}
+- Original SKU formats: {'ABO-072': 'ABO-072'}
+- Total Quantity: 1.0
+- Calculated Cost: $0.220
+INFO 2025-01-04 18:01:21,947 billing_calculator No applicable SKUs for case pick after filtering
+INFO 2025-01-04 18:01:21,948 billing_calculator SKU-specific service calculation for matcha tea (Service ID: 13):
+- Customer Service ID: 43
+- Base Price: $0.26
+- Assigned SKUs (normalized): ['ABO-312', 'ABO-322', 'ABO-323', 'ABO-324', 'ABO-325', 'ABO-331', 'ABO-341', 'ABO-351']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  No match: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:21,948 billing_calculator No matching SKUs found for service matcha tea in order 158654
+INFO 2025-01-04 18:01:21,952 billing_calculator No applicable SKUs for pick cost after filtering
+WARNING 2025-01-04 18:01:21,953 billing_calculator Field notes not found in order 158654
+WARNING 2025-01-04 18:01:21,955 billing_calculator No rules found in rule group 7
+INFO 2025-01-04 18:01:21,958 billing_calculator SKU-specific service calculation for costco pick (Service ID: 26):
+- Customer Service ID: 45
+- Base Price: $0.22
+- Assigned SKUs (normalized): ['ABO-017', 'ABO-072']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  Matched: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {'ABO-072': 1.0}
+- Original SKU formats: {'ABO-072': 'ABO-072'}
+- Total Quantity: 1.0
+- Calculated Cost: $0.220
+INFO 2025-01-04 18:01:21,961 billing_calculator No applicable SKUs for case pick after filtering
+INFO 2025-01-04 18:01:21,962 billing_calculator SKU-specific service calculation for matcha tea (Service ID: 13):
+- Customer Service ID: 43
+- Base Price: $0.26
+- Assigned SKUs (normalized): ['ABO-312', 'ABO-322', 'ABO-323', 'ABO-324', 'ABO-325', 'ABO-331', 'ABO-341', 'ABO-351']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  No match: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:21,962 billing_calculator No matching SKUs found for service matcha tea in order 158655
+INFO 2025-01-04 18:01:21,966 billing_calculator No applicable SKUs for pick cost after filtering
+WARNING 2025-01-04 18:01:21,967 billing_calculator Field notes not found in order 158655
+WARNING 2025-01-04 18:01:21,969 billing_calculator No rules found in rule group 7
+INFO 2025-01-04 18:01:21,971 billing_calculator SKU-specific service calculation for costco pick (Service ID: 26):
+- Customer Service ID: 45
+- Base Price: $0.22
+- Assigned SKUs (normalized): ['ABO-017', 'ABO-072']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  Matched: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {'ABO-072': 1.0}
+- Original SKU formats: {'ABO-072': 'ABO-072'}
+- Total Quantity: 1.0
+- Calculated Cost: $0.220
+INFO 2025-01-04 18:01:21,975 billing_calculator No applicable SKUs for case pick after filtering
+INFO 2025-01-04 18:01:21,977 billing_calculator SKU-specific service calculation for matcha tea (Service ID: 13):
+- Customer Service ID: 43
+- Base Price: $0.26
+- Assigned SKUs (normalized): ['ABO-312', 'ABO-322', 'ABO-323', 'ABO-324', 'ABO-325', 'ABO-331', 'ABO-341', 'ABO-351']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  No match: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:21,977 billing_calculator No matching SKUs found for service matcha tea in order 158662
+INFO 2025-01-04 18:01:21,980 billing_calculator No applicable SKUs for pick cost after filtering
+WARNING 2025-01-04 18:01:21,981 billing_calculator Field notes not found in order 158662
+WARNING 2025-01-04 18:01:21,983 billing_calculator No rules found in rule group 7
+INFO 2025-01-04 18:01:21,985 billing_calculator SKU-specific service calculation for costco pick (Service ID: 26):
+- Customer Service ID: 45
+- Base Price: $0.22
+- Assigned SKUs (normalized): ['ABO-017', 'ABO-072']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  Matched: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {'ABO-072': 1.0}
+- Original SKU formats: {'ABO-072': 'ABO-072'}
+- Total Quantity: 1.0
+- Calculated Cost: $0.220
+INFO 2025-01-04 18:01:21,990 billing_calculator No applicable SKUs for case pick after filtering
+INFO 2025-01-04 18:01:21,991 billing_calculator SKU-specific service calculation for matcha tea (Service ID: 13):
+- Customer Service ID: 43
+- Base Price: $0.26
+- Assigned SKUs (normalized): ['ABO-312', 'ABO-322', 'ABO-323', 'ABO-324', 'ABO-325', 'ABO-331', 'ABO-341', 'ABO-351']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  No match: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:21,991 billing_calculator No matching SKUs found for service matcha tea in order 158663
+INFO 2025-01-04 18:01:21,995 billing_calculator No applicable SKUs for pick cost after filtering
+WARNING 2025-01-04 18:01:21,996 billing_calculator Field notes not found in order 158663
+WARNING 2025-01-04 18:01:21,998 billing_calculator No rules found in rule group 7
+INFO 2025-01-04 18:01:22,000 billing_calculator SKU-specific service calculation for costco pick (Service ID: 26):
+- Customer Service ID: 45
+- Base Price: $0.22
+- Assigned SKUs (normalized): ['ABO-017', 'ABO-072']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  Matched: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {'ABO-072': 1.0}
+- Original SKU formats: {'ABO-072': 'ABO-072'}
+- Total Quantity: 1.0
+- Calculated Cost: $0.220
+INFO 2025-01-04 18:01:22,004 billing_calculator No applicable SKUs for case pick after filtering
+INFO 2025-01-04 18:01:22,005 billing_calculator SKU-specific service calculation for matcha tea (Service ID: 13):
+- Customer Service ID: 43
+- Base Price: $0.26
+- Assigned SKUs (normalized): ['ABO-312', 'ABO-322', 'ABO-323', 'ABO-324', 'ABO-325', 'ABO-331', 'ABO-341', 'ABO-351']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  No match: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,005 billing_calculator No matching SKUs found for service matcha tea in order 158664
+INFO 2025-01-04 18:01:22,008 billing_calculator No applicable SKUs for pick cost after filtering
+WARNING 2025-01-04 18:01:22,009 billing_calculator Field notes not found in order 158664
+WARNING 2025-01-04 18:01:22,011 billing_calculator No rules found in rule group 7
+INFO 2025-01-04 18:01:22,013 billing_calculator SKU-specific service calculation for costco pick (Service ID: 26):
+- Customer Service ID: 45
+- Base Price: $0.22
+- Assigned SKUs (normalized): ['ABO-017', 'ABO-072']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  Matched: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {'ABO-072': 1.0}
+- Original SKU formats: {'ABO-072': 'ABO-072'}
+- Total Quantity: 1.0
+- Calculated Cost: $0.220
+INFO 2025-01-04 18:01:22,016 billing_calculator No applicable SKUs for case pick after filtering
+INFO 2025-01-04 18:01:22,017 billing_calculator SKU-specific service calculation for matcha tea (Service ID: 13):
+- Customer Service ID: 43
+- Base Price: $0.26
+- Assigned SKUs (normalized): ['ABO-312', 'ABO-322', 'ABO-323', 'ABO-324', 'ABO-325', 'ABO-331', 'ABO-341', 'ABO-351']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  No match: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,017 billing_calculator No matching SKUs found for service matcha tea in order 158668
+INFO 2025-01-04 18:01:22,021 billing_calculator No applicable SKUs for pick cost after filtering
+WARNING 2025-01-04 18:01:22,022 billing_calculator Field notes not found in order 158668
+WARNING 2025-01-04 18:01:22,024 billing_calculator No rules found in rule group 7
+INFO 2025-01-04 18:01:22,026 billing_calculator SKU-specific service calculation for costco pick (Service ID: 26):
+- Customer Service ID: 45
+- Base Price: $0.22
+- Assigned SKUs (normalized): ['ABO-017', 'ABO-072']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  Matched: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {'ABO-072': 1.0}
+- Original SKU formats: {'ABO-072': 'ABO-072'}
+- Total Quantity: 1.0
+- Calculated Cost: $0.220
+INFO 2025-01-04 18:01:22,030 billing_calculator case pick calculation details:
+- Original SKUs: {'ABO-012': 12.0}
+- Excluded SKUs: {'ABO-341', 'ABO-072', 'ABO-312', 'ABO-331', 'ABO-325', 'ABO-351', 'TESTSKU', 'ABO-324', 'ABO-323', 'ABO-017', 'ABO-322'}
+- Filtered SKUs: {'ABO-012': 12.0}
+- Calculations:
+SKU ABO-012:
+  - Quantity: 12.0
+  - Case size: 12
+  - Full cases: 1.0
+  - Cost: $0.530
+- Total cost: $0.530
+INFO 2025-01-04 18:01:22,031 billing_calculator SKU-specific service calculation for matcha tea (Service ID: 13):
+- Customer Service ID: 43
+- Base Price: $0.26
+- Assigned SKUs (normalized): ['ABO-312', 'ABO-322', 'ABO-323', 'ABO-324', 'ABO-325', 'ABO-331', 'ABO-341', 'ABO-351']
+- Order SKUs (original): ['ABO-012']
+- Matching Details:
+  No match: Order SKU 'ABO-012' with normalized form 'ABO-012'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,031 billing_calculator No matching SKUs found for service matcha tea in order 158673
+INFO 2025-01-04 18:01:22,035 billing_calculator pick cost calculation details:
+- Original SKUs: {'ABO-012': 12.0}
+- Excluded SKUs: {'ABO-341', 'ABO-072', 'ABO-312', 'ABO-331', 'ABO-325', 'ABO-351', 'TESTSKU', 'ABO-324', 'ABO-323', 'ABO-017', 'ABO-322'}
+- Filtered SKUs: {'ABO-012': 12.0}
+- Calculations:
+
+- Total cost: $0
+WARNING 2025-01-04 18:01:22,036 billing_calculator Field notes not found in order 158673
+WARNING 2025-01-04 18:01:22,039 billing_calculator No rules found in rule group 7
+INFO 2025-01-04 18:01:22,041 billing_calculator SKU-specific service calculation for costco pick (Service ID: 26):
+- Customer Service ID: 45
+- Base Price: $0.22
+- Assigned SKUs (normalized): ['ABO-017', 'ABO-072']
+- Order SKUs (original): ['ABO-012']
+- Matching Details:
+  No match: Order SKU 'ABO-012' with normalized form 'ABO-012'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,042 billing_calculator No matching SKUs found for service costco pick in order 158673
+INFO 2025-01-04 18:01:22,046 billing_calculator case pick calculation details:
+- Original SKUs: {'ABO-171': 1.0}
+- Excluded SKUs: {'ABO-341', 'ABO-072', 'ABO-312', 'ABO-331', 'ABO-325', 'ABO-351', 'TESTSKU', 'ABO-324', 'ABO-323', 'ABO-017', 'ABO-322'}
+- Filtered SKUs: {'ABO-171': 1.0}
+- Calculations:
+
+- Total cost: $0
+INFO 2025-01-04 18:01:22,047 billing_calculator SKU-specific service calculation for matcha tea (Service ID: 13):
+- Customer Service ID: 43
+- Base Price: $0.26
+- Assigned SKUs (normalized): ['ABO-312', 'ABO-322', 'ABO-323', 'ABO-324', 'ABO-325', 'ABO-331', 'ABO-341', 'ABO-351']
+- Order SKUs (original): ['ABO-171']
+- Matching Details:
+  No match: Order SKU 'ABO-171' with normalized form 'ABO-171'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,047 billing_calculator No matching SKUs found for service matcha tea in order 158675
+INFO 2025-01-04 18:01:22,052 billing_calculator pick cost calculation details:
+- Original SKUs: {'ABO-171': 1.0}
+- Excluded SKUs: {'ABO-341', 'ABO-072', 'ABO-312', 'ABO-331', 'ABO-325', 'ABO-351', 'TESTSKU', 'ABO-324', 'ABO-323', 'ABO-017', 'ABO-322'}
+- Filtered SKUs: {'ABO-171': 1.0}
+- Calculations:
+SKU ABO-171:
+  - Quantity: 1.0
+  - Cost: $0.250
+- Total cost: $0.250
+WARNING 2025-01-04 18:01:22,053 billing_calculator Field notes not found in order 158675
+WARNING 2025-01-04 18:01:22,056 billing_calculator No rules found in rule group 7
+INFO 2025-01-04 18:01:22,058 billing_calculator SKU-specific service calculation for costco pick (Service ID: 26):
+- Customer Service ID: 45
+- Base Price: $0.22
+- Assigned SKUs (normalized): ['ABO-017', 'ABO-072']
+- Order SKUs (original): ['ABO-171']
+- Matching Details:
+  No match: Order SKU 'ABO-171' with normalized form 'ABO-171'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,058 billing_calculator No matching SKUs found for service costco pick in order 158675
+INFO 2025-01-04 18:01:22,062 billing_calculator No applicable SKUs for case pick after filtering
+INFO 2025-01-04 18:01:22,063 billing_calculator SKU-specific service calculation for matcha tea (Service ID: 13):
+- Customer Service ID: 43
+- Base Price: $0.26
+- Assigned SKUs (normalized): ['ABO-312', 'ABO-322', 'ABO-323', 'ABO-324', 'ABO-325', 'ABO-331', 'ABO-341', 'ABO-351']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  No match: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,063 billing_calculator No matching SKUs found for service matcha tea in order 158676
+INFO 2025-01-04 18:01:22,067 billing_calculator No applicable SKUs for pick cost after filtering
+WARNING 2025-01-04 18:01:22,069 billing_calculator Field notes not found in order 158676
+WARNING 2025-01-04 18:01:22,071 billing_calculator No rules found in rule group 7
+INFO 2025-01-04 18:01:22,073 billing_calculator SKU-specific service calculation for costco pick (Service ID: 26):
+- Customer Service ID: 45
+- Base Price: $0.22
+- Assigned SKUs (normalized): ['ABO-017', 'ABO-072']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  Matched: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {'ABO-072': 1.0}
+- Original SKU formats: {'ABO-072': 'ABO-072'}
+- Total Quantity: 1.0
+- Calculated Cost: $0.220
+INFO 2025-01-04 18:01:22,077 billing_calculator case pick calculation details:
+- Original SKUs: {'ABO-171': 1.0}
+- Excluded SKUs: {'ABO-341', 'ABO-072', 'ABO-312', 'ABO-331', 'ABO-325', 'ABO-351', 'TESTSKU', 'ABO-324', 'ABO-323', 'ABO-017', 'ABO-322'}
+- Filtered SKUs: {'ABO-171': 1.0}
+- Calculations:
+
+- Total cost: $0
+INFO 2025-01-04 18:01:22,078 billing_calculator SKU-specific service calculation for matcha tea (Service ID: 13):
+- Customer Service ID: 43
+- Base Price: $0.26
+- Assigned SKUs (normalized): ['ABO-312', 'ABO-322', 'ABO-323', 'ABO-324', 'ABO-325', 'ABO-331', 'ABO-341', 'ABO-351']
+- Order SKUs (original): ['ABO-171']
+- Matching Details:
+  No match: Order SKU 'ABO-171' with normalized form 'ABO-171'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,078 billing_calculator No matching SKUs found for service matcha tea in order 158677
+INFO 2025-01-04 18:01:22,083 billing_calculator pick cost calculation details:
+- Original SKUs: {'ABO-171': 1.0}
+- Excluded SKUs: {'ABO-341', 'ABO-072', 'ABO-312', 'ABO-331', 'ABO-325', 'ABO-351', 'TESTSKU', 'ABO-324', 'ABO-323', 'ABO-017', 'ABO-322'}
+- Filtered SKUs: {'ABO-171': 1.0}
+- Calculations:
+SKU ABO-171:
+  - Quantity: 1.0
+  - Cost: $0.250
+- Total cost: $0.250
+WARNING 2025-01-04 18:01:22,084 billing_calculator Field notes not found in order 158677
+WARNING 2025-01-04 18:01:22,088 billing_calculator No rules found in rule group 7
+INFO 2025-01-04 18:01:22,090 billing_calculator SKU-specific service calculation for costco pick (Service ID: 26):
+- Customer Service ID: 45
+- Base Price: $0.22
+- Assigned SKUs (normalized): ['ABO-017', 'ABO-072']
+- Order SKUs (original): ['ABO-171']
+- Matching Details:
+  No match: Order SKU 'ABO-171' with normalized form 'ABO-171'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,090 billing_calculator No matching SKUs found for service costco pick in order 158677
+INFO 2025-01-04 18:01:22,094 billing_calculator No applicable SKUs for case pick after filtering
+INFO 2025-01-04 18:01:22,095 billing_calculator SKU-specific service calculation for matcha tea (Service ID: 13):
+- Customer Service ID: 43
+- Base Price: $0.26
+- Assigned SKUs (normalized): ['ABO-312', 'ABO-322', 'ABO-323', 'ABO-324', 'ABO-325', 'ABO-331', 'ABO-341', 'ABO-351']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  No match: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,095 billing_calculator No matching SKUs found for service matcha tea in order 158678
+INFO 2025-01-04 18:01:22,098 billing_calculator No applicable SKUs for pick cost after filtering
+WARNING 2025-01-04 18:01:22,100 billing_calculator Field notes not found in order 158678
+WARNING 2025-01-04 18:01:22,102 billing_calculator No rules found in rule group 7
+INFO 2025-01-04 18:01:22,104 billing_calculator SKU-specific service calculation for costco pick (Service ID: 26):
+- Customer Service ID: 45
+- Base Price: $0.22
+- Assigned SKUs (normalized): ['ABO-017', 'ABO-072']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  Matched: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {'ABO-072': 3.0}
+- Original SKU formats: {'ABO-072': 'ABO-072'}
+- Total Quantity: 3.0
+- Calculated Cost: $0.660
+INFO 2025-01-04 18:01:22,108 billing_calculator No applicable SKUs for case pick after filtering
+INFO 2025-01-04 18:01:22,108 billing_calculator SKU-specific service calculation for matcha tea (Service ID: 13):
+- Customer Service ID: 43
+- Base Price: $0.26
+- Assigned SKUs (normalized): ['ABO-312', 'ABO-322', 'ABO-323', 'ABO-324', 'ABO-325', 'ABO-331', 'ABO-341', 'ABO-351']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  No match: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,109 billing_calculator No matching SKUs found for service matcha tea in order 158679
+INFO 2025-01-04 18:01:22,112 billing_calculator No applicable SKUs for pick cost after filtering
+WARNING 2025-01-04 18:01:22,114 billing_calculator Field notes not found in order 158679
+WARNING 2025-01-04 18:01:22,116 billing_calculator No rules found in rule group 7
+INFO 2025-01-04 18:01:22,118 billing_calculator SKU-specific service calculation for costco pick (Service ID: 26):
+- Customer Service ID: 45
+- Base Price: $0.22
+- Assigned SKUs (normalized): ['ABO-017', 'ABO-072']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  Matched: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {'ABO-072': 1.0}
+- Original SKU formats: {'ABO-072': 'ABO-072'}
+- Total Quantity: 1.0
+- Calculated Cost: $0.220
+INFO 2025-01-04 18:01:22,121 billing_calculator No applicable SKUs for case pick after filtering
+INFO 2025-01-04 18:01:22,123 billing_calculator SKU-specific service calculation for matcha tea (Service ID: 13):
+- Customer Service ID: 43
+- Base Price: $0.26
+- Assigned SKUs (normalized): ['ABO-312', 'ABO-322', 'ABO-323', 'ABO-324', 'ABO-325', 'ABO-331', 'ABO-341', 'ABO-351']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  No match: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,123 billing_calculator No matching SKUs found for service matcha tea in order 158680
+INFO 2025-01-04 18:01:22,126 billing_calculator No applicable SKUs for pick cost after filtering
+WARNING 2025-01-04 18:01:22,127 billing_calculator Field notes not found in order 158680
+WARNING 2025-01-04 18:01:22,130 billing_calculator No rules found in rule group 7
+INFO 2025-01-04 18:01:22,132 billing_calculator SKU-specific service calculation for costco pick (Service ID: 26):
+- Customer Service ID: 45
+- Base Price: $0.22
+- Assigned SKUs (normalized): ['ABO-017', 'ABO-072']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  Matched: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {'ABO-072': 1.0}
+- Original SKU formats: {'ABO-072': 'ABO-072'}
+- Total Quantity: 1.0
+- Calculated Cost: $0.220
+INFO 2025-01-04 18:01:22,136 billing_calculator No applicable SKUs for case pick after filtering
+INFO 2025-01-04 18:01:22,137 billing_calculator SKU-specific service calculation for matcha tea (Service ID: 13):
+- Customer Service ID: 43
+- Base Price: $0.26
+- Assigned SKUs (normalized): ['ABO-312', 'ABO-322', 'ABO-323', 'ABO-324', 'ABO-325', 'ABO-331', 'ABO-341', 'ABO-351']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  No match: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,137 billing_calculator No matching SKUs found for service matcha tea in order 158681
+INFO 2025-01-04 18:01:22,141 billing_calculator No applicable SKUs for pick cost after filtering
+WARNING 2025-01-04 18:01:22,142 billing_calculator Field notes not found in order 158681
+WARNING 2025-01-04 18:01:22,144 billing_calculator No rules found in rule group 7
+INFO 2025-01-04 18:01:22,146 billing_calculator SKU-specific service calculation for costco pick (Service ID: 26):
+- Customer Service ID: 45
+- Base Price: $0.22
+- Assigned SKUs (normalized): ['ABO-017', 'ABO-072']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  Matched: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {'ABO-072': 1.0}
+- Original SKU formats: {'ABO-072': 'ABO-072'}
+- Total Quantity: 1.0
+- Calculated Cost: $0.220
+INFO 2025-01-04 18:01:22,150 billing_calculator No applicable SKUs for case pick after filtering
+INFO 2025-01-04 18:01:22,151 billing_calculator SKU-specific service calculation for matcha tea (Service ID: 13):
+- Customer Service ID: 43
+- Base Price: $0.26
+- Assigned SKUs (normalized): ['ABO-312', 'ABO-322', 'ABO-323', 'ABO-324', 'ABO-325', 'ABO-331', 'ABO-341', 'ABO-351']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  No match: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,151 billing_calculator No matching SKUs found for service matcha tea in order 158682
+INFO 2025-01-04 18:01:22,154 billing_calculator No applicable SKUs for pick cost after filtering
+WARNING 2025-01-04 18:01:22,156 billing_calculator Field notes not found in order 158682
+WARNING 2025-01-04 18:01:22,158 billing_calculator No rules found in rule group 7
+INFO 2025-01-04 18:01:22,160 billing_calculator SKU-specific service calculation for costco pick (Service ID: 26):
+- Customer Service ID: 45
+- Base Price: $0.22
+- Assigned SKUs (normalized): ['ABO-017', 'ABO-072']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  Matched: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {'ABO-072': 1.0}
+- Original SKU formats: {'ABO-072': 'ABO-072'}
+- Total Quantity: 1.0
+- Calculated Cost: $0.220
+INFO 2025-01-04 18:01:22,165 billing_calculator case pick calculation details:
+- Original SKUs: {'ABO-171': 1.0}
+- Excluded SKUs: {'ABO-341', 'ABO-072', 'ABO-312', 'ABO-331', 'ABO-325', 'ABO-351', 'TESTSKU', 'ABO-324', 'ABO-323', 'ABO-017', 'ABO-322'}
+- Filtered SKUs: {'ABO-171': 1.0}
+- Calculations:
+
+- Total cost: $0
+INFO 2025-01-04 18:01:22,166 billing_calculator SKU-specific service calculation for matcha tea (Service ID: 13):
+- Customer Service ID: 43
+- Base Price: $0.26
+- Assigned SKUs (normalized): ['ABO-312', 'ABO-322', 'ABO-323', 'ABO-324', 'ABO-325', 'ABO-331', 'ABO-341', 'ABO-351']
+- Order SKUs (original): ['ABO-171']
+- Matching Details:
+  No match: Order SKU 'ABO-171' with normalized form 'ABO-171'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,166 billing_calculator No matching SKUs found for service matcha tea in order 158686
+INFO 2025-01-04 18:01:22,170 billing_calculator pick cost calculation details:
+- Original SKUs: {'ABO-171': 1.0}
+- Excluded SKUs: {'ABO-341', 'ABO-072', 'ABO-312', 'ABO-331', 'ABO-325', 'ABO-351', 'TESTSKU', 'ABO-324', 'ABO-323', 'ABO-017', 'ABO-322'}
+- Filtered SKUs: {'ABO-171': 1.0}
+- Calculations:
+SKU ABO-171:
+  - Quantity: 1.0
+  - Cost: $0.250
+- Total cost: $0.250
+WARNING 2025-01-04 18:01:22,171 billing_calculator Field notes not found in order 158686
+WARNING 2025-01-04 18:01:22,173 billing_calculator No rules found in rule group 7
+INFO 2025-01-04 18:01:22,176 billing_calculator SKU-specific service calculation for costco pick (Service ID: 26):
+- Customer Service ID: 45
+- Base Price: $0.22
+- Assigned SKUs (normalized): ['ABO-017', 'ABO-072']
+- Order SKUs (original): ['ABO-171']
+- Matching Details:
+  No match: Order SKU 'ABO-171' with normalized form 'ABO-171'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,176 billing_calculator No matching SKUs found for service costco pick in order 158686
+INFO 2025-01-04 18:01:22,180 billing_calculator No applicable SKUs for case pick after filtering
+INFO 2025-01-04 18:01:22,181 billing_calculator SKU-specific service calculation for matcha tea (Service ID: 13):
+- Customer Service ID: 43
+- Base Price: $0.26
+- Assigned SKUs (normalized): ['ABO-312', 'ABO-322', 'ABO-323', 'ABO-324', 'ABO-325', 'ABO-331', 'ABO-341', 'ABO-351']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  No match: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,181 billing_calculator No matching SKUs found for service matcha tea in order 158687
+INFO 2025-01-04 18:01:22,184 billing_calculator No applicable SKUs for pick cost after filtering
+WARNING 2025-01-04 18:01:22,185 billing_calculator Field notes not found in order 158687
+WARNING 2025-01-04 18:01:22,187 billing_calculator No rules found in rule group 7
+INFO 2025-01-04 18:01:22,189 billing_calculator SKU-specific service calculation for costco pick (Service ID: 26):
+- Customer Service ID: 45
+- Base Price: $0.22
+- Assigned SKUs (normalized): ['ABO-017', 'ABO-072']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  Matched: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {'ABO-072': 1.0}
+- Original SKU formats: {'ABO-072': 'ABO-072'}
+- Total Quantity: 1.0
+- Calculated Cost: $0.220
+INFO 2025-01-04 18:01:22,193 billing_calculator No applicable SKUs for case pick after filtering
+INFO 2025-01-04 18:01:22,194 billing_calculator SKU-specific service calculation for matcha tea (Service ID: 13):
+- Customer Service ID: 43
+- Base Price: $0.26
+- Assigned SKUs (normalized): ['ABO-312', 'ABO-322', 'ABO-323', 'ABO-324', 'ABO-325', 'ABO-331', 'ABO-341', 'ABO-351']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  No match: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,194 billing_calculator No matching SKUs found for service matcha tea in order 158693
+INFO 2025-01-04 18:01:22,197 billing_calculator No applicable SKUs for pick cost after filtering
+WARNING 2025-01-04 18:01:22,198 billing_calculator Field notes not found in order 158693
+WARNING 2025-01-04 18:01:22,200 billing_calculator No rules found in rule group 7
+INFO 2025-01-04 18:01:22,202 billing_calculator SKU-specific service calculation for costco pick (Service ID: 26):
+- Customer Service ID: 45
+- Base Price: $0.22
+- Assigned SKUs (normalized): ['ABO-017', 'ABO-072']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  Matched: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {'ABO-072': 1.0}
+- Original SKU formats: {'ABO-072': 'ABO-072'}
+- Total Quantity: 1.0
+- Calculated Cost: $0.220
+INFO 2025-01-04 18:01:22,205 billing_calculator No applicable SKUs for case pick after filtering
+INFO 2025-01-04 18:01:22,206 billing_calculator SKU-specific service calculation for matcha tea (Service ID: 13):
+- Customer Service ID: 43
+- Base Price: $0.26
+- Assigned SKUs (normalized): ['ABO-312', 'ABO-322', 'ABO-323', 'ABO-324', 'ABO-325', 'ABO-331', 'ABO-341', 'ABO-351']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  No match: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,206 billing_calculator No matching SKUs found for service matcha tea in order 158694
+INFO 2025-01-04 18:01:22,210 billing_calculator No applicable SKUs for pick cost after filtering
+WARNING 2025-01-04 18:01:22,211 billing_calculator Field notes not found in order 158694
+WARNING 2025-01-04 18:01:22,213 billing_calculator No rules found in rule group 7
+INFO 2025-01-04 18:01:22,215 billing_calculator SKU-specific service calculation for costco pick (Service ID: 26):
+- Customer Service ID: 45
+- Base Price: $0.22
+- Assigned SKUs (normalized): ['ABO-017', 'ABO-072']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  Matched: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {'ABO-072': 2.0}
+- Original SKU formats: {'ABO-072': 'ABO-072'}
+- Total Quantity: 2.0
+- Calculated Cost: $0.440
+INFO 2025-01-04 18:01:22,218 billing_calculator No applicable SKUs for case pick after filtering
+INFO 2025-01-04 18:01:22,219 billing_calculator SKU-specific service calculation for matcha tea (Service ID: 13):
+- Customer Service ID: 43
+- Base Price: $0.26
+- Assigned SKUs (normalized): ['ABO-312', 'ABO-322', 'ABO-323', 'ABO-324', 'ABO-325', 'ABO-331', 'ABO-341', 'ABO-351']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  No match: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,219 billing_calculator No matching SKUs found for service matcha tea in order 158698
+INFO 2025-01-04 18:01:22,223 billing_calculator No applicable SKUs for pick cost after filtering
+WARNING 2025-01-04 18:01:22,225 billing_calculator Field notes not found in order 158698
+WARNING 2025-01-04 18:01:22,226 billing_calculator No rules found in rule group 7
+INFO 2025-01-04 18:01:22,228 billing_calculator SKU-specific service calculation for costco pick (Service ID: 26):
+- Customer Service ID: 45
+- Base Price: $0.22
+- Assigned SKUs (normalized): ['ABO-017', 'ABO-072']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  Matched: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {'ABO-072': 1.0}
+- Original SKU formats: {'ABO-072': 'ABO-072'}
+- Total Quantity: 1.0
+- Calculated Cost: $0.220
+INFO 2025-01-04 18:01:22,232 billing_calculator No applicable SKUs for case pick after filtering
+INFO 2025-01-04 18:01:22,233 billing_calculator SKU-specific service calculation for matcha tea (Service ID: 13):
+- Customer Service ID: 43
+- Base Price: $0.26
+- Assigned SKUs (normalized): ['ABO-312', 'ABO-322', 'ABO-323', 'ABO-324', 'ABO-325', 'ABO-331', 'ABO-341', 'ABO-351']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  No match: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,233 billing_calculator No matching SKUs found for service matcha tea in order 158699
+INFO 2025-01-04 18:01:22,236 billing_calculator No applicable SKUs for pick cost after filtering
+WARNING 2025-01-04 18:01:22,237 billing_calculator Field notes not found in order 158699
+WARNING 2025-01-04 18:01:22,239 billing_calculator No rules found in rule group 7
+INFO 2025-01-04 18:01:22,241 billing_calculator SKU-specific service calculation for costco pick (Service ID: 26):
+- Customer Service ID: 45
+- Base Price: $0.22
+- Assigned SKUs (normalized): ['ABO-017', 'ABO-072']
+- Order SKUs (original): ['ABO-072']
+- Matching Details:
+  Matched: Order SKU 'ABO-072' with normalized form 'ABO-072'
+- Matched SKUs: {'ABO-072': 1.0}
+- Original SKU formats: {'ABO-072': 'ABO-072'}
+- Total Quantity: 1.0
+- Calculated Cost: $0.220
+INFO 2025-01-04 18:01:22,245 billing_calculator case pick calculation details:
+- Original SKUs: {'ABO-012': 12.0, 'ABO-351': 1.0}
+- Excluded SKUs: {'ABO-341', 'ABO-072', 'ABO-312', 'ABO-331', 'ABO-325', 'ABO-351', 'TESTSKU', 'ABO-324', 'ABO-323', 'ABO-017', 'ABO-322'}
+- Filtered SKUs: {'ABO-012': 12.0}
+- Calculations:
+SKU ABO-012:
+  - Quantity: 12.0
+  - Case size: 12
+  - Full cases: 1.0
+  - Cost: $0.530
+- Total cost: $0.530
+INFO 2025-01-04 18:01:22,246 billing_calculator SKU-specific service calculation for matcha tea (Service ID: 13):
+- Customer Service ID: 43
+- Base Price: $0.26
+- Assigned SKUs (normalized): ['ABO-312', 'ABO-322', 'ABO-323', 'ABO-324', 'ABO-325', 'ABO-331', 'ABO-341', 'ABO-351']
+- Order SKUs (original): ['ABO-012', 'ABO-351']
+- Matching Details:
+  No match: Order SKU 'ABO-012' with normalized form 'ABO-012'
+  Matched: Order SKU 'ABO-351' with normalized form 'ABO-351'
+- Matched SKUs: {'ABO-351': 1.0}
+- Original SKU formats: {'ABO-351': 'ABO-351'}
+- Total Quantity: 1.0
+- Calculated Cost: $0.260
+INFO 2025-01-04 18:01:22,250 billing_calculator pick cost calculation details:
+- Original SKUs: {'ABO-012': 12.0, 'ABO-351': 1.0}
+- Excluded SKUs: {'ABO-341', 'ABO-072', 'ABO-312', 'ABO-331', 'ABO-325', 'ABO-351', 'TESTSKU', 'ABO-324', 'ABO-323', 'ABO-017', 'ABO-322'}
+- Filtered SKUs: {'ABO-012': 12.0}
+- Calculations:
+
+- Total cost: $0
+WARNING 2025-01-04 18:01:22,251 billing_calculator Field notes not found in order 158711
+WARNING 2025-01-04 18:01:22,254 billing_calculator No rules found in rule group 7
+INFO 2025-01-04 18:01:22,257 billing_calculator SKU-specific service calculation for costco pick (Service ID: 26):
+- Customer Service ID: 45
+- Base Price: $0.22
+- Assigned SKUs (normalized): ['ABO-017', 'ABO-072']
+- Order SKUs (original): ['ABO-012', 'ABO-351']
+- Matching Details:
+  No match: Order SKU 'ABO-012' with normalized form 'ABO-012'
+  No match: Order SKU 'ABO-351' with normalized form 'ABO-351'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,257 billing_calculator No matching SKUs found for service costco pick in order 158711
+INFO 2025-01-04 18:01:22,262 billing_calculator case pick calculation details:
+- Original SKUs: {'ABO-171': 1.0}
+- Excluded SKUs: {'ABO-341', 'ABO-072', 'ABO-312', 'ABO-331', 'ABO-325', 'ABO-351', 'TESTSKU', 'ABO-324', 'ABO-323', 'ABO-017', 'ABO-322'}
+- Filtered SKUs: {'ABO-171': 1.0}
+- Calculations:
+
+- Total cost: $0
+INFO 2025-01-04 18:01:22,263 billing_calculator SKU-specific service calculation for matcha tea (Service ID: 13):
+- Customer Service ID: 43
+- Base Price: $0.26
+- Assigned SKUs (normalized): ['ABO-312', 'ABO-322', 'ABO-323', 'ABO-324', 'ABO-325', 'ABO-331', 'ABO-341', 'ABO-351']
+- Order SKUs (original): ['ABO-171']
+- Matching Details:
+  No match: Order SKU 'ABO-171' with normalized form 'ABO-171'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,263 billing_calculator No matching SKUs found for service matcha tea in order 158754
+INFO 2025-01-04 18:01:22,268 billing_calculator pick cost calculation details:
+- Original SKUs: {'ABO-171': 1.0}
+- Excluded SKUs: {'ABO-341', 'ABO-072', 'ABO-312', 'ABO-331', 'ABO-325', 'ABO-351', 'TESTSKU', 'ABO-324', 'ABO-323', 'ABO-017', 'ABO-322'}
+- Filtered SKUs: {'ABO-171': 1.0}
+- Calculations:
+SKU ABO-171:
+  - Quantity: 1.0
+  - Cost: $0.250
+- Total cost: $0.250
+WARNING 2025-01-04 18:01:22,269 billing_calculator Field notes not found in order 158754
+WARNING 2025-01-04 18:01:22,272 billing_calculator No rules found in rule group 7
+INFO 2025-01-04 18:01:22,274 billing_calculator SKU-specific service calculation for costco pick (Service ID: 26):
+- Customer Service ID: 45
+- Base Price: $0.22
+- Assigned SKUs (normalized): ['ABO-017', 'ABO-072']
+- Order SKUs (original): ['ABO-171']
+- Matching Details:
+  No match: Order SKU 'ABO-171' with normalized form 'ABO-171'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,274 billing_calculator No matching SKUs found for service costco pick in order 158754
+INFO 2025-01-04 18:01:22,279 billing_calculator case pick calculation details:
+- Original SKUs: {'ABO-012': 24.0, 'ABO-022': 12.0, 'ABO-032': 12.0}
+- Excluded SKUs: {'ABO-341', 'ABO-072', 'ABO-312', 'ABO-331', 'ABO-325', 'ABO-351', 'TESTSKU', 'ABO-324', 'ABO-323', 'ABO-017', 'ABO-322'}
+- Filtered SKUs: {'ABO-012': 24.0, 'ABO-022': 12.0, 'ABO-032': 12.0}
+- Calculations:
+SKU ABO-012:
+  - Quantity: 24.0
+  - Case size: 12
+  - Full cases: 2.0
+  - Cost: $1.060
+SKU ABO-022:
+  - Quantity: 12.0
+  - Case size: 12
+  - Full cases: 1.0
+  - Cost: $0.530
+SKU ABO-032:
+  - Quantity: 12.0
+  - Case size: 12
+  - Full cases: 1.0
+  - Cost: $0.530
+- Total cost: $2.120
+INFO 2025-01-04 18:01:22,281 billing_calculator SKU-specific service calculation for matcha tea (Service ID: 13):
+- Customer Service ID: 43
+- Base Price: $0.26
+- Assigned SKUs (normalized): ['ABO-312', 'ABO-322', 'ABO-323', 'ABO-324', 'ABO-325', 'ABO-331', 'ABO-341', 'ABO-351']
+- Order SKUs (original): ['ABO-012', 'ABO-022', 'ABO-032']
+- Matching Details:
+  No match: Order SKU 'ABO-012' with normalized form 'ABO-012'
+  No match: Order SKU 'ABO-022' with normalized form 'ABO-022'
+  No match: Order SKU 'ABO-032' with normalized form 'ABO-032'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,281 billing_calculator No matching SKUs found for service matcha tea in order 158319
+INFO 2025-01-04 18:01:22,286 billing_calculator pick cost calculation details:
+- Original SKUs: {'ABO-012': 24.0, 'ABO-022': 12.0, 'ABO-032': 12.0}
+- Excluded SKUs: {'ABO-341', 'ABO-072', 'ABO-312', 'ABO-331', 'ABO-325', 'ABO-351', 'TESTSKU', 'ABO-324', 'ABO-323', 'ABO-017', 'ABO-322'}
+- Filtered SKUs: {'ABO-012': 24.0, 'ABO-022': 12.0, 'ABO-032': 12.0}
+- Calculations:
+
+- Total cost: $0
+WARNING 2025-01-04 18:01:22,290 billing_calculator No rules found in rule group 7
+INFO 2025-01-04 18:01:22,292 billing_calculator SKU-specific service calculation for costco pick (Service ID: 26):
+- Customer Service ID: 45
+- Base Price: $0.22
+- Assigned SKUs (normalized): ['ABO-017', 'ABO-072']
+- Order SKUs (original): ['ABO-012', 'ABO-022', 'ABO-032']
+- Matching Details:
+  No match: Order SKU 'ABO-012' with normalized form 'ABO-012'
+  No match: Order SKU 'ABO-022' with normalized form 'ABO-022'
+  No match: Order SKU 'ABO-032' with normalized form 'ABO-032'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,292 billing_calculator No matching SKUs found for service costco pick in order 158319
+INFO 2025-01-04 18:01:22,297 billing_calculator case pick calculation details:
+- Original SKUs: {'ABO-012': 12.0, 'ABO-022': 12.0, 'ABO-042': 12.0}
+- Excluded SKUs: {'ABO-341', 'ABO-072', 'ABO-312', 'ABO-331', 'ABO-325', 'ABO-351', 'TESTSKU', 'ABO-324', 'ABO-323', 'ABO-017', 'ABO-322'}
+- Filtered SKUs: {'ABO-012': 12.0, 'ABO-022': 12.0, 'ABO-042': 12.0}
+- Calculations:
+SKU ABO-012:
+  - Quantity: 12.0
+  - Case size: 12
+  - Full cases: 1.0
+  - Cost: $0.530
+SKU ABO-022:
+  - Quantity: 12.0
+  - Case size: 12
+  - Full cases: 1.0
+  - Cost: $0.530
+SKU ABO-042:
+  - Quantity: 12.0
+  - Case size: 12
+  - Full cases: 1.0
+  - Cost: $0.530
+- Total cost: $1.590
+INFO 2025-01-04 18:01:22,298 billing_calculator SKU-specific service calculation for matcha tea (Service ID: 13):
+- Customer Service ID: 43
+- Base Price: $0.26
+- Assigned SKUs (normalized): ['ABO-312', 'ABO-322', 'ABO-323', 'ABO-324', 'ABO-325', 'ABO-331', 'ABO-341', 'ABO-351']
+- Order SKUs (original): ['ABO-012', 'ABO-022', 'ABO-042']
+- Matching Details:
+  No match: Order SKU 'ABO-012' with normalized form 'ABO-012'
+  No match: Order SKU 'ABO-022' with normalized form 'ABO-022'
+  No match: Order SKU 'ABO-042' with normalized form 'ABO-042'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,298 billing_calculator No matching SKUs found for service matcha tea in order 158357
+INFO 2025-01-04 18:01:22,303 billing_calculator pick cost calculation details:
+- Original SKUs: {'ABO-012': 12.0, 'ABO-022': 12.0, 'ABO-042': 12.0}
+- Excluded SKUs: {'ABO-341', 'ABO-072', 'ABO-312', 'ABO-331', 'ABO-325', 'ABO-351', 'TESTSKU', 'ABO-324', 'ABO-323', 'ABO-017', 'ABO-322'}
+- Filtered SKUs: {'ABO-012': 12.0, 'ABO-022': 12.0, 'ABO-042': 12.0}
+- Calculations:
+
+- Total cost: $0
+WARNING 2025-01-04 18:01:22,307 billing_calculator No rules found in rule group 7
+INFO 2025-01-04 18:01:22,309 billing_calculator SKU-specific service calculation for costco pick (Service ID: 26):
+- Customer Service ID: 45
+- Base Price: $0.22
+- Assigned SKUs (normalized): ['ABO-017', 'ABO-072']
+- Order SKUs (original): ['ABO-012', 'ABO-022', 'ABO-042']
+- Matching Details:
+  No match: Order SKU 'ABO-012' with normalized form 'ABO-012'
+  No match: Order SKU 'ABO-022' with normalized form 'ABO-022'
+  No match: Order SKU 'ABO-042' with normalized form 'ABO-042'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,309 billing_calculator No matching SKUs found for service costco pick in order 158357
+INFO 2025-01-04 18:01:22,314 billing_calculator case pick calculation details:
+- Original SKUs: {'ABO-012': 12.0, 'ABO-022': 12.0, 'ABO-042': 12.0}
+- Excluded SKUs: {'ABO-341', 'ABO-072', 'ABO-312', 'ABO-331', 'ABO-325', 'ABO-351', 'TESTSKU', 'ABO-324', 'ABO-323', 'ABO-017', 'ABO-322'}
+- Filtered SKUs: {'ABO-012': 12.0, 'ABO-022': 12.0, 'ABO-042': 12.0}
+- Calculations:
+SKU ABO-012:
+  - Quantity: 12.0
+  - Case size: 12
+  - Full cases: 1.0
+  - Cost: $0.530
+SKU ABO-022:
+  - Quantity: 12.0
+  - Case size: 12
+  - Full cases: 1.0
+  - Cost: $0.530
+SKU ABO-042:
+  - Quantity: 12.0
+  - Case size: 12
+  - Full cases: 1.0
+  - Cost: $0.530
+- Total cost: $1.590
+INFO 2025-01-04 18:01:22,315 billing_calculator SKU-specific service calculation for matcha tea (Service ID: 13):
+- Customer Service ID: 43
+- Base Price: $0.26
+- Assigned SKUs (normalized): ['ABO-312', 'ABO-322', 'ABO-323', 'ABO-324', 'ABO-325', 'ABO-331', 'ABO-341', 'ABO-351']
+- Order SKUs (original): ['ABO-012', 'ABO-022', 'ABO-042']
+- Matching Details:
+  No match: Order SKU 'ABO-012' with normalized form 'ABO-012'
+  No match: Order SKU 'ABO-022' with normalized form 'ABO-022'
+  No match: Order SKU 'ABO-042' with normalized form 'ABO-042'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,315 billing_calculator No matching SKUs found for service matcha tea in order 158359
+INFO 2025-01-04 18:01:22,321 billing_calculator pick cost calculation details:
+- Original SKUs: {'ABO-012': 12.0, 'ABO-022': 12.0, 'ABO-042': 12.0}
+- Excluded SKUs: {'ABO-341', 'ABO-072', 'ABO-312', 'ABO-331', 'ABO-325', 'ABO-351', 'TESTSKU', 'ABO-324', 'ABO-323', 'ABO-017', 'ABO-322'}
+- Filtered SKUs: {'ABO-012': 12.0, 'ABO-022': 12.0, 'ABO-042': 12.0}
+- Calculations:
+
+- Total cost: $0
+WARNING 2025-01-04 18:01:22,325 billing_calculator No rules found in rule group 7
+INFO 2025-01-04 18:01:22,327 billing_calculator SKU-specific service calculation for costco pick (Service ID: 26):
+- Customer Service ID: 45
+- Base Price: $0.22
+- Assigned SKUs (normalized): ['ABO-017', 'ABO-072']
+- Order SKUs (original): ['ABO-012', 'ABO-022', 'ABO-042']
+- Matching Details:
+  No match: Order SKU 'ABO-012' with normalized form 'ABO-012'
+  No match: Order SKU 'ABO-022' with normalized form 'ABO-022'
+  No match: Order SKU 'ABO-042' with normalized form 'ABO-042'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,327 billing_calculator No matching SKUs found for service costco pick in order 158359
+INFO 2025-01-04 18:01:22,332 billing_calculator case pick calculation details:
+- Original SKUs: {'ABO-012': 12.0, 'ABO-022': 12.0, 'ABO-032': 12.0}
+- Excluded SKUs: {'ABO-341', 'ABO-072', 'ABO-312', 'ABO-331', 'ABO-325', 'ABO-351', 'TESTSKU', 'ABO-324', 'ABO-323', 'ABO-017', 'ABO-322'}
+- Filtered SKUs: {'ABO-012': 12.0, 'ABO-022': 12.0, 'ABO-032': 12.0}
+- Calculations:
+SKU ABO-012:
+  - Quantity: 12.0
+  - Case size: 12
+  - Full cases: 1.0
+  - Cost: $0.530
+SKU ABO-022:
+  - Quantity: 12.0
+  - Case size: 12
+  - Full cases: 1.0
+  - Cost: $0.530
+SKU ABO-032:
+  - Quantity: 12.0
+  - Case size: 12
+  - Full cases: 1.0
+  - Cost: $0.530
+- Total cost: $1.590
+INFO 2025-01-04 18:01:22,334 billing_calculator SKU-specific service calculation for matcha tea (Service ID: 13):
+- Customer Service ID: 43
+- Base Price: $0.26
+- Assigned SKUs (normalized): ['ABO-312', 'ABO-322', 'ABO-323', 'ABO-324', 'ABO-325', 'ABO-331', 'ABO-341', 'ABO-351']
+- Order SKUs (original): ['ABO-012', 'ABO-022', 'ABO-032']
+- Matching Details:
+  No match: Order SKU 'ABO-012' with normalized form 'ABO-012'
+  No match: Order SKU 'ABO-022' with normalized form 'ABO-022'
+  No match: Order SKU 'ABO-032' with normalized form 'ABO-032'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,334 billing_calculator No matching SKUs found for service matcha tea in order 158522
+INFO 2025-01-04 18:01:22,339 billing_calculator pick cost calculation details:
+- Original SKUs: {'ABO-012': 12.0, 'ABO-022': 12.0, 'ABO-032': 12.0}
+- Excluded SKUs: {'ABO-341', 'ABO-072', 'ABO-312', 'ABO-331', 'ABO-325', 'ABO-351', 'TESTSKU', 'ABO-324', 'ABO-323', 'ABO-017', 'ABO-322'}
+- Filtered SKUs: {'ABO-012': 12.0, 'ABO-022': 12.0, 'ABO-032': 12.0}
+- Calculations:
+
+- Total cost: $0
+WARNING 2025-01-04 18:01:22,342 billing_calculator No rules found in rule group 7
+INFO 2025-01-04 18:01:22,344 billing_calculator SKU-specific service calculation for costco pick (Service ID: 26):
+- Customer Service ID: 45
+- Base Price: $0.22
+- Assigned SKUs (normalized): ['ABO-017', 'ABO-072']
+- Order SKUs (original): ['ABO-012', 'ABO-022', 'ABO-032']
+- Matching Details:
+  No match: Order SKU 'ABO-012' with normalized form 'ABO-012'
+  No match: Order SKU 'ABO-022' with normalized form 'ABO-022'
+  No match: Order SKU 'ABO-032' with normalized form 'ABO-032'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,344 billing_calculator No matching SKUs found for service costco pick in order 158522
+INFO 2025-01-04 18:01:22,348 billing_calculator case pick calculation details:
+- Original SKUs: {'ABO-022': 48.0}
+- Excluded SKUs: {'ABO-341', 'ABO-072', 'ABO-312', 'ABO-331', 'ABO-325', 'ABO-351', 'TESTSKU', 'ABO-324', 'ABO-323', 'ABO-017', 'ABO-322'}
+- Filtered SKUs: {'ABO-022': 48.0}
+- Calculations:
+SKU ABO-022:
+  - Quantity: 48.0
+  - Case size: 12
+  - Full cases: 4.0
+  - Cost: $2.120
+- Total cost: $2.120
+INFO 2025-01-04 18:01:22,350 billing_calculator SKU-specific service calculation for matcha tea (Service ID: 13):
+- Customer Service ID: 43
+- Base Price: $0.26
+- Assigned SKUs (normalized): ['ABO-312', 'ABO-322', 'ABO-323', 'ABO-324', 'ABO-325', 'ABO-331', 'ABO-341', 'ABO-351']
+- Order SKUs (original): ['ABO-022']
+- Matching Details:
+  No match: Order SKU 'ABO-022' with normalized form 'ABO-022'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,350 billing_calculator No matching SKUs found for service matcha tea in order 158645
+INFO 2025-01-04 18:01:22,354 billing_calculator pick cost calculation details:
+- Original SKUs: {'ABO-022': 48.0}
+- Excluded SKUs: {'ABO-341', 'ABO-072', 'ABO-312', 'ABO-331', 'ABO-325', 'ABO-351', 'TESTSKU', 'ABO-324', 'ABO-323', 'ABO-017', 'ABO-322'}
+- Filtered SKUs: {'ABO-022': 48.0}
+- Calculations:
+
+- Total cost: $0
+WARNING 2025-01-04 18:01:22,357 billing_calculator No rules found in rule group 7
+INFO 2025-01-04 18:01:22,359 billing_calculator SKU-specific service calculation for costco pick (Service ID: 26):
+- Customer Service ID: 45
+- Base Price: $0.22
+- Assigned SKUs (normalized): ['ABO-017', 'ABO-072']
+- Order SKUs (original): ['ABO-022']
+- Matching Details:
+  No match: Order SKU 'ABO-022' with normalized form 'ABO-022'
+- Matched SKUs: {}
+- Original SKU formats: {}
+- Total Quantity: 0
+- Calculated Cost: $0.00
+INFO 2025-01-04 18:01:22,359 billing_calculator No matching SKUs found for service costco pick in order 158645
+INFO 2025-01-04 18:01:22,360 views Report generated successfully
+ERROR 2025-01-04 18:04:12,540 log Internal Server Error: /rules/group/8/advanced-rule/create/
+Traceback (most recent call last):
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+               ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\backends\django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+           ^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\base.py", line 196, in compile_nodelist
+    nodelist = parser.parse()
+               ^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\loader_tags.py", line 295, in do_extends
+    nodelist = parser.parse()
+               ^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\loader_tags.py", line 234, in do_block
+    nodelist = parser.parse(("endblock",))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\defaulttags.py", line 862, in do_for
+    nodelist_loop = parser.parse(
+                    ^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\base.py", line 489, in parse
+    raise self.error(token, e)
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\base.py", line 487, in parse
+    filter_expression = self.compile_filter(token.contents)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\base.py", line 605, in compile_filter
+    return FilterExpression(token, self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\base.py", line 701, in __init__
+    filter_func = parser.find_filter(filter_name)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\base.py", line 611, in find_filter
+    raise TemplateSyntaxError("Invalid filter: '%s'" % filter_name)
+django.template.exceptions.TemplateSyntaxError: Invalid filter: 'get_calculation_description'
+INFO 2025-01-04 18:13:37,960 autoreload C:\Users\Hassan\PycharmProjects\LedgerLink\rules\templatetags\rule_filters.py changed, reloading.
+INFO 2025-01-04 18:13:38,695 autoreload Watching for file changes with StatReloader
+ERROR 2025-01-04 18:20:49,665 log Internal Server Error: /rules/group/8/advanced-rule/create/
+Traceback (most recent call last):
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+               ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\backends\django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+           ^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\base.py", line 196, in compile_nodelist
+    nodelist = parser.parse()
+               ^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\base.py", line 519, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\base.py", line 536, in extend_nodelist
+    raise self.error(
+django.template.exceptions.TemplateSyntaxError: <ExtendsNode: extends 'base.html'> must be the first tag in the template.
+ERROR 2025-01-04 18:20:51,034 log Internal Server Error: /rules/group/8/advanced-rule/create/
+Traceback (most recent call last):
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+               ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\backends\django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+           ^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\base.py", line 196, in compile_nodelist
+    nodelist = parser.parse()
+               ^^^^^^^^^^^^^^
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\base.py", line 519, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+  File "C:\Users\Hassan\PycharmProjects\LL_LedgerLink\LedgerLink\.venv\Lib\site-packages\django\template\base.py", line 536, in extend_nodelist
+    raise self.error(
+django.template.exceptions.TemplateSyntaxError: <ExtendsNode: extends 'base.html'> must be the first tag in the template.
+INFO 2025-01-04 18:57:20,593 autoreload Watching for file changes with StatReloader
+WARNING 2025-01-04 19:40:12,947 log Not Found: /favicon.ico
+WARNING 2025-01-04 19:43:03,532 log Bad Request: /rules/api/advanced-rule/validate-conditions/
+WARNING 2025-01-04 19:43:04,230 log Bad Request: /rules/api/advanced-rule/validate-conditions/
+WARNING 2025-01-04 19:43:04,417 log Bad Request: /rules/api/advanced-rule/validate-conditions/
+WARNING 2025-01-04 19:43:04,657 log Bad Request: /rules/api/advanced-rule/validate-conditions/
+WARNING 2025-01-04 19:43:04,867 log Bad Request: /rules/api/advanced-rule/validate-conditions/
+WARNING 2025-01-04 19:46:32,158 log Bad Request: /rules/api/advanced-rule/validate-conditions/
+WARNING 2025-01-04 19:46:32,827 log Bad Request: /rules/api/advanced-rule/validate-conditions/
+WARNING 2025-01-04 19:46:33,112 log Bad Request: /rules/api/advanced-rule/validate-conditions/
+WARNING 2025-01-04 19:46:33,410 log Bad Request: /rules/api/advanced-rule/validate-conditions/
+WARNING 2025-01-04 19:46:33,755 log Bad Request: /rules/api/advanced-rule/validate-conditions/
+WARNING 2025-01-04 19:46:34,063 log Bad Request: /rules/api/advanced-rule/validate-conditions/
+WARNING 2025-01-04 19:46:35,578 log Bad Request: /rules/api/advanced-rule/validate-calculations/
+WARNING 2025-01-04 19:46:36,099 log Bad Request: /rules/api/advanced-rule/validate-calculations/
