@@ -53,7 +53,9 @@ INSTALLED_APPS = [
     "crispy_bootstrap5",
     "rest_framework",
     'Main.apps.MainConfig',
-    'billing.apps.BillingConfig'
+    'billing.apps.BillingConfig',
+    'ai_core.apps.AICoreConfig',
+    'channels',
 ]
 
 # Add LOGIN_REDIRECT_URL and LOGOUT_REDIRECT_URL
@@ -74,6 +76,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+     'ai_core.middleware.AIMonitoringMiddleware',
 ]
 
 ROOT_URLCONF = 'LedgerLink.urls'
@@ -98,6 +101,16 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'LedgerLink.wsgi.application'
 
+# Channels configuration
+ASGI_APPLICATION = 'LedgerLink.asgi.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
@@ -132,6 +145,13 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Celery Configuration
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
@@ -190,7 +210,7 @@ MESSAGE_TAGS = {
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# Add this logging configuration
+# Update the LOGGING configuration in settings.py
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -223,5 +243,117 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
+        'ai_core': {  # Logger for AI system
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
     },
+}
+
+# AI system configuration
+# ----------------------------------------------------------------------
+# This dictionary contains the configuration for the AI system components.
+# It includes the enabled status of each component, their settings, and the
+# security settings for the AI system.
+#
+# Parameters:
+# ----------------------------------------------------------------------
+# enabled (bool): A boolean value indicating whether the AI system is enabled.
+#
+# components (dict): A dictionary containing the configuration for each AI system component.
+#
+# security (dict): A dictionary containing the security settings for the AI system.
+#
+# Returns:
+# ----------------------------------------------------------------------
+# AI_SYSTEM_CONFIG (dict): A dictionary containing the AI system configuration.
+# ```
+# AI system configuration settings for the Django project
+# LedgerLink/settings.py
+# Add this configuration
+AI_SYSTEM_CONFIG = {
+    'enabled': True,
+    'components': {
+        'project_analyzer': {
+            'enabled': True,
+            'settings': {
+                'analysis_interval': 600,
+                'ignore_patterns': [
+                    '*.pyc',
+                    '__pycache__',
+                    'migrations',
+                ]
+            }
+        },
+        'context_manager': {
+            'enabled': True,
+            'settings': {
+                'cache_timeout': 600,
+                'max_context_size': 10000
+            }
+        },
+        'code_generator': {
+            'enabled': True,
+            'settings': {
+                'template_dir': 'ai_core/code_templates'
+            }
+        }
+    },
+    'security': {
+        'restricted_paths': [
+            'settings.py',
+            'manage.py',
+            'wsgi.py',
+            'asgi.py'
+        ],
+        'backup_enabled': True,
+        'backup_path': 'ai_backups'
+    }
+}
+
+# ----------------------------------------------------------------------
+# End of AI system configuration
+
+# ----------------------------------------------------------------------
+"""
+Configure Django Rest Framework (DRF) settings for the project.
+
+This dictionary defines the default authentication and permission classes
+for DRF views in the project. It ensures that API endpoints are secure
+and only accessible to authenticated users.
+
+Parameters:
+----------
+DEFAULT_PERMISSION_CLASSES : list
+    A list of permission classes that determine the default permissions
+    for all DRF views. In this case, it requires users to be authenticated
+    to access any API endpoint.
+
+DEFAULT_AUTHENTICATION_CLASSES : list
+    A list of authentication classes that determine how users are
+    authenticated for DRF views. It includes both session-based and
+    basic authentication methods.
+
+Returns:
+-------
+dict
+    A dictionary containing the DRF configuration settings.
+"""
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ],
+}
+
+# ----------------------------------------------------------------------
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'ai_system_cache',
+    }
 }

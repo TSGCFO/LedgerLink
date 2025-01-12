@@ -11,6 +11,7 @@ from django.db.models import Q
 from django.core.exceptions import ValidationError
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
+from django.utils.translation import gettext_lazy as _  # Add this import
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -19,6 +20,7 @@ from rest_framework import status
 import json
 import logging
 
+from products.models import Product
 from .models import RuleGroup, Rule, AdvancedRule
 from .forms import RuleGroupForm, RuleForm, AdvancedRuleForm
 from customer_services.models import CustomerService
@@ -130,6 +132,7 @@ class RuleUpdateView(LoginRequiredMixin, UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['group'] = self.object.rule_group
+        context['groupId'] = self.object.rule_group.id  # Add this line
         return context
 
     def form_valid(self, form):
@@ -163,6 +166,7 @@ class AdvancedRuleCreateView(LoginRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['group'] = get_object_or_404(RuleGroup, pk=self.kwargs['group_id'])
+        context['groupId'] = self.kwargs['group_id']  # Add this line
         context['calculation_types'] = AdvancedRule.CALCULATION_TYPES
         return context
 
@@ -188,6 +192,7 @@ class AdvancedRuleUpdateView(LoginRequiredMixin, UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['group'] = self.object.rule_group
+        context['groupId'] = self.object.rule_group.id  # Add this line
         context['calculation_types'] = AdvancedRule.CALCULATION_TYPES
         return context
 
@@ -361,7 +366,7 @@ def get_calculation_types(request):
 
 @api_view(['POST'])
 def validate_rule_value(request):
-    """Validate a rule value for a given field and operator"""
+    """Validate a rule value based on field type and operator"""
     try:
         field = request.data.get('field')
         operator = request.data.get('operator')
@@ -369,22 +374,58 @@ def validate_rule_value(request):
 
         if not all([field, operator, value]):
             return Response(
-                {'error': 'All parameters are required'},
+                {'error': _('Field, operator, and value are required')},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Create a temporary rule for validation
+        # Create temporary rule for validation
         rule = Rule(field=field, operator=operator, value=value)
+
         try:
-            rule.clean()
+            rule.clean()  # This will run the model's validation
             return Response({'valid': True})
+
         except ValidationError as e:
             return Response(
-                {'valid': False, 'errors': e.messages},
+                {
+                    'valid': False,
+                    'errors': [str(error) for error in e.messages]
+                },
                 status=status.HTTP_400_BAD_REQUEST
             )
 
     except Exception as e:
+        logger.error(f"Error validating rule value: {str(e)}")
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+@api_view(['GET'])
+def get_customer_skus(request, group_id):
+    """Return SKUs for a specific rule group's customer"""
+    try:
+        rule_group = get_object_or_404(RuleGroup, id=group_id)
+        customer = rule_group.customer_service.customer
+        skus = Product.objects.filter(
+            customer=customer
+        ).values(
+            'id',
+            'sku',
+            'labeling_unit_1',
+            'labeling_quantity_1',
+            'labeling_unit_2',
+            'labeling_quantity_2'
+        ).order_by('sku')
+
+        return Response({
+            'skus': list(skus),
+            'customer': {
+                'id': customer.id,
+                'name': customer.company_name
+            }
+        })
+    except Exception as e:
+        logger.error(f"Error fetching SKUs: {str(e)}")
         return Response(
             {'error': str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR

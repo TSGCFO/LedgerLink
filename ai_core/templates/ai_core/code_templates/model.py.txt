@@ -1,0 +1,18 @@
+# ai_core/templates/ai_core/code_templates/model.py.txt
+class {{ model_name }}(models.Model):
+    """{{ model_description|default:"" }}"""
+    {% for field in fields %}
+    {{ field.name }} = models.{{ field.type }}({% for param, value in field.params.items %}{{ param }}={{ value }}{% if not forloop.last %}, {% endif %}{% endfor %})
+    {% endfor %}
+
+    {% if meta_options %}
+    class Meta:
+        {% for option, value in meta_options.items %}
+        {{ option }} = {{ value }}
+        {% endfor %}
+    {% endif %}
+
+    {% for method in methods %}
+    def {{ method.name }}(self{% if method.params %}, {{ method.params }}{% endif %}):
+        {{ method.body|safe }}
+    {% endfor %}

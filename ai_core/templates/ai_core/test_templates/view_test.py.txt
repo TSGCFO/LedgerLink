@@ -1,0 +1,24 @@
+# ai_core/templates/ai_core/test_templates/view_test.py.txt
+from django.test import TestCase, Client
+from django.urls import reverse
+from ..models import {{ model }}
+from ..views import {{ view_name }}
+
+class {{ view_name }}Tests(TestCase):
+    def setUp(self):
+        """Set up test data"""
+        self.client = Client()
+        {% if model %}
+        self.model = {{ model }}
+        {% endif %}
+
+    {% for test_case in test_cases %}
+    def {{ test_case.name }}(self):
+        """Test {{ test_case.method }} request to {{ test_case.url }}"""
+        {% if test_case.method == 'GET' %}
+        response = self.client.get('{{ test_case.url }}')
+        {% else %}
+        response = self.client.post('{{ test_case.url }}', {{ test_case.data }})
+        {% endif %}
+        self.assertEqual(response.status_code, {{ test_case.expected_status }})
+    {% endfor %}

@@ -2,8 +2,12 @@
 
 from django import forms
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 import json
+
 from .models import RuleGroup, Rule, AdvancedRule
+from customer_services.models import CustomerService
+from products.models import Product
 
 
 class RuleGroupForm(forms.ModelForm):
@@ -11,8 +15,14 @@ class RuleGroupForm(forms.ModelForm):
         model = RuleGroup
         fields = ['customer_service', 'logic_operator']
         widgets = {
-            'customer_service': forms.Select(attrs={'class': 'form-select'}),
-            'logic_operator': forms.Select(attrs={'class': 'form-select'})
+            'customer_service': forms.Select(attrs={
+                'class': 'form-select',
+                'data-controller': 'select'
+            }),
+            'logic_operator': forms.Select(attrs={
+                'class': 'form-select',
+                'data-controller': 'select'
+            })
         }
 
 
@@ -21,16 +31,62 @@ class RuleForm(forms.ModelForm):
         model = Rule
         fields = ['field', 'operator', 'value', 'adjustment_amount']
         widgets = {
-            'field': forms.Select(attrs={'class': 'form-select'}),
-            'operator': forms.Select(attrs={'class': 'form-select'}),
-            'value': forms.TextInput(attrs={'class': 'form-control'}),
-            'adjustment_amount': forms.NumberInput(
-                attrs={
-                    'class': 'form-control',
-                    'step': '0.01'
-                }
-            )
+            'field': forms.Select(attrs={
+                'class': 'form-select',
+                'data-controller': 'rule-field'
+            }),
+            'operator': forms.Select(attrs={
+                'class': 'form-select',
+                'data-controller': 'rule-operator'
+            }),
+            'value': forms.TextInput(attrs={
+                'class': 'form-control',
+                'data-controller': 'rule-value'
+            }),
+            'adjustment_amount': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01'
+            })
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['field'].widget.attrs['data-operators-url'] = 'rules:get_operators'
+
+        if self.instance and self.instance.field == 'sku_quantity':
+            self.fields['value'].widget = forms.Select(attrs={
+                'class': 'form-select',
+                'multiple': 'multiple',
+                'data-controller': 'sku-selector'
+            })
+            if self.instance.rule_group:
+                customer_service = self.instance.rule_group.customer_service
+                self.fields['value'].choices = self.get_sku_choices(customer_service)
+
+    def get_sku_choices(self, customer_service):
+        """Get SKU choices for the customer"""
+        skus = Product.objects.filter(
+            customer=customer_service.customer
+        ).values_list('sku', flat=True)
+        return [(sku, sku) for sku in skus]  # Use SKU as both value and label
+
+    def clean(self):
+        cleaned_data = super().clean()
+        field = cleaned_data.get('field')
+        operator = cleaned_data.get('operator')
+        value = cleaned_data.get('value')
+
+        if field == 'sku_quantity':
+            # Handle SKU validation
+            if operator in ['contains', 'ncontains', 'only_contains']:
+                if not value:
+                    raise ValidationError(_('At least one SKU must be selected'))
+
+                # If multiple SKUs were selected, they come as a list
+                if isinstance(value, (list, tuple)):
+                    cleaned_data['value'] = ';'.join(value)
+
+        return cleaned_data
 
 
 class AdvancedRuleForm(forms.ModelForm):
@@ -47,7 +103,8 @@ class AdvancedRuleForm(forms.ModelForm):
                 'data-controller': 'rule-operator'
             }),
             'value': forms.TextInput(attrs={
-                'class': 'form-control'
+                'class': 'form-control',
+                'data-controller': 'rule-value'
             }),
             'adjustment_amount': forms.NumberInput(attrs={
                 'class': 'form-control',
@@ -56,16 +113,56 @@ class AdvancedRuleForm(forms.ModelForm):
             'conditions': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 4,
-                'data-controller': 'json-editor',
-                'placeholder': '{\n  "field_name": {\n    "operator": "value"\n  }\n}'
+                'data-controller': 'json-editor'
             }),
             'calculations': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 4,
-                'data-controller': 'json-editor',
-                'placeholder': '[\n  {\n    "type": "calculation_type",\n    "value": 0\n  }\n]'
+                'data-controller': 'json-editor'
             })
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['field'].widget.attrs['data-operators-url'] = 'rules:get_operators'
+
+        if self.instance and self.instance.field == 'sku_quantity':
+            self.setup_sku_selector()
+
+    def setup_sku_selector(self):
+        """Set up the SKU selector for SKU quantity fields"""
+        self.fields['value'].widget = forms.Select(attrs={
+            'class': 'form-select',
+            'multiple': 'multiple',
+            'data-controller': 'sku-selector'
+        })
+        if self.instance.rule_group:
+            customer_service = self.instance.rule_group.customer_service
+            self.fields['value'].choices = self.get_sku_choices(customer_service)
+
+    def get_sku_choices(self, customer_service):
+        """Get SKU choices for the customer"""
+        skus = Product.objects.filter(
+            customer=customer_service.customer
+        ).values_list('sku', flat=True)
+        return [(sku, sku) for sku in skus]  # Use SKU as both value and label
+
+    def clean(self):
+        cleaned_data = super().clean()
+        field = cleaned_data.get('field')
+        operator = cleaned_data.get('operator')
+        value = cleaned_data.get('value')
+
+        if field == 'sku_quantity':
+            if operator in ['contains', 'ncontains', 'only_contains']:
+                if not value:
+                    raise ValidationError(_('At least one SKU must be selected'))
+
+                # If multiple SKUs were selected, they come as a list
+                if isinstance(value, (list, tuple)):
+                    cleaned_data['value'] = ';'.join(value)
+
+        return cleaned_data
 
     def clean_conditions(self):
         """Validate the conditions JSON structure"""
@@ -76,24 +173,14 @@ class AdvancedRuleForm(forms.ModelForm):
                 conditions = json.loads(conditions)
 
             if not isinstance(conditions, dict):
-                raise ValidationError("Conditions must be a JSON object")
-
-            for field, criteria in conditions.items():
-                if not isinstance(criteria, dict):
-                    raise ValidationError(f"Criteria for field '{field}' must be a JSON object")
-
-                for operator, value in criteria.items():
-                    if not isinstance(operator, str):
-                        raise ValidationError(f"Invalid operator type in field '{field}'")
-                    if not isinstance(value, (str, int, float, bool)):
-                        raise ValidationError(f"Invalid value type in field '{field}'")
+                raise ValidationError(_("Conditions must be a JSON object"))
 
             return conditions
 
         except json.JSONDecodeError as e:
-            raise ValidationError(f"Invalid JSON format: {str(e)}")
+            raise ValidationError(_(f"Invalid JSON format: {str(e)}"))
         except Exception as e:
-            raise ValidationError(f"Invalid conditions format: {str(e)}")
+            raise ValidationError(_(f"Invalid conditions format: {str(e)}"))
 
     def clean_calculations(self):
         """Validate the calculations JSON structure"""
@@ -104,86 +191,11 @@ class AdvancedRuleForm(forms.ModelForm):
                 calculations = json.loads(calculations)
 
             if not isinstance(calculations, list):
-                raise ValidationError("Calculations must be a JSON array")
-
-            valid_types = set(AdvancedRule.CALCULATION_TYPES)
-
-            for calc in calculations:
-                if not isinstance(calc, dict):
-                    raise ValidationError("Each calculation must be a JSON object")
-
-                if 'type' not in calc:
-                    raise ValidationError("Missing 'type' in calculation")
-                if 'value' not in calc:
-                    raise ValidationError("Missing 'value' in calculation")
-
-                if calc['type'] not in valid_types:
-                    raise ValidationError(f"Invalid calculation type: {calc['type']}")
-
-                try:
-                    float(calc['value'])
-                except (TypeError, ValueError):
-                    raise ValidationError(f"Invalid numeric value: {calc['value']}")
-
-                # Validate specific calculation types
-                if calc['type'] == 'tiered_percentage':
-                    if 'tiers' not in calc:
-                        raise ValidationError("Missing 'tiers' for tiered_percentage calculation")
-                    for tier in calc['tiers']:
-                        if not all(k in tier for k in ('min', 'max', 'percentage')):
-                            raise ValidationError("Invalid tier structure")
-
-                elif calc['type'] == 'product_specific':
-                    if 'rates' not in calc:
-                        raise ValidationError("Missing 'rates' for product_specific calculation")
-                    if not isinstance(calc['rates'], dict):
-                        raise ValidationError("Rates must be a JSON object")
+                raise ValidationError(_("Calculations must be a JSON array"))
 
             return calculations
 
         except json.JSONDecodeError as e:
-            raise ValidationError(f"Invalid JSON format: {str(e)}")
+            raise ValidationError(_(f"Invalid JSON format: {str(e)}"))
         except Exception as e:
-            raise ValidationError(f"Invalid calculations format: {str(e)}")
-
-    def clean(self):
-        """Additional validation for the form as a whole"""
-        cleaned_data = super().clean()
-
-        # Ensure adjustment_amount is provided if there are no calculations
-        calculations = cleaned_data.get('calculations', [])
-        adjustment_amount = cleaned_data.get('adjustment_amount')
-
-        if not calculations and not adjustment_amount:
-            raise ValidationError(
-                "Either adjustment amount or calculations must be provided"
-            )
-
-        # Validate field and operator compatibility with conditions
-        field = cleaned_data.get('field')
-        operator = cleaned_data.get('operator')
-        conditions = cleaned_data.get('conditions', {})
-
-        if field and operator and conditions:
-            for condition_field, criteria in conditions.items():
-                # Check if the condition field exists in the model
-                if condition_field not in dict(Rule.FIELD_CHOICES):
-                    raise ValidationError(f"Invalid field in conditions: {condition_field}")
-
-                # Check operator compatibility
-                for condition_operator in criteria.keys():
-                    if condition_operator not in dict(Rule.OPERATOR_CHOICES):
-                        raise ValidationError(
-                            f"Invalid operator in conditions: {condition_operator}"
-                        )
-
-        return cleaned_data
-
-    class Media:
-        css = {
-            'all': ('css/jsoneditor.min.css',)
-        }
-        js = (
-            'js/jsoneditor.min.js',
-            'js/advanced-rule-form.js',
-        )
+            raise ValidationError(_(f"Invalid calculations format: {str(e)}"))

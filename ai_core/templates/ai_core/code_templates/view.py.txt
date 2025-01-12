@@ -1,0 +1,10 @@
+# ai_core/templates/ai_core/code_templates/view.py.txt
+class {{ view_name }}({% for mixin in mixins %}{{ mixin }}, {% endfor %}{{ base_class }}):
+    {% if model %}
+    model = {{ model }}
+    {% endif %}
+
+    {% for method in methods %}
+    def {{ method.name }}(self{% if method.params %}, {{ method.params }}{% endif %}):
+        {{ method.body|safe }}
+    {% endfor %}

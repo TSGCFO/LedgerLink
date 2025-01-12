@@ -33,6 +33,11 @@ urlpatterns = [
     path('inserts/', include('inserts.urls')),
     path('rules/', include('rules.urls')),
     path('billing/', include('billing.urls')),  # Include the billing app urls
+    # Web interface URLs (HTML)
+    path('ai/', include('ai_core.urls')),
+
+    # API URLs (JSON)
+    path('api/ai/', include('ai_core.api.urls')),
     path('', include('Main.urls')),  # Include the Main app urls
                   path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
                   path('logout/', auth_views.LogoutView.as_view(), name='logout'),

@@ -3,511 +3,668 @@
 {% load crispy_forms_filters %}
 {% load static %}
 {% load crispy_forms_tags %}
-{% load rule_filters %}
 
-{% block title %}
-    {% if form.instance.pk %}Edit{% else %}New{% endif %} Advanced Rule - LedgerLink
-{% endblock %}
+{% block title %}{% if form.instance.pk %}Edit{% else %}Create{% endif %} Advanced Rule{% endblock %}
 
 {% block extra_css %}
-        <link href="{% static 'css/rules/json-editor.css' %}" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.10.0/jsoneditor.min.css" rel="stylesheet" type="text/css"><style>
-    .jsoneditor {
-        max-height: 300px;
-        margin-bottom: 1rem;
+<link href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.10.0/jsoneditor.min.css" rel="stylesheet">
+<style>
+    .step-indicator {
+        display: flex;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid #dee2e6;
     }
 
-    .field-help {
-        font-size: 0.875rem;
+    .step {
+        flex: 1;
+        text-align: center;
+        padding: 1rem;
         color: #6c757d;
-        margin-bottom: 0.5rem;
+        position: relative;
     }
 
-    .preview-section {
-        background-color: #f8f9fa;
-        border-radius: 0.25rem;
+    .step.active {
+        color: #0d6efd;
+        font-weight: 500;
+    }
+
+    .step.active::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background-color: #0d6efd;
+    }
+
+    /* SKU Selector Styles */
+    .sku-selector-container {
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
         padding: 1rem;
         margin-top: 1rem;
     }
 
-    .calculation-type {
+    .sku-list {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+    }
+
+    .sku-item {
+        padding: 0.75rem;
+        border-bottom: 1px solid #dee2e6;
         cursor: pointer;
-        transition: background-color 0.2s ease-in-out;
+        transition: background-color 0.2s;
     }
 
-    .calculation-type:hover {
-        background-color: #e9ecef;
+    .sku-item:last-child {
+        border-bottom: none;
     }
 
-    .calculation-type.selected {
-        background-color: #e2e6ea;
-        border-color: #6c757d;
+    .sku-item:hover {
+        background-color: #f8f9fa;
     }
 
-    .json-error {
-        color: #dc3545;
+    .sku-item.selected {
+        background-color: #e7f1ff;
+        border-left: 3px solid #0d6efd;
+    }
+
+    .sku-item .form-check {
+        pointer-events: none;
+    }
+
+    .selected-skus {
+        margin-top: 1rem;
+        padding: 0.75rem;
+        background-color: #f8f9fa;
+        border-radius: 0.375rem;
+        min-height: 50px;
+    }
+
+    .sku-badge {
+        display: inline-flex;
+        align-items: center;
+        background-color: #0d6efd;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        margin: 0.25rem;
         font-size: 0.875rem;
-        margin-top: 0.25rem;
     }
 
-    .validation-indicator {
-        position: absolute;
-        right: 1rem;
-        top: 50%;
-        transform: translateY(-50%);
+    .sku-badge .remove-sku {
+        margin-left: 0.5rem;
+        cursor: pointer;
+        opacity: 0.8;
     }
 
-    .loading-spinner {
-        width: 1rem;
-        height: 1rem;
-        border: 2px solid #f3f3f3;
-        border-top: 2px solid #3498db;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
+    .sku-badge .remove-sku:hover {
+        opacity: 1;
     }
 
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+    /* JSON Field Guidance Styles */
+    .json-guidance {
+        background-color: #f8f9fa;
+        border-left: 4px solid #ffc107;
+        padding: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    .json-example {
+        background-color: #fff;
+        padding: 1rem;
+        border-radius: 0.375rem;
+        font-family: monospace;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        border: 1px solid #dee2e6;
+    }
+
+    .json-example pre {
+        margin-bottom: 0;
+    }
+
+    /* Operator Hint Styles */
+    .operator-hint {
+        padding: 1rem;
+        margin-top: 1rem;
+        background-color: #e7f1ff;
+        border-radius: 0.375rem;
+        border-left: 4px solid #0d6efd;
+    }
+
+    .operator-hint.warning {
+        background-color: #fff3cd;
+        border-left-color: #ffc107;
+    }
+
+    /* Navigation Buttons */
+    .navigation-buttons {
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid #dee2e6;
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4">
-    <!-- Header -->
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
         <div>
-            <h1 class="h2">{% if form.instance.pk %}Edit{% else %}New{% endif %} Advanced Rule</h1>
+            <h1 class="h2">{% if form.instance.pk %}Edit{% else %}Create{% endif %} Advanced Rule</h1>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{% url 'rules:rule_group_list' %}">Rule Groups</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'rules:rule_group_detail' group.id %}">{{ group.customer_service }}</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">
-                        {% if form.instance.pk %}Edit Rule{% else %}New Rule{% endif %}
-                    </li>
+                    <li class="breadcrumb-item"><a href="{% url 'rules:rule_group_detail' group.id %}">{{ group }}</a></li>
+                    <li class="breadcrumb-item active">{% if form.instance.pk %}Edit{% else %}New{% endif %} Advanced Rule</li>
                 </ol>
             </nav>
         </div>
-        <div class="btn-toolbar mb-2 mb-md-0">
-            <div class="btn-group me-2">
-                <a href="{% url 'rules:rule_group_detail' group.id %}" class="btn btn-sm btn-outline-secondary">
-                    <i class="bi bi-x-lg"></i> Cancel
-                </a>
-            </div>
-        </div>
     </div>
 
-    <!-- Rule Form -->
-    <div class="row">
-        <!-- Main Form -->
-        <div class="col-md-8">
-            <form method="post" id="advancedRuleForm" novalidate>
-                {% csrf_token %}
+    <form method="post" id="advancedRuleForm">
+        {% csrf_token %}
 
-                <!-- Basic Rule Card -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Basic Rule Criteria</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                {{ form.field|as_crispy_field }}
-                            </div>
-                            <div class="col-md-4">
-                                {{ form.operator|as_crispy_field }}
-                            </div>
-                            <div class="col-md-4">
-                                {{ form.value|as_crispy_field }}
-                            </div>
-                            <div class="col-md-6">
-                                {{ form.adjustment_amount|as_crispy_field }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Advanced Conditions Card -->
-                <div class="card mb-4">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">Advanced Conditions</h5>
-                        <button type="button" class="btn btn-sm btn-outline-secondary" id="validateConditions">
-                            <i class="bi bi-check-circle"></i> Validate
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <div class="position-relative mb-3">
-                            {{ form.conditions|as_crispy_field }}
-                            <div class="validation-indicator d-none"></div>
-                        </div>
-                        <div class="preview-section d-none" id="conditionsPreview">
-                            <h6 class="mb-3">Preview</h6>
-                            <div id="conditionsPreviewContent"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Calculations Card -->
-                <div class="card mb-4">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">Calculations</h5>
-                        <button type="button" class="btn btn-sm btn-outline-secondary" id="validateCalculations">
-                            <i class="bi bi-check-circle"></i> Validate
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <!-- Calculation Types -->
-                        <div class="mb-4">
-                            <h6 class="mb-3">Available Calculation Types</h6>
-                            <div class="row g-2">
-                                {% for calc_type in calculation_types %}
-                                <div class="col-md-6">
-                                    <div class="calculation-type p-2 rounded border"
-                                         data-type="{{ calc_type }}">
-                                        <h6 class="mb-1">{{ calc_type|title }}</h6>
-                                        <small class="text-muted">{{ calc_type|get_calculation_description }}</small>
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-
-                        <div class="position-relative mb-3">
-                            {{ form.calculations|as_crispy_field }}
-                            <div class="validation-indicator d-none"></div>
-                        </div>
-                        <div class="preview-section d-none" id="calculationsPreview">
-                            <h6 class="mb-3">Preview</h6>
-                            <div id="calculationsPreviewContent"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Submit Button -->
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-end">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-save"></i>
-                                {% if form.instance.pk %}Save Changes{% else %}Create Rule{% endif %}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </form>
+        <!-- Step Indicator -->
+        <div class="step-indicator">
+            <div class="step active" data-step="1">
+                <i class="bi bi-1-circle"></i>
+                <div class="mt-2">Base Rule</div>
+            </div>
+            <div class="step" data-step="2">
+                <i class="bi bi-2-circle"></i>
+                <div class="mt-2">Additional Conditions</div>
+            </div>
+            <div class="step" data-step="3">
+                <i class="bi bi-3-circle"></i>
+                <div class="mt-2">Calculations</div>
+            </div>
         </div>
 
-        <!-- Help Panel -->
-        <div class="col-md-4">
-            <!-- Help Card -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="bi bi-question-circle me-2"></i>Help
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <h6>Basic Rule</h6>
-                    <p class="text-muted small mb-3">
-                        Set up the primary condition that must be met for this rule to apply.
-                    </p>
-
-                    <h6>Advanced Conditions</h6>
-                    <p class="text-muted small mb-3">
-                        Add additional conditions using JSON format:
-                    </p>
-                    <pre class="small bg-light p-2 rounded"><code>{
-  "field_name": {
-    "operator": "value"
-  }
-}</code></pre>
-
-                    <h6>Calculations</h6>
-                    <p class="text-muted small mb-0">
-                        Define how the price should be calculated using JSON format:
-                    </p>
-                    <pre class="small bg-light p-2 rounded"><code>[
-  {
-    "type": "calculation_type",
-    "value": 0.00
-  }
-]</code></pre>
-                </div>
+        <!-- Step 1: Base Rule -->
+        <div class="card mb-4 form-section active" id="step1">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Base Rule</h5>
             </div>
-
-            <!-- Field Reference -->
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="bi bi-list-ul me-2"></i>Field Reference
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="accordion" id="fieldAccordion">
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button"
-                                        data-bs-toggle="collapse" data-bs-target="#numericFields">
-                                    Numeric Fields
-                                </button>
-                            </h2>
-                            <div id="numericFields" class="accordion-collapse collapse"
-                                 data-bs-parent="#fieldAccordion">
-                                <div class="accordion-body">
-                                    <ul class="list-unstyled mb-0">
-                                        <li><code>weight_lb</code> - Weight in pounds</li>
-                                        <li><code>line_items</code> - Number of line items</li>
-                                        <li><code>total_item_qty</code> - Total quantity</li>
-                                        <li><code>volume_cuft</code> - Volume in cubic feet</li>
-                                        <li><code>packages</code> - Number of packages</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button"
-                                        data-bs-toggle="collapse" data-bs-target="#textFields">
-                                    Text Fields
-                                </button>
-                            </h2>
-                            <div id="textFields" class="accordion-collapse collapse"
-                                 data-bs-parent="#fieldAccordion">
-                                <div class="accordion-body">
-                                    <ul class="list-unstyled mb-0">
-                                        <li><code>reference_number</code></li>
-                                        <li><code>ship_to_name</code></li>
-                                        <li><code>ship_to_company</code></li>
-                                        <li><code>ship_to_city</code></li>
-                                        <li><code>ship_to_state</code></li>
-                                        <li><code>ship_to_country</code></li>
-                                        <li><code>carrier</code></li>
-                                        <li><code>notes</code></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button"
-                                        data-bs-toggle="collapse" data-bs-target="#specialFields">
-                                    Special Fields
-                                </button>
-                            </h2>
-                            <div id="specialFields" class="accordion-collapse collapse"
-                                 data-bs-parent="#fieldAccordion">
-                                <div class="accordion-body">
-                                    <ul class="list-unstyled mb-0">
-                                        <li>
-                                            <code>sku_quantity</code>
-                                            <small class="d-block text-muted">
-                                                JSON array of SKU and quantity pairs
-                                            </small>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        {{ form.field|as_crispy_field }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.operator|as_crispy_field }}
+                    </div>
+                    <div class="col-md-4">
+                        <div id="valueContainer">
+                            {{ form.value|as_crispy_field }}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+
+        <!-- Step 2: Additional Conditions -->
+        <div class="card mb-4 form-section d-none" id="step2">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Additional Conditions (Optional)</h5>
+            </div>
+            <div class="card-body">
+                {{ form.conditions|as_crispy_field }}
+
+                <div class="json-guidance">
+                    <h6><i class="bi bi-info-circle"></i> Conditions Format</h6>
+                    <p class="mb-2">Define additional conditions that must be met. Each condition should specify:</p>
+                    <ul class="mb-2">
+                        <li>Field name (e.g., "weight_lb", "total_item_qty")</li>
+                        <li>Operator (e.g., "gt", "lt", "eq")</li>
+                        <li>Value to compare against</li>
+                    </ul>
+                    <div class="json-example">
+<pre>{
+    "weight_lb": {
+        "gt": 50
+    },
+    "total_item_qty": {
+        "lt": 100
+    }
+}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Calculations -->
+        <div class="card mb-4 form-section d-none" id="step3">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Price Adjustments</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        {{ form.adjustment_amount|as_crispy_field }}
+                    </div>
+                </div>
+
+                {{ form.calculations|as_crispy_field }}
+
+                <div class="json-guidance">
+                    <h6><i class="bi bi-info-circle"></i> Calculations Format</h6>
+                    <p class="mb-2">Define how the price should be calculated. Each calculation should specify:</p>
+                    <ul class="mb-2">
+                        <li>Type of calculation (e.g., "flat_fee", "percentage", "per_unit")</li>
+                        <li>Value to apply</li>
+                    </ul>
+                    <div class="json-example">
+<pre>[
+    {
+        "type": "flat_fee",
+        "value": 10.00
+    },
+    {
+        "type": "percentage",
+        "value": 5.0
+    }
+]</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="navigation-buttons">
+            <button type="button" class="btn btn-outline-secondary" id="prevBtn" style="display: none;">
+                <i class="bi bi-arrow-left"></i> Previous
+            </button>
+            <button type="button" class="btn btn-primary" id="nextBtn">
+                Next <i class="bi bi-arrow-right"></i>
+            </button>
+            <button type="submit" class="btn btn-success d-none" id="submitBtn">
+                <i class="bi bi-check-lg"></i> Save Rule
+            </button>
+        </div>
+    </form>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-    <!-- JSON Editor JS from CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.10.0/jsoneditor.min.js"></script>
-    <!-- Your custom JSON editor JS -->
-    <script src="{% static 'js/rules/json-editor.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.10.0/jsoneditor.min.js"></script>
 <script>
+// Initialize configuration object with safe Django template variables
+const RULE_CONFIG = {
+    groupId: {{ group.id|stringformat:"d" }},
+    csrfToken: '{{ csrf_token }}',
+    urls: {
+        getCustomerSkus: '{% url "rules:get_customer_skus" group.id %}',
+        validateConditions: '{% url "rules:validate_conditions" %}',
+        validateCalculations: '{% url "rules:validate_calculations" %}'
+    }
+};
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize JSON editors
-    const conditionsEditor = new JSONEditor(
-        document.getElementById('id_conditions'),
-        {
+    const form = document.getElementById('advancedRuleForm');
+    const steps = document.querySelectorAll('.step');
+    const sections = document.querySelectorAll('.form-section');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    const fieldSelect = document.getElementById('id_field');
+    const operatorSelect = document.getElementById('id_operator');
+    const valueContainer = document.getElementById('valueContainer');
+    let currentStep = 1;
+
+    // Initialize JSON editors with error handling
+    let conditionsEditor, calculationsEditor;
+    try {
+        conditionsEditor = new JSONEditor(document.getElementById('id_conditions'), {
             mode: 'code',
             modes: ['code', 'tree'],
             onChangeText: validateConditions
-        }
-    );
+        });
 
-    const calculationsEditor = new JSONEditor(
-        document.getElementById('id_calculations'),
-        {
+        calculationsEditor = new JSONEditor(document.getElementById('id_calculations'), {
             mode: 'code',
             modes: ['code', 'tree'],
             onChangeText: validateCalculations
-        }
-    );
-
-    // Field and operator dependency
-    const fieldSelect = document.getElementById('id_field');
-    const operatorSelect = document.getElementById('id_operator');
-
-    fieldSelect.addEventListener('change', async function() {
-        const field = this.value;
-        const response = await fetch(`{% url 'rules:get_operators' %}?field=${field}`);
-        const data = await response.json();
-
-        operatorSelect.innerHTML = data.operators.map(op =>
-            `<option value="${op.value}">${op.label}</option>`
-        ).join('');
-    });
-
-    // Calculation type selection
-    document.querySelectorAll('.calculation-type').forEach(el => {
-        el.addEventListener('click', function() {
-            const type = this.dataset.type;
-            const currentCalcs = calculationsEditor.get() || [];
-
-            currentCalcs.push({
-                type: type,
-                value: 0
-            });
-
-            calculationsEditor.set(currentCalcs);
-            validateCalculations();
         });
+    } catch (error) {
+        console.error('Error initializing JSON editors:', error);
+        showError('Failed to initialize JSON editors. Please refresh the page.');
+    }
+
+    // Field change handler
+    fieldSelect.addEventListener('change', async function() {
+        if (this.value === 'sku_quantity') {
+            const operators = [
+                { value: 'contains', label: 'Contains' },
+                { value: 'ncontains', label: 'Does not contain' },
+                { value: 'only_contains', label: 'Only contains' }
+            ];
+
+            operatorSelect.innerHTML = operators
+                .map(op => `<option value="${op.value}">${op.label}</option>`)
+                .join('');
+
+            try {
+                await initializeSkuSelector();
+            } catch (error) {
+                console.error('Error initializing SKU selector:', error);
+                showError('Failed to load SKUs. Please try again.');
+            }
+        }
     });
+
+    // Initialize SKU selector
+    // Replace the initializeSkuSelector function in your advanced_rule_form.html
+
+async function initializeSkuSelector() {
+    try {
+        const response = await fetch(RULE_CONFIG.urls.getCustomerSkus);
+        if (!response.ok) throw new Error('Failed to fetch SKUs');
+
+        const data = await response.json();
+        valueContainer.innerHTML = `
+            <label class="form-label">Select SKUs</label>
+            <div class="sku-selector-container">
+                           <div class="input-group mb-3">
+                    <span class="input-group-text">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text"
+                           class="form-control"
+                           id="skuSearch"
+                           placeholder="Search SKUs...">
+                    <button class="btn btn-outline-secondary"
+                            type="button"
+                            id="clearSearch">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+
+                <!-- Operator Hint -->
+                <div class="operator-hint mb-3">
+                    <h6 class="operator-title"></h6>
+                    <p class="operator-description mb-0"></p>
+                </div>
+
+                <!-- SKU List -->
+                <div class="sku-list border rounded">
+                    <div class="list-group list-group-flush">
+                        ${data.skus.map(item => `
+                            <div class="sku-item list-group-item" data-sku="${item.sku}">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="fw-bold">${item.sku}</div>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input">
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- Selected SKUs -->
+                <div class="selected-skus mt-3">
+                    <h6 class="d-flex justify-content-between align-items-center">
+                        Selected SKUs
+                        <span class="badge bg-primary" id="selectedCount">0</span>
+                    </h6>
+                    <div id="selectedSkuTags" class="d-flex flex-wrap gap-2 mt-2"></div>
+                </div>
+
+                <input type="hidden" name="value" id="skuValues">
+            </div>
+        `;
+
+        // Initialize the SKU selector functionality
+        setupSkuSelector();
+        // Update operator hint
+        updateOperatorHint();
+
+    } catch (error) {
+        console.error('Error loading SKUs:', error);
+        valueContainer.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                Error loading SKUs. Please try again.
+            </div>
+        `;
+    }
+}
+    function setupSkuSelector() {
+        const searchInput = document.getElementById('skuSearch');
+        const clearButton = document.getElementById('clearSearch');
+        const skuItems = document.querySelectorAll('.sku-item');
+        const selectedSkus = new Set();
+
+        // Search functionality
+        searchInput?.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            skuItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+
+        clearButton?.addEventListener('click', function() {
+            if (searchInput) {
+                searchInput.value = '';
+                skuItems.forEach(item => item.style.display = '');
+            }
+        });
+
+        // SKU selection
+        skuItems.forEach(item => {
+            item.addEventListener('click', function() {
+                const sku = this.dataset.sku;
+                const checkbox = this.querySelector('input[type="checkbox"]');
+
+                if (selectedSkus.has(sku)) {
+                    selectedSkus.delete(sku);
+                    this.classList.remove('selected');
+                    if (checkbox) checkbox.checked = false;
+                } else {
+                    selectedSkus.add(sku);
+                    this.classList.add('selected');
+                    if (checkbox) checkbox.checked = true;
+                }
+
+                updateSelectedTags();
+            });
+        });
+
+        function updateSelectedTags() {
+            const container = document.getElementById('selectedSkuTags');
+            const hiddenInput = document.getElementById('skuValues');
+            const countElement = document.getElementById('selectedCount');
+
+            if (container && hiddenInput) {
+                container.innerHTML = Array.from(selectedSkus)
+                    .map(sku => `
+                        <span class="sku-badge">
+                            ${sku}
+                            <span class="remove-sku" data-sku="${sku}">&times;</span>
+                        </span>
+                    `)
+                    .join('');
+
+                hiddenInput.value = Array.from(selectedSkus).join(';');
+                if (countElement) {
+                    countElement.textContent = selectedSkus.size;
+                }
+
+                // Add remove functionality to badges
+                container.querySelectorAll('.remove-sku').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const sku = this.dataset.sku;
+                        selectedSkus.delete(sku);
+                        const skuItem = document.querySelector(`.sku-item[data-sku="${sku}"]`);
+                        if (skuItem) {
+                            skuItem.classList.remove('selected');
+                            const checkbox = skuItem.querySelector('input[type="checkbox"]');
+                            if (checkbox) checkbox.checked = false;
+                        }
+                        updateSelectedTags();
+                    });
+                });
+            }
+        }
+    }
+
+    // Navigation functions
+    prevBtn?.addEventListener('click', () => {
+        if (currentStep > 1) {
+            showStep(currentStep - 1);
+        }
+    });
+
+    nextBtn?.addEventListener('click', () => {
+        if (validateStep(currentStep) && currentStep < 3) {
+            showStep(currentStep + 1);
+        }
+    });
+
+    function showStep(step) {
+        currentStep = step;
+
+        steps.forEach((s, index) => {
+            s.classList.toggle('active', index + 1 === step);
+            if (index + 1 < step) {
+                s.classList.add('completed');
+            } else {
+                s.classList.remove('completed');
+            }
+        });
+
+        sections.forEach((s, index) => {
+            s.classList.toggle('d-none', index + 1 !== step);
+        });
+
+        if (prevBtn && nextBtn && submitBtn) {
+            prevBtn.style.display = step === 1 ? 'none' : 'inline-block';
+            nextBtn.style.display = step === 3 ? 'none' : 'inline-block';
+            submitBtn.classList.toggle('d-none', step !== 3);
+        }
+    }
 
     // Validation functions
+    function validateStep(step) {
+        switch(step) {
+            case 1:
+                return validateBaseRule();
+            case 2:
+                return validateConditions();
+            case 3:
+                return validateCalculations();
+            default:
+                return true;
+        }
+    }
+
+    function validateBaseRule() {
+        const field = fieldSelect.value;
+        const operator = operatorSelect.value;
+        const value = document.getElementById('id_value')?.value;
+
+        if (!field || !operator || !value) {
+            showError('Please fill in all base rule fields');
+            return false;
+        }
+        return true;
+    }
+
     async function validateConditions() {
-        const conditions = conditionsEditor.get();
-        const indicator = document.querySelector('#id_conditions').nextElementSibling;
+        if (!conditionsEditor) return true;
 
         try {
-            const response = await fetch('{% url "rules:validate_conditions" %}', {
+            const conditions = conditionsEditor.get();
+            const response = await fetch(RULE_CONFIG.urls.validateConditions, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    'X-CSRFToken': RULE_CONFIG.csrfToken
                 },
                 body: JSON.stringify({ conditions })
             });
 
             const data = await response.json();
-
-            if (data.valid) {
-                indicator.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i>';
-                showPreview('conditions', conditions);
-            } else {
-                indicator.innerHTML = '<i class="bi bi-x-circle-fill text-danger"></i>';
-                hidePreview('conditions');
+            if (!data.valid) {
+                showError(data.errors.join('\n'));
+                return false;
             }
-
-            indicator.classList.remove('d-none');
-
+            return true;
         } catch (error) {
-            console.error('Validation error:', error);
-            indicator.innerHTML = '<i class="bi bi-x-circle-fill text-danger"></i>';
-            indicator.classList.remove('d-none');
+            console.error('Error validating conditions:', error);
+            showError('Invalid conditions format');
+            return false;
         }
     }
 
     async function validateCalculations() {
-        const calculations = calculationsEditor.get();
-        const indicator = document.querySelector('#id_calculations').nextElementSibling;
+        if (!calculationsEditor) return true;
 
         try {
-            const response = await fetch('{% url "rules:validate_calculations" %}', {
+            const calculations = calculationsEditor.get();
+            const response = await fetch(RULE_CONFIG.urls.validateCalculations, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    'X-CSRFToken': RULE_CONFIG.csrfToken
                 },
                 body: JSON.stringify({ calculations })
             });
 
             const data = await response.json();
-
-            if (data.valid) {
-                indicator.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i>';
-                showPreview('calculations', calculations);
-            } else {
-                indicator.innerHTML = '<i class="bi bi-x-circle-fill text-danger"></i>';
-                hidePreview('calculations');
+            if (!data.valid) {
+                showError(data.errors.join('\n'));
+                return false;
             }
-
-            indicator.classList.remove('d-none');
-
+            return true;
         } catch (error) {
-            console.error('Validation error:', error);
-            indicator.innerHTML = '<i class="bi bi-x-circle-fill text-danger"></i>';
-            indicator.classList.remove('d-none');
+            console.error('Error validating calculations:', error);
+            showError('Invalid calculations format');
+            return false;
         }
     }
 
-    // Preview functions
-    function showPreview(type, data) {
-        const preview = document.getElementById(`${type}Preview`);
-        const content = document.getElementById(`${type}PreviewContent`);
-
-        if (type === 'conditions') {
-            content.innerHTML = formatConditionsPreview(data);
-        } else {
-            content.innerHTML = formatCalculationsPreview(data);
-        }
-
-        preview.classList.remove('d-none');
-    }
-
-    function hidePreview(type) {
-        document.getElementById(`${type}Preview`).classList.add('d-none');
-    }
-
-    function formatConditionsPreview(conditions) {
-        return Object.entries(conditions)
-            .map(([field, criteria]) => {
-                return `<div class="mb-2">
-                    <strong>${field}:</strong>
-                    ${Object.entries(criteria)
-                        .map(([op, val]) => `${op} ${val}`)
-                        .join(', ')}
-                </div>`;
-            })
-            .join('');
-    }
-
-    function formatCalculationsPreview(calculations) {
-        return calculations
-            .map(calc => {
-                return `<div class="mb-2">
-                    <span class="badge bg-secondary">${calc.type}</span>
-                    <strong class="ms-2">$${calc.value}</strong>
-                </div>`;
-            })
-            .join('');
+    // Utility functions
+    function showError(message) {
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-danger alert-dismissible fade show';
+        alert.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        form.insertBefore(alert, form.firstChild);
     }
 
     // Form submission
-    document.getElementById('advancedRuleForm').addEventListener('submit', function(e) {
+    form.addEventListener('submit', async function(e) {
         e.preventDefault();
 
-        // Validate JSON fields
-        const conditions = conditionsEditor.get();
-        const calculations = calculationsEditor.get();
+        if (!validateStep(currentStep)) {
+            return;
+        }
 
         try {
-            // Update hidden form fields with validated JSON
-            document.getElementById('id_conditions').value = JSON.stringify(conditions);
-            document.getElementById('id_calculations').value = JSON.stringify(calculations);
+            // Update hidden JSON fields
+            if (conditionsEditor && calculationsEditor) {
+                document.getElementById('id_conditions').value =
+                    JSON.stringify(conditionsEditor.get());
+                document.getElementById('id_calculations').value =
+                    JSON.stringify(calculationsEditor.get());
+            }
 
-            // Submit the form
             this.submit();
         } catch (error) {
-            console.error('Form submission error:', error);
-            alert('Please fix the validation errors before submitting.');
+            console.error('Error submitting form:', error);
+            showError('Error saving rule. Please try again.');
         }
     });
-
-    // Initialize validation buttons
-    document.getElementById('validateConditions').addEventListener('click', validateConditions);
-    document.getElementById('validateCalculations').addEventListener('click', validateCalculations);
 });
 </script>
 {% endblock %}

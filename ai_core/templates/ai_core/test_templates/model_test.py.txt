@@ -1,0 +1,31 @@
+# ai_core/templates/ai_core/test_templates/model_test.py.txt
+from django.test import TestCase
+from django.core.exceptions import ValidationError
+from ..models import {{ model_name }}
+
+class {{ model_name }}Tests(TestCase):
+    def setUp(self):
+        """Set up test data"""
+        self.valid_data = {
+            {% for field in fields %}
+            '{{ field.name }}': {{ field.test_value|default:'None' }},
+            {% endfor %}
+        }
+
+    {% for test_case in test_cases %}
+    def {{ test_case.name }}(self):
+        """{{ test_case.description|default:"" }}"""
+        {% if test_case.type == 'validation' %}
+        obj = {{ model_name }}(**self.valid_data)
+        {% if test_case.should_fail %}
+        with self.assertRaises(ValidationError):
+            obj.full_clean()
+        {% else %}
+        obj.full_clean()  # Should not raise
+        {% endif %}
+        {% elif test_case.type == 'method' %}
+        obj = {{ model_name }}(**self.valid_data)
+        result = obj.{{ test_case.method_name }}({{ test_case.params }})
+        self.assertEqual(result, {{ test_case.expected_result }})
+        {% endif %}
+    {% endfor %}
