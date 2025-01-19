@@ -1,0 +1,436 @@
+<html lang="en" class="h-full bg-gray-50 dark"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LedgerLink</title>
+    <link rel="icon" type="image/png" href="/static/images/favicon.png">
+
+
+
+    <!-- Tailwind CSS -->
+
+    <link rel="stylesheet" href="/static/css/tailwind/output.css">
+
+
+    <!-- Material Icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+    <!-- Select2 CSS -->
+    <link rel="stylesheet" href="/static/vendors/select2/select2.min.css">
+
+    <!-- Custom Styles -->
+    <style>
+        /* Additional customization can go here */
+    </style>
+
+
+</head>
+<body class="h-full antialiased text-gray-700" data-new-gr-c-s-check-loaded="14.1092.0" data-gr-ext-installed="">
+    <div class="min-h-full">
+        <!-- Navbar -->
+
+<!-- components/navbar.html -->
+<nav class="bg-white shadow-md dark:bg-gray-800 fixed top-0 w-full z-50">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+            <!-- Logo -->
+            <div class="flex items-center">
+                <a href="/dashboard/" class="flex items-center">
+                    <img src="/static/images/logo.svg" alt="LedgerLink" class="h-8 w-auto">
+                    <span class="ml-2 text-2xl font-bold text-gray-900 dark:text-white">LedgerLink</span>
+                </a>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="hidden md:block">
+                <div class="relative">
+                    <label>
+                        <input type="text" placeholder="Search..." class="w-72 pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 text-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                    </label>
+                    <span class="absolute left-3 top-2.5 text-gray-400">
+                        <i class="material-icons">search</i>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center space-x-4">
+                <!-- Notifications -->
+                <button class="notifications-button relative p-2 rounded-full text-gray-500 hover:text-gray-700 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    <span class="sr-only">View Notifications</span>
+                    <i class="material-icons">notifications</i>
+                    <span class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500"></span>
+                </button>
+
+                <!-- Dark Mode Toggle -->
+                <button id="themeToggle" class="p-2 rounded-full text-gray-500 hover:text-gray-700 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    <span class="sr-only">Toggle Dark Mode</span>
+                    <i class="material-icons">brightness_4</i>
+                </button>
+
+                <!-- User Dropdown -->
+
+                <div class="relative">
+                    <button id="profileDropdownButton" class="flex items-center text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        <img class="h-8 w-8 rounded-full" src="https://ui-avatars.com/api/?name=hassan&amp;background=random" alt="hassan">
+                    </button>
+                    <div id="profileDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-md dark:bg-gray-700 z-50">
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
+                            Your Profile
+                        </a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
+                            Settings
+                        </a>
+                        <a href="/logout/" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
+                            Sign Out
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</nav>
+
+
+        <!-- Sidebar -->
+        <div class="flex">
+            <!-- components/sidebar.html -->
+<div class="h-screen bg-white dark:bg-gray-800 shadow-lg">
+    <div class="flex flex-col h-full">
+        <!-- Sidebar Header -->
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Dashboard</h2>
+        </div>
+
+        <!-- Navigation Links -->
+        <nav class="flex-1 px-4 py-6 space-y-1">
+            <!-- Dashboard -->
+            <a href="/dashboard/" class="text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700 group flex items-center px-4 py-3 text-sm font-medium rounded-lg">
+                <i class="material-icons mr-3 text-lg">dashboard</i>
+                Dashboard
+            </a>
+
+            <!-- Customers -->
+            <a href="/customers/" class="bg-primary-50 text-primary-600 dark:bg-primary-700 dark:text-primary-200 group flex items-center px-4 py-3 text-sm font-medium rounded-lg">
+                <i class="material-icons mr-3 text-lg">groups</i>
+                Customers
+            </a>
+
+            <!-- Inserts -->
+            <a href="/inserts/" class="text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700 group flex items-center px-4 py-3 text-sm font-medium rounded-lg">
+                <i class="material-icons mr-3 text-lg">layers</i>
+                Inserts
+            </a>
+
+            <!-- Products -->
+            <a href="/products/" class="text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700 group flex items-center px-4 py-3 text-sm font-medium rounded-lg">
+                <i class="material-icons mr-3 text-lg">inventory</i>
+                Products
+            </a>
+
+            <!-- Orders -->
+            <a href="/orders/" class="text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700 group flex items-center px-4 py-3 text-sm font-medium rounded-lg">
+                <i class="material-icons mr-3 text-lg">shopping_cart</i>
+                Orders
+            </a>
+
+            <!-- Materials -->
+            <a href="/materials/" class="text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700 group flex items-center px-4 py-3 text-sm font-medium rounded-lg">
+                <i class="material-icons mr-3 text-lg">inventory_2</i>
+                Materials
+            </a>
+
+            <!-- Rules -->
+            <a href="/rules/" class="text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700 group flex items-center px-4 py-3 text-sm font-medium rounded-lg">
+                <i class="material-icons mr-3 text-lg">rule</i>
+                Rules
+            </a>
+        </nav>
+    </div>
+</div>
+
+            <main class="flex-1">
+                <!-- Filter Container -->
+                <div id="filter-container" class="bg-white shadow rounded-lg p-4 mb-4">
+
+<div class="container mx-auto px-4 sm:px-6 lg:px-8">
+    <form method="get" class="grid grid-cols-1 gap-4 md:grid-cols-4 bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+        <!-- Search Bar -->
+        <input type="search" name="search" placeholder="Search customers..." value="" class="col-span-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary-500 focus:border-primary-500">
+
+        <!-- Sort Dropdown -->
+        <label>
+            <select name="sort" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary-500 focus:border-primary-500">
+                <option value="">Sort by</option>
+                <option value="company_name">Company Name</option>
+                <option value="email">Email</option>
+                <option value="created_at">Created Date</option>
+            </select>
+        </label>
+
+        <!-- Filter Dropdown -->
+        <select name="filter" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary-500 focus:border-primary-500">
+            <option value="">Filter by</option>
+            <option value="recent">Recently Added</option>
+            <option value="active">Active Customers</option>
+        </select>
+
+        <!-- Apply Button -->
+        <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:ring focus:ring-primary-500">
+            Apply Filters
+        </button>
+    </form>
+</div>
+
+                </div>
+
+                <!-- Page Content -->
+
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <!-- Page Header -->
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Customers</h1>
+            <div class="flex gap-4">
+                <a href="/logout/" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-sm text-gray-900 dark:text-white rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 focus:ring focus:ring-primary-500">
+                    Logout
+                </a>
+                <a href="/customers/create/" class="px-4 py-2 bg-primary-600 text-sm text-white rounded-md hover:bg-primary-700 focus:ring focus:ring-primary-500">
+                    + Add Customer
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customers Table -->
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead class="bg-gray-50 dark:bg-gray-700">
+                <tr>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Company Name
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Email
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Phone
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Location
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Created
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Actions
+                    </th>
+                </tr>
+                </thead>
+                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+
+                    <tr>
+                        <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">
+                            <a href="/customers/5/" class="hover:underline">
+                                Hassan Sadiq
+                            </a>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                            tonai@talencore.com
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                            4163170051
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                            Vaughan
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                            Jan 15, 2025
+                        </td>
+                        <td class="px-6 py-4 text-right text-sm font-medium">
+                            <div class="flex justify-end gap-2">
+                                <a href="/customers/5/" class="text-primary-600 hover:text-primary-700">View</a>
+                                <a href="/customers/5/edit/" class="text-blue-600 hover:text-blue-700">Edit</a>
+                                <a href="/customers/5/delete/" class="text-red-600 hover:text-red-700">Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">
+                            <a href="/customers/4/" class="hover:underline">
+                                Talencore
+                            </a>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                            hassansadiq73@gmail.com
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                            4163170051
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                            Kleinburg
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                            Nov 09, 2024
+                        </td>
+                        <td class="px-6 py-4 text-right text-sm font-medium">
+                            <div class="flex justify-end gap-2">
+                                <a href="/customers/4/" class="text-primary-600 hover:text-primary-700">View</a>
+                                <a href="/customers/4/edit/" class="text-blue-600 hover:text-blue-700">Edit</a>
+                                <a href="/customers/4/delete/" class="text-red-600 hover:text-red-700">Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">
+                            <a href="/customers/2/" class="hover:underline">
+                                Leather Better
+                            </a>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                            test_test12@test.com
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                            -
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                            -
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                            Jul 29, 2024
+                        </td>
+                        <td class="px-6 py-4 text-right text-sm font-medium">
+                            <div class="flex justify-end gap-2">
+                                <a href="/customers/2/" class="text-primary-600 hover:text-primary-700">View</a>
+                                <a href="/customers/2/edit/" class="text-blue-600 hover:text-blue-700">Edit</a>
+                                <a href="/customers/2/delete/" class="text-red-600 hover:text-red-700">Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">
+                            <a href="/customers/1/" class="hover:underline">
+                                Abokichi
+                            </a>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                            h.sadiq@tsgfulfillment.com
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                            -
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                            -
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                            Jul 28, 2024
+                        </td>
+                        <td class="px-6 py-4 text-right text-sm font-medium">
+                            <div class="flex justify-end gap-2">
+                                <a href="/customers/1/" class="text-primary-600 hover:text-primary-700">View</a>
+                                <a href="/customers/1/edit/" class="text-blue-600 hover:text-blue-700">Edit</a>
+                                <a href="/customers/1/delete/" class="text-red-600 hover:text-red-700">Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+            </main>
+        </div>
+
+        <!-- Footer -->
+        <footer class="bg-white shadow mt-8">
+    <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+        <p class="text-center text-gray-500 text-sm">
+            © 2025 LedgerLink. All rights reserved.
+        </p>
+    </div>
+</footer>
+    </div>
+
+    <!-- jQuery -->
+<script src="/static/vendors/jquery/jquery.min.js"></script>
+
+    <!-- jQuery UI -->
+    <script src="/static/js/jquery-ui/jquery-ui-1.14.1.custom/external/jquery/jquery.js"></script>
+
+
+    <!-- Select2 JavaScript -->
+        <script src="/static/vendors/select2/select2.full.js"></script>
+
+     <!-- Global JavaScript -->
+    <script type="module" src="/static/js/modules/navbar.js"></script>
+    <script src="/static/vendors/jquery/jquery.js"></script>
+
+
+
+    <script type="module" src="/static/js/main.js">
+        import {AppState} from "../../static/js/main.js";
+
+        AppState.initTheme();  // Sets up the theme on page load
+        AppState.setTheme('light');  // Dynamically switch to dark mode
+
+    </script>
+
+    <script type="module">
+        import {Toast} from "../../static/js/main.js";
+        import {FormHandler, Modal} from "../../static/js/main.mjs";
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Select2 for all select elements with the `select2` class
+            $('.select2').select2({
+                placeholder: "Select an option",
+                allowClear: true
+            });
+
+            // Dropdown menu toggle for user profile
+            const profileButton = document.getElementById('profileDropdownButton');
+            const dropdown = document.getElementById('profileDropdown');
+
+            if (profileButton && dropdown) {
+                profileButton.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    dropdown.classList.toggle('hidden');
+                });
+
+                document.addEventListener('click', () => {
+                    dropdown.classList.add('hidden');
+                });
+            }
+
+            // Example: Show a toast notification
+            Toast.show("Welcome to LedgerLink!", "success");
+
+            // Example: Set up modals (if needed globally)
+            document.querySelectorAll("[data-modal-trigger]").forEach(trigger => {
+                trigger.addEventListener("click", () => {
+                    Modal.show({
+                        title: "Example Modal",
+                        content: "This is a dynamically triggered modal."
+                    });
+                });
+            });
+
+            // Example: Enhance forms
+            document.querySelectorAll("form").forEach(form => {
+                new FormHandler(form);
+            });
+        });
+    </script>
+
+    <!-- Page-Specific Scripts -->
+
+
+    <!-- Django Messages -->
+
+
+

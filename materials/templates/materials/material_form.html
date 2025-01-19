@@ -1,16 +1,80 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-     <title>{% block title %}Material Form{% endblock %}</title>
-</head>
-<body>
-    <h1>{% block heading %}Material Form{% endblock %}</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Save</button>
-    </form>
-    <a href="{% url 'material_list' %}">Back to Material List</a>
-</body>
-</html>
+{% extends '_base.html' %}
+{% load crispy_forms_filters %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-10">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Page Header -->
+        <div class="flex justify-between items-center mb-10">
+            <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white">Material Form</h1>
+            <a href="{% url 'materials:material_list' %}"
+               class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 focus:ring focus:ring-gray-500 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">
+                Cancel
+            </a>
+        </div>
+
+        <!-- Form Section -->
+        <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-8">
+            <form method="post" novalidate id="materialForm">
+                {% csrf_token %}
+
+                <!-- General Information -->
+                <fieldset class="mb-8">
+                    <legend class="text-xl font-semibold text-gray-900 dark:text-white mb-4">General Information</legend>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            <label for="id_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
+                            {{ form.name|as_crispy_field }}
+                        </div>
+                        <div class="form-group">
+                            <label for="id_unit_price" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Unit Price</label>
+                            {{ form.unit_price|as_crispy_field }}
+                        </div>
+                    </div>
+                    <div class="form-group mt-6">
+                        <label for="id_description" class="block text-sm font-medium text-black-700 dark:text-gray-300">Description</label>
+                        {{ form.description|as_crispy_field }}
+                        <textarea id="id_description" name="description" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-500 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:placeholder-blue-gray-200 dark:focus:ring-primary-500" rows="5" placeholder="Enter a description...">{{ form.description.value|default:''}}</textarea>
+                    </div>
+                </fieldset>
+
+                <!-- Form Actions -->
+                <div class="flex justify-end gap-4">
+                    <button type="reset"
+                            class="px-5 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 focus:ring focus:ring-gray-500 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">
+                        Reset
+                    </button>
+                    <button type="submit"
+                            class="px-5 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:ring focus:ring-primary-500">
+                        Save Material
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('materialForm');
+
+        form.addEventListener('reset', (e) => {
+            if (!confirm('Are you sure you want to reset the form?')) {
+                e.preventDefault();
+            }
+        });
+
+        form.addEventListener('submit', (e) => {
+            const requiredFields = Array.from(form.querySelectorAll('[required]'));
+            const emptyFields = requiredFields.filter(field => !field.value.trim());
+
+            if (emptyFields.length) {
+                e.preventDefault();
+                alert('Please fill out all required fields.');
+                emptyFields[0].focus();
+            }
+        });
+    });
+</script>
+{% endblock %}

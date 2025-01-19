@@ -54,3 +54,12 @@ def parse_json(value):
         return value
     except (json.JSONDecodeError, TypeError):
         return []
+
+@register.filter(name='addclass')
+def addclass(field, css_class):
+    return field.as_widget(attrs={'class': css_class})
+
+
+@register.filter(name='split')
+def split(value, arg):
+    return value.split(arg)

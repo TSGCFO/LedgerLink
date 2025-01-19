@@ -1,0 +1,148 @@
+{% load compress %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}LedgerLink{% endblock %}</title>
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+
+
+
+    <!-- Tailwind CSS -->
+
+    <link rel="stylesheet" href="{% static 'css/tailwind/output.css' %}">
+
+
+    <!-- Material Icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+    <!-- Select2 CSS -->
+    <link rel="stylesheet" href="{% static 'vendors/select2/select2.min.css' %}">
+
+    <!-- Custom Styles -->
+    <style>
+        /* Additional customization can go here */
+    </style>
+
+    {% block head %}{% endblock %}
+</head>
+<body class="h-full antialiased text-gray-700">
+    <div class="min-h-full">
+        <!-- Navbar -->
+        {% include 'components/navbar.html' %}
+
+        <!-- Sidebar -->
+        <div class="flex">
+            {% include 'components/sidebar.html' %}
+            <main class="flex-1 pt-16">
+                <!-- Filter Container -->
+                <div id="filter-container" class="bg-white shadow rounded-lg p-4 mb-4">
+                    {% block filter_bar %}{% endblock %}
+                </div>
+
+                <!-- Page Content -->
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+
+        <!-- Footer -->
+        {% include 'components/footer.html' %}
+    </div>
+
+    <!-- jQuery -->
+<script src="{% static 'vendors/jquery/jquery.min.js' %}"></script>
+
+    <!-- jQuery UI -->
+    <script src="{% static 'js/jquery-ui/jquery-ui-1.14.1.custom/external/jquery/jquery.js' %}"></script>
+
+
+    <!-- Select2 JavaScript -->
+        <script src="{% static 'vendors/select2/select2.full.js' %}"></script>
+
+     <!-- Global JavaScript -->
+    <script type="module" src="{% static 'js/modules/navbar.js' %}"></script>
+    <script src="{% static 'vendors/jquery/jquery.js' %}"></script>
+
+
+
+    <script type="module" src="{% static 'js/main.mjs' %}">
+        import {AppState} from "../../static/js/main.mjs";
+
+        AppState.initTheme();  // Sets up the theme on page load
+        AppState.setTheme('light');  // Dynamically switch to dark mode
+
+    </script>
+
+    <script type="module">
+        import {Toast} from "../../static/js/main.js";
+        import {FormHandler, Modal} from "../../static/js/main.mjs";
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Select2 for all select elements with the `select2` class
+            $('.select2').select2({
+                placeholder: "Select an option",
+                allowClear: true
+            });
+
+            // Dropdown menu toggle for user profile
+            const profileButton = document.getElementById('profileDropdownButton');
+            const dropdown = document.getElementById('profileDropdown');
+
+            if (profileButton && dropdown) {
+                profileButton.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    dropdown.classList.toggle('hidden');
+                });
+
+                document.addEventListener('click', () => {
+                    dropdown.classList.add('hidden');
+                });
+            }
+
+            // Example: Show a toast notification
+            Toast.show("Welcome to LedgerLink!", "success");
+
+            // Example: Set up modals (if needed globally)
+            document.querySelectorAll("[data-modal-trigger]").forEach(trigger => {
+                trigger.addEventListener("click", () => {
+                    Modal.show({
+                        title: "Example Modal",
+                        content: "This is a dynamically triggered modal."
+                    });
+                });
+            });
+
+            // Example: Enhance forms
+            document.querySelectorAll("form").forEach(form => {
+                new FormHandler(form);
+            });
+        });
+    </script>
+
+    <!-- Page-Specific Scripts -->
+    {% block scripts %}{% endblock %}
+
+    <!-- Django Messages -->
+    {% if messages %}
+    <div class="fixed top-4 right-4 z-50">
+        {% for message in messages %}
+        <div class="{% if message.tags %}{{ message.tags }}{% endif %} bg-white dark:bg-gray-800 shadow-lg rounded-lg p-4 mb-4 flex items-center">
+            {% if message.tags == 'success' %}
+            <svg class="h-6 w-6 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            {% elif message.tags == 'error' %}
+            <svg class="h-6 w-6 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+            {% endif %}
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</body>
+</html>

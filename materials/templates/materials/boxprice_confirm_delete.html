@@ -1,16 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-<title>Delete Box Price</title>
-</head>
-<body>
-    <h1>Delete Box Price</h1>
-    <p>Are you sure you want to delete "{{ boxprice.box_type }}"?</p>
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit">Confirm</button>
-    </form>
-    <a href="{% url 'boxprice_list' %}">Back to Box Price List</a>
-</body>
-</html>
+{% extends '_base.html' %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center py-8">
+    <div class="max-w-lg w-full bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+        <div class="text-center">
+            <div class="mb-4 text-red-500">
+                <i class="material-icons" style="font-size: 3rem;">error_outline</i>
+            </div>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Delete Box Price</h2>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                Are you sure you want to delete the box type <strong>{{ boxprice.box_type }}</strong>?<br>
+                This action cannot be undone.
+            </p>
+            <form method="post" class="space-y-4">
+                {% csrf_token %}
+                <div class="flex justify-between">
+                    <a href="{% url 'boxprice_list' %}"
+                       class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 focus:ring focus:ring-gray-500 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">
+                        Cancel
+                    </a>
+                    <button type="submit"
+                            class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:ring focus:ring-red-500">
+                        Delete
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

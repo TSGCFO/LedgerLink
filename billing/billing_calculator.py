@@ -20,6 +20,20 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class ServiceCost:
+    """
+    Represents the cost details of a specific service.
+
+    This class holds information about a service's identifier, name, and
+    the monetary amount associated with it. It can be used to track
+    service costs in billing systems or for general financial record-keeping.
+
+    :ivar service_id: Unique identifier for the service.
+    :type service_id: int
+    :ivar service_name: Human-readable name of the service.
+    :type service_name: str
+    :ivar amount: Cost amount associated with the service.
+    :type amount: Decimal
+    """
     service_id: int
     service_name: str
     amount: Decimal
@@ -27,6 +41,21 @@ class ServiceCost:
 
 @dataclass
 class OrderCost:
+    """
+    Represents the cost details of an order.
+
+    This class is a data structure to encapsulate the cost-related components
+    of an order. It includes the order's identifier, a list of associated 
+    service costs, and the total amount for the order. It is intended to 
+    facilitate clear organization and management of order cost data.
+
+    :ivar order_id: Unique identifier for the order.
+    :type order_id: int
+    :ivar service_costs: List of service costs related to the order.
+    :type service_costs: List[ServiceCost]
+    :ivar total_amount: Total cost of the order, including all services.
+    :type total_amount: Decimal
+    """
     order_id: int
     service_costs: List[ServiceCost] = field(default_factory=list)
     total_amount: Decimal = Decimal('0')
@@ -34,6 +63,29 @@ class OrderCost:
 
 @dataclass
 class BillingReport:
+    """
+    Represents a billing report for a specific customer over a given time period.
+
+    This class encapsulates the billing details, including costs of individual 
+    orders, service-specific totals, and the overall total amount billed. It is 
+    designed to provide a structured summary of billing information for reporting 
+    and analysis purposes.
+
+    :ivar customer_id: ID of the customer the billing report belongs to.
+    :type customer_id: int
+    :ivar start_date: Start date of the billing period.
+    :type start_date: datetime
+    :ivar end_date: End date of the billing period.
+    :type end_date: datetime
+    :ivar order_costs: List of individual order costs for the billing period.
+    :type order_costs: List[OrderCost]
+    :ivar service_totals: Aggregated costs by service type, keyed by
+        service ID.
+    :type service_totals: Dict[int, Decimal]
+    :ivar total_amount: Total amount billed for the customer in the
+        given period.
+    :type total_amount: Decimal
+    """
     customer_id: int
     start_date: datetime
     end_date: datetime
@@ -44,12 +96,17 @@ class BillingReport:
 
 def normalize_sku(sku: str) -> str:
     """
-    Normalize SKU format for consistent comparison.
-    Examples:
-        'pack boxes' -> 'PACKBOXES'
-        'TestSKU' -> 'TESTSKU'
-        '6pack boxes' -> '6PACKBOXES'
-        '  Pack  Boxes  ' -> 'PACKBOXES'
+    Normalize a given SKU (Stock Keeping Unit) by removing extra spaces,
+    converting it to uppercase, and ensuring the result is a valid string.
+    The function handles empty or invalid inputs gracefully by returning an
+    empty string.
+
+    :param sku: The SKU to normalize.
+    :type sku: str
+    :return: A normalized SKU where extra spaces are removed, and all letters
+        are in uppercase. If the input is invalid or empty, returns an
+        empty string.
+    :rtype: str
     """
     try:
         if not sku:
@@ -62,9 +119,18 @@ def normalize_sku(sku: str) -> str:
 
 def convert_sku_format(sku_data) -> Dict:
     """
-    Convert SKU data from JSON array format to dictionary format
-    Input format: [{"sku": "ABO-022", "quantity": 720}]
-    Output format: {'ABO-022': 720}
+    Converts SKU data into a normalized dictionary format. The input SKU data can be
+    provided as a JSON-encoded string or a list of dictionaries. Each dictionary should 
+    contain two keys: 'sku' and 'quantity'. The function normalizes SKUs and aggregates 
+    quantities for duplicate SKUs. Invalid entries are logged and excluded from the result.
+
+    :param sku_data: Input SKU data that can be of type `str` (JSON-encoded) 
+        or a `list` of dictionaries, where each dictionary must include 
+        'sku' and 'quantity' keys.
+    :rtype: Dict
+    :return: A dictionary where keys are normalized SKUs and values are 
+        the aggregated quantities. Returns an empty dictionary if the input 
+        is invalid or contains errors.
     """
     try:
         if isinstance(sku_data, str):
@@ -111,7 +177,18 @@ def convert_sku_format(sku_data) -> Dict:
 
 
 def validate_sku_quantity(sku_data) -> bool:
-    """Validate SKU quantity data format and content."""
+    """
+    Validates the SKU data to ensure that each SKU is a non-empty string and each associated
+    quantity is a positive numeric value. Allows input in stringified JSON or list format and 
+    processes it to dictionary form for validation.
+
+    :param sku_data: SKU data to be validated. It can be a stringified JSON or a list of SKUs 
+        and their quantities.
+    :type sku_data: Union[str, list]
+
+    :return: True if the SKU data is valid, otherwise False.
+    :rtype: bool
+    """
     try:
         if isinstance(sku_data, str):
             sku_data = json.loads(sku_data)
@@ -143,6 +220,19 @@ def validate_sku_quantity(sku_data) -> bool:
 
 
 class RuleEvaluator:
+    """
+    Responsible for evaluating rules and rule groups in the given context.
+
+    This class provides functionality to evaluate individual rules and rule groups
+    based on their defined fields, operators, and associated conditions. It performs
+    validation and comparison operations on order objects and their relevant attributes,
+    while supporting both numeric and string fields, as well as complex field types
+    like SKU quantities.
+
+    :ivar logger: Logger instance to log warnings and errors encountered during rule
+                  evaluation.
+    :type logger: logging.Logger
+    """
     @staticmethod
     def evaluate_rule(rule: Rule, order: Order) -> bool:
         try:
@@ -268,6 +358,28 @@ class RuleEvaluator:
 
 
 class BillingCalculator:
+    """
+    The BillingCalculator class is responsible for calculating costs associated with a customer's
+    services based on various parameters such as order details, service charge types, and assigned SKUs.
+    It encapsulates the logic for validating inputs, identifying applicable services, and generating a
+    comprehensive billing report for the specified time range.
+
+    This class makes use of intricate business logic for quantity-based services, including detailed
+    matching of SKUs, calculation of full cases, and the handling of other specific service types such
+    as 'Pick Cost', 'Case Pick', and 'SKU Cost'. It also facilitates logging for auditing and debugging
+    purposes. Services without SKUs are calculated based on preset base prices, with additional support
+    for uncommon cases.
+
+    :ivar customer_id: The unique ID representing the customer.
+    :type customer_id: int
+    :ivar start_date: The starting date for the billing period.
+    :type start_date: datetime
+    :ivar end_date: The ending date for the billing period.
+    :type end_date: datetime
+    :ivar report: The generated BillingReport object containing summarized billing details for the
+        specified parameters.
+    :type report: BillingReport
+    """
     def __init__(self, customer_id: int, start_date: datetime, end_date: datetime):
         self.customer_id = customer_id
         self.start_date = start_date
@@ -621,7 +733,19 @@ class BillingCalculator:
             raise
 
     def to_json(self) -> str:
-        """Convert the report to JSON format"""
+        """
+        Convert the report to JSON format
+         Convert the report to a dictionary format and then convert it to JSON format using the json.dumps method.
+         If an error occurs during the conversion, log the error and return an empty string.
+         This method serializes the report data into a JSON string format, which can be easily transmitted or stored.
+         It uses the to_dict method to convert the report to a dictionary format before serializing it to JSON.
+         The JSON output is formatted with indentation for better readability.
+
+          Returns:
+            str: A JSON-formatted string representation of the billing report. The string includes all the details of the report,
+            such as customer information, order costs, service totals, and the overall total amount.
+
+          """
         try:
             return json.dumps(self.to_dict(), indent=2)
         except Exception as e:
@@ -656,7 +780,22 @@ def generate_billing_report(
         end_date: Union[datetime, str],
         output_format: str = 'json'
 ) -> str:
-    """Generate a billing report for the specified customer and date range."""
+    """
+    Generates a billing report for a specified customer over a specified date range 
+    and returns the report in the desired format. The report can be generated either as a 
+    JSON or CSV file depending on the output format specified.
+
+    :param customer_id: Identifier of the customer for whom the billing report is being generated.
+    :type customer_id: int
+    :param start_date: Start date of the report. Can be provided as a datetime object or ISO 8601 string.
+    :type start_date: Union[datetime, str]
+    :param end_date: End date of the report. Can be provided as a datetime object or ISO 8601 string.
+    :type end_date: Union[datetime, str]
+    :param output_format: Format in which the report will be returned. Options are "json" (default) or "csv".
+    :type output_format: str
+    :return: A string representation of the billing report in the specified format.
+    :rtype: str
+    """
     try:
         logger.info(f"Generating report for customer {customer_id} from {start_date} to {end_date}")
 

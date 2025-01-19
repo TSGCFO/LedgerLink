@@ -1,16 +1,51 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-  <title>Box Price Detail</title>
-</head>
-<body>
-    <h1>{{ boxprice.box_type }}</h1>
-    <p>Price: {{ boxprice.price }}</p>
-    <p>Dimensions: {{ boxprice.length }} x {{ boxprice.width }} x {{ boxprice.height }}</p>
-    <a href="{% url 'boxprice_update' boxprice.pk %}">Edit</a> |
-    <a href="{% url 'boxprice_delete' boxprice.pk %}">Delete</a>
-    <br>
-    <a href="{% url 'boxprice_list' %}">Back to Box Price List</a>
-</body>
-</html>
+{% extends '_base.html' %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Page Header -->
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Box Price Details</h1>
+            <div class="flex space-x-4">
+                <a href="{% url 'boxprice_update' boxprice.pk %}"
+                   class="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:ring focus:ring-primary-500">
+                    <i class="material-icons align-middle">edit</i> Edit
+                </a>
+                <a href="{% url 'boxprice_delete' boxprice.pk %}"
+                   class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:ring focus:ring-red-500">
+                    <i class="material-icons align-middle">delete</i> Delete
+                </a>
+            </div>
+        </div>
+
+        <!-- Details Card -->
+        <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">General Information</h2>
+            <div class="space-y-4">
+                <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400">Box Type</span>
+                    <span class="text-gray-900 dark:text-white">{{ boxprice.box_type }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400">Price</span>
+                    <span class="text-gray-900 dark:text-white">{{ boxprice.price }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400">Dimensions (L x W x H)</span>
+                    <span class="text-gray-900 dark:text-white">
+                        {{ boxprice.length }} x {{ boxprice.width }} x {{ boxprice.height }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Back Button -->
+        <div class="mt-8">
+            <a href="{% url 'boxprice_list' %}"
+               class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 focus:ring focus:ring-gray-500 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">
+                Back to Box Price List
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

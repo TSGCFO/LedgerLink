@@ -1,16 +1,83 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-  <title>{% block title %}Insert Form{% endblock %}</title>
-</head>
-<body>
-    <h1>{% block heading %}Insert Form{% endblock %}</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Save</button>
-    </form>
-    <a href="{% url 'insert_list' %}">Back to Insert List</a>
-</body>
-</html>
+{% extends '_base.html' %}
+{% load crispy_forms_filters %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-10">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Page Header -->
+        <div class="flex justify-between items-center mb-10">
+            <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white">Insert Form</h1>
+            <a href="{% url 'insert_list' %}"
+               class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 focus:ring focus:ring-gray-500 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">
+                Cancel
+            </a>
+        </div>
+
+        <!-- Form Section -->
+        <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-8">
+            <form method="post" novalidate id="insertForm">
+                {% csrf_token %}
+
+                <!-- General Information -->
+                <fieldset class="mb-8">
+                    <legend class="text-xl font-semibold text-gray-900 dark:text-white mb-4">General Information</legend>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            <label for="id_sku" class="block text-sm font-medium text-gray-700 dark:text-gray-300">SKU</label>
+                            {{ form.sku|as_crispy_field }}
+                        </div>
+                        <div class="form-group">
+                            <label for="id_insert_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Insert Name</label>
+                            {{ form.insert_name|as_crispy_field }}
+                        </div>
+                        <div class="form-group">
+                            <label for="id_insert_quantity" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Quantity</label>
+                            {{ form.insert_quantity|as_crispy_field }}
+                        </div>
+                        <div class="form-group">
+                            <label for="id_customer" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Customer</label>
+                            {{ form.customer|as_crispy_field }}
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- Form Actions -->
+                <div class="flex justify-end gap-4">
+                    <button type="reset"
+                            class="px-5 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 focus:ring focus:ring-gray-500 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">
+                        Reset
+                    </button>
+                    <button type="submit"
+                            class="px-5 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:ring focus:ring-primary-500">
+                        Save Insert
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('insertForm');
+
+        form.addEventListener('reset', (e) => {
+            if (!confirm('Are you sure you want to reset the form?')) {
+                e.preventDefault();
+            }
+        });
+
+        form.addEventListener('submit', (e) => {
+            const requiredFields = Array.from(form.querySelectorAll('[required]'));
+            const emptyFields = requiredFields.filter(field => !field.value.trim());
+
+            if (emptyFields.length) {
+                e.preventDefault();
+                alert('Please fill out all required fields.');
+                emptyFields[0].focus();
+            }
+        });
+    });
+</script>
+{% endblock %}

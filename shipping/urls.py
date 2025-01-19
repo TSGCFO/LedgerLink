@@ -6,6 +6,8 @@ from .views import (
     USShippingDeleteView
 )
 
+app_name = 'shipping'
+
 urlpatterns = [
     path('cadshipping/', CADShippingListView.as_view(), name='cadshipping_list'),
     path('cadshipping/<int:pk>/', CADShippingDetailView.as_view(), name='cadshipping_detail'),

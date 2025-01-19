@@ -1,49 +1,61 @@
-<!-- Main/templates/components/sidebar.html -->
-<div class="h-full overflow-y-auto sidebar-scroll">
-    <nav class="mt-5 px-2">
-        <a href="{% url 'main:dashboard' %}"
-           class="group flex items-center px-2 py-2 text-base font-medium rounded-md {% if request.resolver_match.url_name == 'dashboard' %}bg-gray-100 text-gray-900{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
-            <i class="bi bi-house-door me-2"></i>
-            Dashboard
-        </a>
+<!-- components/sidebar.html -->
+<div class="h-screen bg-white dark:bg-gray-800 shadow-lg pt-16">
+    <div class="flex flex-col h-full">
+        <!-- Sidebar Header -->
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Dashboard</h2>
+        </div>
 
-        <a href="{% url 'products:product_list' %}"
-           class="mt-1 group flex items-center px-2 py-2 text-base font-medium rounded-md {% if 'products' in request.path %}bg-gray-100 text-gray-900{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
-            <i class="bi bi-box me-2"></i>
-            Products
-        </a>
-
-        <a href="{% url 'orders:order_list' %}"
-           class="mt-1 group flex items-center px-2 py-2 text-base font-medium rounded-md {% if 'orders' in request.path %}bg-gray-100 text-gray-900{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
-            <i class="bi bi-cart me-2"></i>
-            Orders
-        </a>
-
-        <a href="{% url 'customer_services:customer_service_list' %}"
-           class="mt-1 group flex items-center px-2 py-2 text-base font-medium rounded-md {% if 'customer_services' in request.path %}bg-gray-100 text-gray-900{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
-            <i class="bi bi-gear-fill me-2"></i>
-            Customer Services
-        </a>
-
-        <!-- Add this section to your existing sidebar navigation -->
-            <a href="{% url 'rules:rule_group_list' %}" class="mt-1 group flex items-center px-2 py-2 text-base font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900 {% if request.resolver_match.namespace == 'rules' %}active{% endif %}">
-                <i class="bi bi-diagram-3"></i>
-                <span>Rules</span>
+        <!-- Navigation Links -->
+        <nav class="flex-1 px-4 py-6 space-y-1">
+            <!-- Dashboard -->
+            <a href="{% url 'main:dashboard' %}"
+               class="{% if request.resolver_match.url_name == 'dashboard' %}bg-primary-50 text-primary-600 dark:bg-primary-700 dark:text-primary-200{% else %}text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700{% endif %} group flex items-center px-4 py-3 text-sm font-medium rounded-lg">
+                <i class="material-icons mr-3 text-lg">dashboard</i>
+                Dashboard
             </a>
 
-        {% comment %}
-        <!-- Temporarily comment out until services views are implemented -->
-        <a href="{% url 'services:service_list' %}"
-           class="mt-1 group flex items-center px-2 py-2 text-base font-medium rounded-md {% if 'services' in request.path %}bg-gray-100 text-gray-900{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
-            <i class="bi bi-gear me-2"></i>
-            Services
-        </a>
-        {% endcomment %}
+            <!-- Customers -->
+            <a href="{% url 'customers:list' %}"
+               class="{% if 'customers' in request.path %}bg-primary-50 text-primary-600 dark:bg-primary-700 dark:text-primary-200{% else %}text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700{% endif %} group flex items-center px-4 py-3 text-sm font-medium rounded-lg">
+                <i class="material-icons mr-3 text-lg">groups</i>
+                Customers
+            </a>
 
-        <a href="{% url 'billing:report' %}"
-           class="mt-1 group flex items-center px-2 py-2 text-base font-medium rounded-md {% if 'billing' in request.path %}bg-gray-100 text-gray-900{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
-            <i class="bi bi-file-text me-2"></i>
-            Billing Reports
-        </a>
-    </nav>
+            <!-- Inserts -->
+            <a href="{% url 'insert_list' %}"
+               class="{% if 'insert' in request.path %}bg-primary-50 text-primary-600 dark:bg-primary-700 dark:text-primary-200{% else %}text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700{% endif %} group flex items-center px-4 py-3 text-sm font-medium rounded-lg">
+                <i class="material-icons mr-3 text-lg">layers</i>
+                Inserts
+            </a>
+
+            <!-- Products -->
+            <a href="{% url 'products:product_list' %}"
+               class="{% if 'products' in request.path %}bg-primary-50 text-primary-600 dark:bg-primary-700 dark:text-primary-200{% else %}text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700{% endif %} group flex items-center px-4 py-3 text-sm font-medium rounded-lg">
+                <i class="material-icons mr-3 text-lg">inventory</i>
+                Products
+            </a>
+
+            <!-- Orders -->
+            <a href="{% url 'orders:order_list' %}"
+               class="{% if 'orders' in request.path %}bg-primary-50 text-primary-600 dark:bg-primary-700 dark:text-primary-200{% else %}text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700{% endif %} group flex items-center px-4 py-3 text-sm font-medium rounded-lg">
+                <i class="material-icons mr-3 text-lg">shopping_cart</i>
+                Orders
+            </a>
+
+            <!-- Materials -->
+            <a href="{% url 'materials:material_list' %}"
+               class="{% if 'materials' in request.path %}bg-primary-50 text-primary-600 dark:bg-primary-700 dark:text-primary-200{% else %}text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700{% endif %} group flex items-center px-4 py-3 text-sm font-medium rounded-lg">
+                <i class="material-icons mr-3 text-lg">inventory_2</i>
+                Materials
+            </a>
+
+            <!-- Rules -->
+            <a href="{% url 'rules:rule_group_list' %}"
+               class="{% if 'rules' in request.path %}bg-primary-50 text-primary-600 dark:bg-primary-700 dark:text-primary-200{% else %}text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700{% endif %} group flex items-center px-4 py-3 text-sm font-medium rounded-lg">
+                <i class="material-icons mr-3 text-lg">rule</i>
+                Rules
+            </a>
+        </nav>
+    </div>
 </div>

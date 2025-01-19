@@ -16,7 +16,8 @@ class CustomerForm(forms.ModelForm):
             'state',
             'zip',
             'country',
-            'business_type'
+            'business_type',
+            'is_active'
         ]
 
     def __init__(self, *args, **kwargs):
@@ -40,5 +41,8 @@ class CustomerForm(forms.ModelForm):
             Row(
                 Column('country', css_class='form-group col-md-6 mb-3'),
                 Column('business_type', css_class='form-group col-md-6 mb-3'),
+            ),
+            Row(
+                Column('is_active', css_class='form-group col-md-6 mb-3'),
             ),
         )

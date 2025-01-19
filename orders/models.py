@@ -5,6 +5,18 @@ from customers.models import Customer
 
 
 class Order(models.Model):
+    PRIORITY_CHOICES = [ # Choices for the priority field in the Order model
+        ('low', 'Low'),
+        ('medium', 'Medium'),
+        ('high', 'High'),
+    ]
+    STATUS_CHOICES = [ # Choices for the status field in the Order model
+        ('draft', 'Draft'),
+        ('submitted', 'Submitted'),
+        ('shipped', 'Shipped'),
+        ('delivered', 'Delivered'),
+        ('cancelled', 'Cancelled'),
+    ]
     transaction_id = models.IntegerField(primary_key=True)  # Externally assigned
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     close_date = models.DateTimeField(blank=True, null=True)

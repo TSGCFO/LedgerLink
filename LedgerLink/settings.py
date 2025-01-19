@@ -56,6 +56,8 @@ INSTALLED_APPS = [
     'billing.apps.BillingConfig',
     'ai_core.apps.AICoreConfig',
     'channels',
+    'tailwind',
+    'compressor',
 ]
 
 # Add LOGIN_REDIRECT_URL and LOGOUT_REDIRECT_URL
@@ -64,7 +66,7 @@ LOGIN_REDIRECT_URL = 'main:dashboard'
 LOGOUT_REDIRECT_URL = 'login'
 
 # Update crispy forms to use Bootstrap 5
-CRISPY_TEMPLATE_PACK = 'bootstrap5'  # Change from bootstrap4
+CRISPY_TEMPLATE_PACK = 'bootstrap5' # Change from bootstrap4
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 
 MIDDLEWARE = [
@@ -120,7 +122,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'pycharm_django',
         'USER': 'postgres',
-        'PASSWORD': 'hassan',
+        'PASSWORD':'',
         'HOST': 'localhost',
         'PORT': '5432',
     }
@@ -177,13 +179,22 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # Additional locations of static files
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
-    ]
+    BASE_DIR / 'static/css/tailwind',  # Ensure Tailwind files are included
+
+]
 
 # The finders Django uses to locate static files
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'compressor.finders.CompressorFinder',
 ]
+
+# Compressor configuration
+# https://django-compressor.readthedocs.io/en/stable/settings/
+COMPRESS_ROOT = BASE_DIR / 'static'
+COMPRESS_ENABLED = True
+
 
 # Simplified static file serving
 # https://warehouse.python.org/project/whitenoise/

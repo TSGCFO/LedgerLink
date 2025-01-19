@@ -13,18 +13,33 @@ class OrderForm(forms.ModelForm):
             'volume_cuft', 'packages', 'notes', 'carrier'
         ]
         widgets = {
-            'close_date': forms.DateTimeInput(
-                attrs={'type': 'datetime-local'},
-                format='%Y-%m-%dT%H:%M'
-            ),
-            'sku_quantity': forms.Textarea(
+            'order_date': forms.DateInput(
                 attrs={
-                    'rows': 4,
-                    'placeholder': '[{"sku": "ABC123", "quantity": 5}]'
+                    'type': 'date',
+                    'class': 'w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white'
                 }
             ),
-            'notes': forms.Textarea(attrs={'rows': 3}),
+            'customer': forms.Select(
+                attrs={
+                    'class': 'w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white'
+                }
+            ),
+            'status': forms.Select(
+                attrs={
+                    'class': 'w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white'
+                }
+            ),
+            'priority': forms.Select(
+                attrs={
+                    'class': 'w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white'
+                }
+            ),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            field.widget.attrs['class'] = 'w-full px-4 py-2 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm'
 
     def clean_sku_quantity(self):
         sku_quantity = self.cleaned_data.get('sku_quantity')

@@ -1,0 +1,21 @@
+<!-- templates/components/button.html -->
+<button type="{{ type|default:'button' }}"
+        class="inline-flex items-center justify-center rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-offset-2
+    {% if variant == 'primary' %}
+        bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500
+    {% elif variant == 'secondary' %}
+        bg-white text-gray-700 hover:bg-gray-50 focus:ring-primary-500 border border-gray-300
+    {% elif variant == 'danger' %}
+        bg-red-600 text-white hover:bg-red-700 focus:ring-red-500
+    {% endif %}
+    {% if size == 'sm' %}
+        px-3 py-2 text-sm
+    {% elif size == 'lg' %}
+        px-6 py-3 text-lg
+    {% else %}
+        px-4 py-2 text-base
+    {% endif %}
+    {{ css_class }}"
+>
+    {{ text }}
+</button>

@@ -1,38 +1,67 @@
-<nav class="bg-indigo-600 text-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
-            <!-- Logo/Brand -->
-            <div class="flex-shrink-0">
-                <a href="{% url 'main:dashboard' %}" class="text-white font-bold text-xl">
-                    LedgerLink
+{% load static %}
+<!-- components/navbar.html -->
+<nav class="bg-white shadow-md dark:bg-gray-800 fixed top-0 w-full z-50">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+            <!-- Logo -->
+            <div class="flex items-center">
+                <a href="{% url 'main:dashboard' %}" class="flex items-center">
+                    <img src="{% static 'images/logo.svg' %}" alt="LedgerLink" class="h-8 w-auto">
+                    <span class="ml-2 text-2xl font-bold text-gray-900 dark:text-white">LedgerLink</span>
                 </a>
             </div>
 
-            <!-- Desktop Navigation -->
+            <!-- Search Bar -->
             <div class="hidden md:block">
-                <div class="ml-10 flex items-baseline space-x-4">
-                    {% if user.is_authenticated %}
-                        <a href="{% url 'main:dashboard' %}"
-                           class="px-3 py-2 rounded-md text-sm font-medium {% if request.resolver_match.url_name == 'dashboard' %}bg-indigo-700{% else %}hover:bg-indigo-500{% endif %}">
-                            Dashboard
-                        </a>
-                    {% endif %}
+                <div class="relative">
+                    <label>
+                        <input type="text"
+                               placeholder="Search..."
+                               class="w-72 pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 text-sm bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                    </label>
+                    <span class="absolute left-3 top-2.5 text-gray-400">
+                        <i class="material-icons">search</i>
+                    </span>
                 </div>
             </div>
 
-            <!-- User Menu -->
-            <div class="ml-4 flex items-center">
+            <!-- Action Buttons -->
+            <div class="flex items-center space-x-4">
+                <!-- Notifications -->
+                <button class="notifications-button relative p-2 rounded-full text-gray-500 hover:text-gray-700 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    <span class="sr-only">View Notifications</span>
+                    <i class="material-icons">notifications</i>
+                    <span class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500"></span>
+                </button>
+
+                <!-- Dark Mode Toggle -->
+                <button id="themeToggle" class="p-2 rounded-full text-gray-500 hover:text-gray-700 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    <span class="sr-only">Toggle Dark Mode</span>
+                    <i class="material-icons">brightness_4</i>
+                </button>
+
+                <!-- User Dropdown -->
                 {% if user.is_authenticated %}
-                    <span class="text-sm mr-4">{{ user.username }}</span>
-                    <a href="{% url 'logout' %}"
-                       class="text-white hover:bg-indigo-500 px-3 py-2 rounded-md text-sm font-medium">
-                        Logout
-                    </a>
+                <div class="relative">
+                    <button id="profileDropdownButton" class="flex items-center text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        <img class="h-8 w-8 rounded-full" src="https://ui-avatars.com/api/?name={{ user.username }}&background=random" alt="{{ user.username }}">
+                    </button>
+                    <div id="profileDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-md dark:bg-gray-700 z-50">
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
+                            Your Profile
+                        </a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
+                            Settings
+                        </a>
+                        <a href="{% url 'logout' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
+                            Sign Out
+                        </a>
+                    </div>
+                </div>
                 {% else %}
-                    <a href="{% url 'login' %}"
-                       class="text-white hover:bg-indigo-500 px-3 py-2 rounded-md text-sm font-medium">
-                        Login
-                    </a>
+                <a href="{% url 'login' %}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700">
+                    Sign In
+                </a>
                 {% endif %}
             </div>
         </div>

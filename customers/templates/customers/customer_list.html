@@ -1,89 +1,161 @@
-{% extends 'base.html' %}
+{% extends '_base.html' %}
 {% load static %}
 
+{% block filter_bar %}
+<div class="container mx-auto px-4 sm:px-6 lg:px-8">
+    <form method="get" class="grid grid-cols-1 gap-4 md:grid-cols-4 bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+        <!-- Search Bar -->
+        <input type="search" name="search" placeholder="Search customers..."
+               value="{{ search_query }}"
+               class="col-span-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary-500 focus:border-primary-500">
+
+        <!-- Sort Dropdown -->
+        <label>
+            <select name="sort" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary-500 focus:border-primary-500">
+                <option value="">Sort by</option>
+                <option value="company_name" {% if sort == 'company_name' %}selected{% endif %}>Company Name</option>
+                <option value="email" {% if sort == 'email' %}selected{% endif %}>Email</option>
+                <option value="created_at" {% if sort == 'created_at' %}selected{% endif %}>Created Date</option>
+            </select>
+        </label>
+
+        <!-- Filter Dropdown -->
+        <select name="filter" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary-500 focus:border-primary-500">
+            <option value="">Filter by</option>
+            <option value="recent" {% if filter == 'recent' %}selected{% endif %}>Recently Added</option>
+            <option value="active" {% if filter == 'active' %}selected{% endif %}>Active Customers</option>
+        </select>
+
+        <!-- Apply Button -->
+        <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:ring focus:ring-primary-500">
+            Apply Filters
+        </button>
+    </form>
+</div>
+{% endblock %}
+
 {% block content %}
-    <div class="container-fluid py-4">
-        <!-- Update the header section in customers/templates/customers/customer_list.html -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="h2">Customers</h1>
-            <div class="header-buttons">
-                <a href="{% url 'logout' %}" class="btn btn-light me-3">Logout</a>
-                <a href="{% url 'customers:add' %}" class="btn btn-primary btn-add-customer">
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <!-- Page Header -->
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Customers</h1>
+            <div class="flex gap-4">
+                <a href="{% url 'logout' %}"
+                   class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-sm text-gray-900 dark:text-white rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 focus:ring focus:ring-primary-500">
+                    Logout
+                </a>
+                <a href="{% url 'customers:add' %}"
+                   class="px-4 py-2 bg-primary-600 text-sm text-white rounded-md hover:bg-primary-700 focus:ring focus:ring-primary-500">
                     + Add Customer
                 </a>
             </div>
         </div>
+    </div>
 
-        <!-- Search Bar -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <form method="get" class="row g-3">
-                    <div class="col-md-10">
-                        <input type="search" name="search" class="form-control"
-                               placeholder="Search customers..."
-                               value="{{ search_query }}">
-                    </div>
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-primary w-100">
-                            🔍 Search
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
-
-        <!-- Customers Table -->
-        <div class="table-responsive">
-            <table class="table align-middle">
-                <thead>
+    <!-- Customers Table -->
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-x-auto"> <!-- Added overflow-x-auto -->
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead class="bg-gray-50 dark:bg-gray-700">
                 <tr>
-                    <th>Company Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Location</th>
-                    <th>Created</th>
-                    <th class="text-end">Actions</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Company Name
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Legal Business Name
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Email
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Phone
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Address
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        City
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        State
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        ZIP
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Country
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Business Type
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Active
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Created At
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Actions
+                    </th>
                 </tr>
                 </thead>
-                <tbody>
+                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {% for customer in customers %}
                     <tr>
-                        <td>
-                            <a href="{% url 'customers:detail' customer.pk %}" class="text-primary text-decoration-none">
+                        <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">
+                            <a href="{% url 'customers:detail' customer.pk %}" class="hover:underline">
                                 {{ customer.company_name }}
                             </a>
                         </td>
-                        <td>{{ customer.email }}</td>
-                        <td>{{ customer.phone|default:"-" }}</td>
-                        <td>{{ customer.city|default:"-" }}</td>
-                        <td>{{ customer.created_at|date:"M d, Y" }}</td>
-                        <td>
-                            <div class="btn-group float-end">
-                                <a href="{% url 'customers:detail' customer.pk %}" class="btn btn-sm btn-outline-secondary">
-                                    <i class="bi bi-eye"></i>
-                                </a>
-                                <a href="{% url 'customers:edit' customer.pk %}" class="btn btn-sm btn-outline-primary">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <a href="{% url 'customers:delete' customer.pk %}" class="btn btn-sm btn-outline-danger">
-                                    <i class="bi bi-trash"></i>
-                                </a>
+                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                            {{ customer.legal_business_name|default:"-" }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                            {{ customer.email }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                            {{ customer.phone|default:"-" }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                            {{ customer.address|default:"-" }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                            {{ customer.city|default:"-" }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                            {{ customer.state|default:"-" }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                            {{ customer.zip|default:"-" }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                            {{ customer.country|default:"-" }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                            {{ customer.business_type|default:"-" }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                            {{ customer.is_active|yesno:"Yes,No" }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                            {{ customer.created_at|date:"M d, Y" }}
+                        </td>
+                        <td class="px-6 py-4 text-right text-sm font-medium">
+                            <div class="flex justify-end gap-2">
+                                <a href="{% url 'customers:detail' customer.pk %}"
+                                   class="text-primary-600 hover:text-primary-700">View</a>
+                                <a href="{% url 'customers:edit' customer.pk %}"
+                                   class="text-blue-600 hover:text-blue-700">Edit</a>
+                                <a href="{% url 'customers:delete' customer.pk %}"
+                                   class="text-red-600 hover:text-red-700">Delete</a>
                             </div>
                         </td>
                     </tr>
                 {% empty %}
                     <tr>
-                        <td colspan="6" class="text-center py-4">
-                            <p class="text-muted mb-0">No customers found</p>
+                        <td colspan="13" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                            No customers found.
                         </td>
                     </tr>
                 {% endfor %}
@@ -91,16 +163,5 @@
             </table>
         </div>
     </div>
-
-    <footer class="footer mt-auto py-3 bg-light">
-        <div class="container">
-            <div class="d-flex justify-content-between">
-                <span>© 2024 LedgerLink. All rights reserved.</span>
-                <div>
-                    <a href="#" class="text-muted text-decoration-none me-3">Privacy Policy</a>
-                    <a href="#" class="text-muted text-decoration-none">Terms of Service</a>
-                </div>
-            </div>
-        </div>
-    </footer>
+</div>
 {% endblock %}

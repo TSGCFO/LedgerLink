@@ -1,0 +1,27 @@
+{% load rest_framework %}
+<!-- templates/components/form_field.html -->
+{% macro form_field(field, label="", help_text="") %}
+<div class="space-y-1">
+    {% if label %}
+    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">
+        {{ label }}
+    </label>
+    {% endif %}
+
+    <div class="mt-1">
+        {{ field|add_class:"block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm" }}
+    </div>
+
+    {% if field.errors %}
+    <div class="mt-1">
+        {% for error in field.errors %}
+        <p class="text-sm text-red-600">{{ error }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if help_text %}
+    <p class="mt-2 text-sm text-gray-500">{{ help_text }}</p>
+    {% endif %}
+</div>
+{% endmacro %}

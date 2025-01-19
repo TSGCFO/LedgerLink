@@ -1,243 +1,323 @@
-{% extends 'base.html' %}
-{% load crispy_forms_filters %}
+{% extends '_base.html' %}
+{% load custom_filters %}
 {% load static %}
 {% load crispy_forms_tags %}
 
-{% block title %}{% if form.instance.pk %}Edit{% else %}New{% endif %} Order - LedgerLink{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/tailwind/output.css' %}">
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+{% endblock %}
+
+{% block title %}{% if form.instance.pk %}Edit Order{% else %}New Order{% endif %} - LedgerLink{% endblock %}
 
 {% block content %}
-    <div class="container-fluid py-4">
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Header -->
-        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-            <div>
-                <h1 class="h2">{% if form.instance.pk %}Edit{% else %}New{% endif %} Order</h1>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{% url 'orders:order_list' %}">Orders</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">
-                            {% if form.instance.pk %}Edit Order {{ form.instance.transaction_id }}{% else %}New Order{% endif %}
-                        </li>
-                    </ol>
-                </nav>
-            </div>
-            <div class="btn-toolbar mb-2 mb-md-0">
-                <div class="btn-group me-2">
-                    <a href="{% url 'orders:order_list' %}" class="btn btn-sm btn-outline-secondary">
-                        <i class="bi bi-x-lg"></i> Cancel
+        <div class="mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+                        {% if form.instance.pk %}
+                            Edit Order #{{ form.instance.transaction_id }}
+                        {% else %}
+                            Create New Order
+                        {% endif %}
+                    </h1>
+                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                        {% if form.instance.pk %}
+                            Update the order details below
+                        {% else %}
+                            Fill in the order details below
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="{% url 'orders:order_list' %}"
+                       class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                        </svg>
+                        Back to List
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- Order Form -->
-        <div class="row">
-            <div class="col-md-8">
-                <form method="post" novalidate>
+        <!-- Form Card -->
+        <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden">
+            <div class="p-6">
+                <form method="post" enctype="multipart/form-data" class="space-y-8">
                     {% csrf_token %}
 
-                    <!-- Basic Information Card -->
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">Basic Information</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    {{ form.transaction_id|as_crispy_field }}
-                                </div>
-                                <div class="col-md-6">
-                                    {{ form.customer|as_crispy_field }}
-                                </div>
-                                <div class="col-md-6">
-                                    {{ form.reference_number|as_crispy_field }}
-                                </div>
-                                <div class="col-md-6">
-                                    {{ form.close_date|as_crispy_field }}
-                                </div>
+                    {% if form.errors %}
+                    <div class="rounded-md bg-red-50 dark:bg-red-900/50 p-4 mb-6">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                </svg>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Shipping Information Card -->
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">Shipping Information</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    {{ form.ship_to_name|as_crispy_field }}
-                                </div>
-                                <div class="col-md-6">
-                                    {{ form.ship_to_company|as_crispy_field }}
-                                </div>
-                                <div class="col-12">
-                                    {{ form.ship_to_address|as_crispy_field }}
-                                </div>
-                                <div class="col-12">
-                                    {{ form.ship_to_address2|as_crispy_field }}
-                                </div>
-                                <div class="col-md-4">
-                                    {{ form.ship_to_city|as_crispy_field }}
-                                </div>
-                                <div class="col-md-4">
-                                    {{ form.ship_to_state|as_crispy_field }}
-                                </div>
-                                <div class="col-md-4">
-                                    {{ form.ship_to_zip|as_crispy_field }}
-                                </div>
-                                <div class="col-12">
-                                    {{ form.ship_to_country|as_crispy_field }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Order Details Card -->
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">Order Details</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row g-3">
-                                <div class="col-md-4">
-                                    {{ form.weight_lb|as_crispy_field }}
-                                </div>
-                                <div class="col-md-4">
-                                    {{ form.line_items|as_crispy_field }}
-                                </div>
-                                <div class="col-md-4">
-                                    {{ form.total_item_qty|as_crispy_field }}
-                                </div>
-                                <div class="col-md-4">
-                                    {{ form.volume_cuft|as_crispy_field }}
-                                </div>
-                                <div class="col-md-4">
-                                    {{ form.packages|as_crispy_field }}
-                                </div>
-                                <div class="col-md-4">
-                                    {{ form.carrier|as_crispy_field }}
-                                </div>
-                                <div class="col-12">
-                                    <div class="form-group">
-                                        <label for="id_sku_quantity">SKU Quantity</label>
-                                        <textarea name="sku_quantity" cols="40" rows="4" class="form-control" placeholder='[{"sku": "ABC123", "quantity": 5}]' id="id_sku_quantity">{% if form.instance.sku_quantity %}{{ form.instance.sku_quantity|safe }}{% endif %}</textarea>
-                                        {% if form.sku_quantity.errors %}
-                                            {% for error in form.sku_quantity.errors %}
-                                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-red-800 dark:text-red-200">
+                                    There were errors with your submission
+                                </h3>
+                                <div class="mt-2 text-sm text-red-700 dark:text-red-300">
+                                    <ul class="list-disc list-inside space-y-1">
+                                        {% for field in form %}
+                                            {% for error in field.errors %}
+                                                <li>{{ field.label }}: {{ error }}</li>
                                             {% endfor %}
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    {{ form.notes|as_crispy_field }}
+                                        {% endfor %}
+                                        {% for error in form.non_field_errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    {% endif %}
 
-                    <!-- Submit Buttons -->
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-end">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="bi bi-save"></i>
-                                    {% if form.instance.pk %}Save Changes{% else %}Create Order{% endif %}
+                    <!-- Customer and Transaction Section -->
+                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <div class="space-y-2">
+                            <label for="{{ form.customer.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Customer
+                                {% if form.customer.field.required %}
+                                    <span class="text-red-500">*</span>
+                                {% endif %}
+                            </label>
+                            <div class="relative">
+                                {{ form.customer }}
+                                {% if form.customer.help_text %}
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ form.customer.help_text }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if form.instance.pk %}
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Transaction ID
+                            </label>
+                            <div class="flex items-center space-x-2">
+                                <input type="text" value="{{ form.instance.transaction_id }}"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-100 dark:bg-gray-700 dark:text-gray-300" readonly>
+                                <button type="button" onclick="copyToClipboard('{{ form.instance.transaction_id }}')"
+                                        class="p-2 text-gray-400 hover:text-gray-500 focus:outline-none">
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>
+                                    </svg>
                                 </button>
                             </div>
                         </div>
+                        {% endif %}
                     </div>
-                </form>
-            </div>
 
-            <!-- Side Panel -->
-            <div class="col-md-4">
-                <!-- Help Card -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">
-                            <i class="bi bi-question-circle me-2"></i>Help
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <h6>Transaction ID</h6>
-                        <p class="text-muted small mb-3">
-                            A unique identifier for this order.
-                        </p>
+                    <!-- Order Details Section -->
+                    <div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-6">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-6">Order Details</h3>
+                        <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+                            <!-- Order Date -->
+                            <div class="space-y-2">
+                                <label for="{{ form.order_date.id_for_label }}"
+                                       class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Order Date
+                                    {% if form.order_date.field.required %}
+                                        <span class="text-red-500">*</span>
+                                    {% endif %}
+                                </label>
+                                <div class="relative">
+                                    {{ form.order_date }}
+                                    <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
 
-                        <h6>SKU Quantity</h6>
-                        <p class="text-muted small mb-3">
-                            Enter SKUs and their quantities in JSON format:<br>
-                            <code>[{"sku": "ABC123", "quantity": 5}]</code>
-                        </p>
+                            <!-- Status -->
+                            <div class="space-y-2">
+                                <label for="{{ form.status.id_for_label }}"
+                                       class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Status
+                                    {% if form.status.field.required %}
+                                        <span class="text-red-500">*</span>
+                                    {% endif %}
+                                </label>
+                                {{ form.status }}
+                            </div>
 
-                        <h6>Close Date</h6>
-                        <p class="text-muted small mb-0">
-                            When the order is completed. Leave empty for open orders.
-                        </p>
-                    </div>
-                </div>
-
-                {% if form.instance.pk %}
-                    <!-- Metadata Card -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">
-                                <i class="bi bi-info-circle me-2"></i>Status
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <span class="badge {% if form.instance.close_date %}bg-success{% else %}bg-warning{% endif %}">
-                                    {% if form.instance.close_date %}Closed{% else %}Open{% endif %}
-                                </span>
+                            <!-- Priority -->
+                            <div class="space-y-2">
+                                <label for="{{ form.priority.id_for_label }}"
+                                       class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Priority
+                                    {% if form.priority.field.required %}
+                                        <span class="text-red-500">*</span>
+                                    {% endif %}
+                                </label>
+                                {{ form.priority }}
                             </div>
                         </div>
                     </div>
-                {% endif %}
+
+                    <!-- Additional Fields -->
+                    <div class="space-y-6">
+                        {% for field in form %}
+                            {% if field.name not in 'customer,order_date,status,priority'|split:',' %}
+                            <div class="space-y-2">
+                                <label for="{{ field.id_for_label }}"
+                                       class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    {{ field.label }}
+                                    {% if field.field.required %}
+                                        <span class="text-red-500">*</span>
+                                    {% endif %}
+                                </label>
+                                {{ field }}
+                                {% if field.help_text %}
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ field.help_text }}</p>
+                                {% endif %}
+                                {% if field.errors %}
+                                    <div class="text-red-500 text-sm mt-1">
+                                        {{ field.errors|join:', ' }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+                        <a href="{% url 'orders:order_list' %}"
+                           class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600 transition-colors duration-200">
+                            Cancel
+                        </a>
+                        <button type="submit"
+                                class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-200">
+                            {% if form.instance.pk %}
+                                Update Order
+                            {% else %}
+                                Create Order
+                            {% endif %}
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
+</div>
 
-    {% block extra_js %}
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                // Initialize datepicker if needed
-                const dateInputs = document.querySelectorAll('input[type="datetime-local"]');
-                dateInputs.forEach(input => {
-                    // Any custom date picker initialization can go here
-                });
+{% block extra_js %}
+<script src="{% static 'js/main.js' %}"></script>
+<script>
+    // Initialize date picker for order date
+    document.addEventListener('DOMContentLoaded', function() {
+        const dateFields = document.querySelectorAll('input[type="date"]');
+        dateFields.forEach(field => {
+            if (!field.value) {
+                field.valueAsDate = new Date();
+            }
+        });
 
-                // JSON field formatting
-                const jsonField = document.getElementById('id_sku_quantity');
-                if (jsonField) {
-                    jsonField.addEventListener('change', function() {
-                        try {
-                            const value = this.value.trim();
-                            if (value) {
-                                const parsed = JSON.parse(value);
-                                const formatted = JSON.stringify(parsed);
-                                this.value = formatted;
-                            }
-                        } catch (e) {
-                            // Invalid JSON - leave as is
-                        }
-                    });
+        // Add custom styling to select elements
+        const selectElements = document.querySelectorAll('select');
+        selectElements.forEach(select => {
+            select.classList.add('appearance-none', 'bg-white', 'dark:bg-gray-700', 'border', 'border-gray-300',
+                               'dark:border-gray-600', 'rounded-md', 'py-2', 'px-4', 'pr-8', 'leading-tight',
+                               'focus:outline-none', 'focus:ring-2', 'focus:ring-primary-500', 'focus:border-primary-500');
 
-                    // Format initial value if it exists
-                    try {
-                        const initialValue = jsonField.value.trim();
-                        if (initialValue) {
-                            // Remove escaped quotes and format
-                            const unescaped = initialValue.replace(/\\"/g, '"');
-                            const parsed = JSON.parse(unescaped);
-                            jsonField.value = JSON.stringify(parsed);
-                        }
-                    } catch (e) {
-                        // Invalid JSON - leave as is
-                    }
+            // Create custom select wrapper
+            const wrapper = document.createElement('div');
+            wrapper.className = 'relative';
+            select.parentNode.insertBefore(wrapper, select);
+            wrapper.appendChild(select);
+
+            // Add custom arrow
+            const arrow = document.createElement('div');
+            arrow.className = 'pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300';
+            arrow.innerHTML = `
+                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                </svg>
+            `;
+            wrapper.appendChild(arrow);
+        });
+    });
+
+    // Form validation with improved UI feedback
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const requiredFields = this.querySelectorAll('[required]');
+        let valid = true;
+
+        requiredFields.forEach(field => {
+            const fieldWrapper = field.closest('.space-y-2');
+            if (!field.value.trim()) {
+                valid = false;
+                field.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
+
+                // Add or update error message
+                let errorMsg = fieldWrapper.querySelector('.error-message');
+                if (!errorMsg) {
+                    errorMsg = document.createElement('p');
+                    errorMsg.className = 'error-message text-red-500 text-sm mt-1 flex items-center';
+                    errorMsg.innerHTML = `
+                        <svg class="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                  clip-rule="evenodd"/>
+                        </svg>
+                        This field is required
+                    `;
+                    fieldWrapper.appendChild(errorMsg);
                 }
-            });
-        </script>
-    {% endblock %}
+            } else {
+                field.classList.remove('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
+                const errorMsg = fieldWrapper.querySelector('.error-message');
+                if (errorMsg) {
+                    errorMsg.remove();
+                }
+            }
+        });
+
+        if (!valid) {
+            e.preventDefault();
+            // Scroll to first error
+            const firstError = document.querySelector('.border-red-500');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    });
+
+    // Copy to clipboard function
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            // Show success message
+            const notification = document.createElement('div');
+            notification.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transform transition-transform duration-300 translate-y-0';
+            notification.innerHTML = `
+                <div class="flex items-center space-x-2">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <span>Copied to clipboard!</span>
+                </div>
+            `;
+            document.body.appendChild(notification);
+
+            // Remove notification after 3 seconds
+            setTimeout(() => {
+                notification.classList.add('translate-y-full');
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        });
+    }
+</script>
+{% endblock %}
 {% endblock %}
