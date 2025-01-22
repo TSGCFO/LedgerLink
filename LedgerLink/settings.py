@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
+
+import django_filters
 from django.contrib.messages import constants as messages
 
 
@@ -49,14 +51,16 @@ INSTALLED_APPS = [
     "materials.apps.MaterialsConfig",
     "shipping.apps.ShippingConfig",
     "rules.apps.BillingConfig",
+    "corsheaders",
     "crispy_forms",
     "crispy_bootstrap5",
     "rest_framework",
     'Main.apps.MainConfig',
     'billing.apps.BillingConfig',
     'ai_core.apps.AICoreConfig',
-    'channels',
-    'tailwind',
+    #'channels',
+    #'tailwind',
+    'django_filters',
     'compressor',
 ]
 
@@ -70,16 +74,19 @@ CRISPY_TEMPLATE_PACK = 'bootstrap5' # Change from bootstrap4
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.security.SecurityMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    #'whitenoise.middleware.WhiteNoiseMiddleware',
      'ai_core.middleware.AIMonitoringMiddleware',
+
 ]
+
 
 ROOT_URLCONF = 'LedgerLink.urls'
 
@@ -105,14 +112,14 @@ WSGI_APPLICATION = 'LedgerLink.wsgi.application'
 
 # Channels configuration
 ASGI_APPLICATION = 'LedgerLink.asgi.application'
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [('127.0.0.1', 6379)],
-        },
-    },
-}
+# CHANNEL_LAYERS = {
+#     'default': {
+#         'BACKEND': 'channels_redis.core.RedisChannelLayer',
+#         'CONFIG': {
+#             "hosts": [('127.0.0.1', 6379)],
+#         },
+#     },
+# }
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
@@ -148,12 +155,12 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Celery Configuration
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'UTC'
+# CELERY_BROKER_URL = 'redis://localhost:6379/0'
+# CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+# CELERY_ACCEPT_CONTENT = ['json']
+# CELERY_TASK_SERIALIZER = 'json'
+# CELERY_RESULT_SERIALIZER = 'json'
+# CELERY_TIMEZONE = 'UTC'
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
@@ -353,12 +360,19 @@ dict
 """
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 35,
 }
 
 # ----------------------------------------------------------------------
@@ -368,3 +382,42 @@ CACHES = {
         'LOCATION': 'ai_system_cache',
     }
 }
+
+
+#During development
+# Correctly configure CORS_ALLOWED_ORIGINS during development
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:3000",  # Localhost with specific port
+    "http://127.0.0.1:8000",  # Django development server
+]
+
+# For development only! Remove in production!
+CORS_ALLOW_ALL_ORIGINS = True
+
+
+# For development only
+CORS_ALLOW_CREDENTIALS = True
+
+
+# Additional CORS settings if needed
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]

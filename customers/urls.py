@@ -1,9 +1,13 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from .views import (
     CustomerListView, CustomerDetailView, CustomerCreateView,
-    CustomerUpdateView, CustomerDeleteView
+    CustomerUpdateView, CustomerDeleteView, CustomerViewSet
 )
 from django.views.generic import TemplateView
+
+router = DefaultRouter()
+router.register(r'', CustomerViewSet, basename='customers')
 
 app_name = 'customers'
 
@@ -15,5 +19,8 @@ urlpatterns = [
     path('<int:pk>/delete/', CustomerDeleteView.as_view(), name='delete'),
     path('create-success/', TemplateView.as_view(template_name='customers/customer_create_success.html'),
          name='create_success'),
+
+    #   API---------------URLS---------------------
+    path('api/', include(router.urls)),
 
 ]

@@ -7,6 +7,12 @@ from django.db.models import Q
 from .models import Customer
 from .forms import CustomerForm
 from django.utils.timezone import now, timedelta
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.filters import SearchFilter, OrderingFilter
+from django_filters import rest_framework as filters
+from .models import Customer
+from .serializers import CustomerSerializer
 
 
 class CustomerListView(LoginRequiredMixin, ListView):
@@ -94,3 +100,40 @@ class CustomerDeleteView(LoginRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(request, 'Customer deleted successfully!')
         return super().delete(request, *args, **kwargs)
+
+
+'====================================================================================================================='
+'====================================================================================================================='
+'====================================================================================================================='
+
+
+class CustomerFilter(filters.FilterSet):
+    created_at = filters.DateFromToRangeFilter()
+
+    class Meta:
+        model = Customer
+        fields = {
+            'company_name': ['icontains'],
+            'email': ['icontains'],
+            'city': ['icontains'],
+            'state': ['exact'],
+            'country': ['exact'],
+            'is_active': ['exact'],
+            'business_type': ['exact'],
+        }
+
+
+class CustomerViewSet(viewsets.ModelViewSet):
+    serializer_class = CustomerSerializer
+    permission_classes = [AllowAny]
+    filter_backends = [filters.DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_class = CustomerFilter
+    search_fields = ['company_name', 'legal_business_name', 'email', 'phone', 'city']
+    ordering_fields = [
+        'company_name', 'email', 'phone', 'city', 'state',
+        'country', 'is_active', 'created_at', 'business_type'
+    ]
+    ordering = ['company_name']
+
+    def get_queryset(self):
+        return Customer.objects.all()

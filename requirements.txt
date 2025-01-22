@@ -103,7 +103,7 @@ django-crispy-forms==2.3
     # via
     #   -r requirements.in
     #   crispy-bootstrap5
-django-tailwind==3.8.0
+#django-tailwind==3.8.0
 
 filelock==3.16.1
     # via
@@ -400,3 +400,7 @@ wheel==0.45.1
 # The following packages are considered to be unsafe in a requirements file:
 # pip
 # setuptools
+
+djangorestframework>=3.15.2
+celery>=5.3.6
+django-filter>=24.3
