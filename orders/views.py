@@ -1,168 +1,120 @@
-from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.urls import reverse_lazy
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
-from django.shortcuts import get_object_or_404, redirect
+# orders/views.py
 from django.db.models import Q
+from rest_framework import viewsets, filters
+from rest_framework.permissions import AllowAny
+from django_filters import rest_framework as django_filters
 from .models import Order
-from .forms import OrderForm
-from django.http import HttpResponse
-import csv
-from django.views import View
+from .serializers import OrderSerializer
 
-class OrderListView(LoginRequiredMixin, ListView):
-    model = Order
-    template_name = 'orders/order_list.html'
-    context_object_name = 'orders'
-    paginate_by = 10
-    #ordering = ['-order_date']
+class OrderFilter(django_filters.FilterSet):
+    """Filter set for advanced order filtering."""
+    customer = django_filters.NumberFilter(field_name='customer__id')
+    status = django_filters.ChoiceFilter(choices=Order.STATUS_CHOICES)
+    priority = django_filters.ChoiceFilter(choices=Order.PRIORITY_CHOICES)
+    reference_number = django_filters.CharFilter(lookup_expr='icontains')
+    created_after = django_filters.DateTimeFilter(field_name='created_at', lookup_expr='gte')
+    created_before = django_filters.DateTimeFilter(field_name='created_at', lookup_expr='lte')
+    closed_after = django_filters.DateTimeFilter(field_name='close_date', lookup_expr='gte')
+    closed_before = django_filters.DateTimeFilter(field_name='close_date', lookup_expr='lte')
+    min_weight = django_filters.NumberFilter(field_name='weight_lb', lookup_expr='gte')
+    max_weight = django_filters.NumberFilter(field_name='weight_lb', lookup_expr='lte')
+    min_volume = django_filters.NumberFilter(field_name='volume_cuft', lookup_expr='gte')
+    max_volume = django_filters.NumberFilter(field_name='volume_cuft', lookup_expr='lte')
+    carrier = django_filters.CharFilter(lookup_expr='icontains')
+    has_notes = django_filters.BooleanFilter(field_name='notes', lookup_expr='isnull', exclude=True)
+    city = django_filters.CharFilter(field_name='ship_to_city', lookup_expr='icontains')
+    state = django_filters.CharFilter(field_name='ship_to_state', lookup_expr='icontains')
+    country = django_filters.CharFilter(field_name='ship_to_country', lookup_expr='icontains')
+
+    class Meta:
+        model = Order
+        fields = [
+            'customer', 'status', 'priority', 'reference_number',
+            'carrier', 'city', 'state', 'country'
+        ]
+
+class OrderViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint for orders with advanced filtering, searching, and sorting.
+    
+    Filter parameters:
+    - customer: Filter by customer ID
+    - status: Filter by order status (draft/submitted/shipped/delivered/cancelled)
+    - priority: Filter by priority level (low/medium/high)
+    - reference_number: Filter by reference number (contains, case-insensitive)
+    - created_after: Filter by creation date (greater than or equal)
+    - created_before: Filter by creation date (less than or equal)
+    - closed_after: Filter by close date (greater than or equal)
+    - closed_before: Filter by close date (less than or equal)
+    - min_weight: Filter by minimum weight in pounds
+    - max_weight: Filter by maximum weight in pounds
+    - min_volume: Filter by minimum volume in cubic feet
+    - max_volume: Filter by maximum volume in cubic feet
+    - carrier: Filter by carrier name (contains, case-insensitive)
+    - has_notes: Filter orders that have notes
+    - city: Filter by shipping city (contains, case-insensitive)
+    - state: Filter by shipping state (contains, case-insensitive)
+    - country: Filter by shipping country (contains, case-insensitive)
+    
+    Search:
+    - Searches across reference number, customer name, shipping details
+    
+    Sorting:
+    - Sort by any field using the ordering parameter
+    - Prefix with '-' for descending order
+    Example: ?ordering=-created_at
+    """
+    queryset = Order.objects.select_related('customer')
+    serializer_class = OrderSerializer
+    permission_classes = [AllowAny]
+    filterset_class = OrderFilter
+    filter_backends = [
+        django_filters.DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+    search_fields = [
+        'reference_number',
+        'customer__company_name',
+        'ship_to_name',
+        'ship_to_company',
+        'ship_to_address',
+        'ship_to_city',
+        'ship_to_state',
+        'ship_to_country',
+        'carrier',
+        'notes'
+    ]
+    ordering_fields = [
+        'transaction_id',
+        'customer__company_name',
+        'close_date',
+        'reference_number',
+        'weight_lb',
+        'volume_cuft',
+        'total_item_qty',
+        'status',
+        'priority'
+    ]
+    ordering = ['-transaction_id']  # Default ordering
 
     def get_queryset(self):
+        """
+        Optionally restricts the returned orders by filtering against
+        query parameters in the URL.
+        """
         queryset = super().get_queryset()
-        search_query = self.request.GET.get('search')
-        status_filter = self.request.GET.get('status')
-        priority_filter = self.request.GET.get('priority')
-
-        if search_query:
+        
+        # Example of custom filtering
+        query = self.request.query_params.get('q', None)
+        if query:
             queryset = queryset.filter(
-                Q(transaction_id__icontains=search_query) |
-                Q(customer__name__icontains=search_query) |
-                Q(customer__email__icontains=search_query)
-            )
-
-        if status_filter:
-            queryset = queryset.filter(status=status_filter)
-
-        if priority_filter:
-            queryset = queryset.filter(priority=priority_filter)
-
+                Q(reference_number__icontains=query) |
+                Q(customer__company_name__icontains=query) |
+                Q(ship_to_name__icontains=query) |
+                Q(ship_to_company__icontains=query) |
+                Q(ship_to_city__icontains=query) |
+                Q(carrier__icontains=query)
+            ).distinct()
+        
         return queryset
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['status_choices'] = Order.STATUS_CHOICES
-        context['priority_choices'] = Order.PRIORITY_CHOICES
-        context['search_query'] = self.request.GET.get('search', '')
-        context['status_filter'] = self.request.GET.get('status', '')
-        context['priority_filter'] = self.request.GET.get('priority', '')
-        return context
-
-class OrderCreateView(LoginRequiredMixin, CreateView):
-    model = Order
-    form_class = OrderForm
-    template_name = 'orders/order_form.html'
-    success_url = reverse_lazy('orders:order_list')
-
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        messages.success(self.request, 'Order created successfully.')
-        return response
-
-    def form_invalid(self, form):
-        messages.error(self.request, 'Please correct the errors below.')
-        return super().form_invalid(form)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['title'] = 'Create New Order'
-        return context
-
-class OrderUpdateView(LoginRequiredMixin, UpdateView):
-    model = Order
-    form_class = OrderForm
-    template_name = 'orders/order_form.html'
-    success_url = reverse_lazy('orders:order_list')
-
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        messages.success(self.request, f'Order #{self.object.transaction_id} updated successfully.')
-        return response
-
-    def form_invalid(self, form):
-        messages.error(self.request, 'Please correct the errors below.')
-        return super().form_invalid(form)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['title'] = f'Edit Order #{self.object.transaction_id}'
-        return context
-
-class OrderDetailView(LoginRequiredMixin, DetailView):
-    model = Order
-    template_name = 'orders/order_detail.html'
-    context_object_name = 'order'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['title'] = f'Order #{self.object.transaction_id}'
-        return context
-
-class OrderDeleteView(LoginRequiredMixin, DeleteView):
-    model = Order
-    template_name = 'orders/order_confirm_delete.html'
-    success_url = reverse_lazy('orders:order_list')
-    context_object_name = 'order'
-
-    def delete(self, request, *args, **kwargs):
-        order = self.get_object()
-        messages.success(request, f'Order #{order.transaction_id} has been deleted.')
-        return super().delete(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['title'] = f'Delete Order #{self.object.transaction_id}'
-        return context
-
-
-class OrderDownloadView(LoginRequiredMixin, View):
-    def get(self, request, *args, **kwargs):
-        # Create the HttpResponse object with CSV header
-        response = HttpResponse(
-            content_type='text/csv',
-            headers={'Content-Disposition': 'attachment; filename="orders.csv"'},
-        )
-
-        # Get filtered queryset if any filters are applied
-        queryset = Order.objects.all()
-        search_query = request.GET.get('search')
-        status_filter = request.GET.get('status')
-        priority_filter = request.GET.get('priority')
-
-        if search_query:
-            queryset = queryset.filter(
-                Q(transaction_id__icontains=search_query) |
-                Q(customer__name__icontains=search_query) |
-                Q(customer__email__icontains=search_query)
-            )
-
-        if status_filter:
-            queryset = queryset.filter(status=status_filter)
-
-        if priority_filter:
-            queryset = queryset.filter(priority=priority_filter)
-
-        # Create the CSV writer
-        writer = csv.writer(response)
-
-        # Write the header row
-        writer.writerow([
-            'Transaction ID',
-            'Customer',
-            'close_date',
-            'Status',
-            'Priority',
-
-        ])
-
-        # Write the data rows
-        for order in queryset:
-            writer.writerow([
-                order.transaction_id,
-                str(order.customer),
-                order.close_date,
-                #order.get_status_display(),
-                #order.get_priority_display(),
-
-           ])
-
-        return response

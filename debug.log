@@ -40128,3 +40128,301 @@ INFO 2025-01-22 00:17:53,658 system Initialized component: context_manager
 INFO 2025-01-22 00:17:53,721 system Initialized component: code_generator
 INFO 2025-01-22 00:17:53,721 system AI System initialized successfully
 INFO 2025-01-22 00:17:53,745 autoreload Watching for file changes with StatReloader
+INFO 2025-01-22 15:37:29,550 autoreload Watching for file changes with StatReloader
+WARNING 2025-01-22 15:39:07,479 signals Celery tasks not available. Feature implementation will be synchronous.
+INFO 2025-01-22 15:39:07,480 system Loaded component: project_analyzer
+INFO 2025-01-22 15:39:07,480 system Loaded component: context_manager
+INFO 2025-01-22 15:39:07,480 system Loaded component: code_generator
+INFO 2025-01-22 15:39:07,481 system Initialized component: project_analyzer
+INFO 2025-01-22 15:39:07,481 system Initialized component: context_manager
+INFO 2025-01-22 15:39:07,616 system Initialized component: code_generator
+INFO 2025-01-22 15:39:07,616 system AI System initialized successfully
+WARNING 2025-01-22 15:39:08,542 signals Celery tasks not available. Feature implementation will be synchronous.
+INFO 2025-01-22 15:39:08,543 system Loaded component: project_analyzer
+INFO 2025-01-22 15:39:08,543 system Loaded component: context_manager
+INFO 2025-01-22 15:39:08,543 system Loaded component: code_generator
+INFO 2025-01-22 15:39:08,544 system Initialized component: project_analyzer
+INFO 2025-01-22 15:39:08,544 system Initialized component: context_manager
+INFO 2025-01-22 15:39:08,633 system Initialized component: code_generator
+INFO 2025-01-22 15:39:08,634 system AI System initialized successfully
+INFO 2025-01-22 15:39:08,667 autoreload Watching for file changes with StatReloader
+WARNING 2025-01-22 15:46:30,253 log Forbidden: /services/api/
+WARNING 2025-01-22 15:46:30,474 log Not Found: /favicon.ico
+WARNING 2025-01-22 15:46:39,510 log Forbidden: /services/api/
+INFO 2025-01-22 15:51:36,628 autoreload C:\Users\Hassan\PycharmProjects\LedgerLink\services\views.py changed, reloading.
+WARNING 2025-01-22 15:51:38,272 signals Celery tasks not available. Feature implementation will be synchronous.
+INFO 2025-01-22 15:51:38,273 system Loaded component: project_analyzer
+INFO 2025-01-22 15:51:38,273 system Loaded component: context_manager
+INFO 2025-01-22 15:51:38,273 system Loaded component: code_generator
+INFO 2025-01-22 15:51:38,274 system Initialized component: project_analyzer
+INFO 2025-01-22 15:51:38,274 system Initialized component: context_manager
+INFO 2025-01-22 15:51:38,383 system Initialized component: code_generator
+INFO 2025-01-22 15:51:38,383 system AI System initialized successfully
+INFO 2025-01-22 15:51:38,426 autoreload Watching for file changes with StatReloader
+INFO 2025-01-22 15:51:46,700 autoreload C:\Users\Hassan\PycharmProjects\LedgerLink\services\views.py changed, reloading.
+WARNING 2025-01-22 15:51:48,202 signals Celery tasks not available. Feature implementation will be synchronous.
+INFO 2025-01-22 15:51:48,203 system Loaded component: project_analyzer
+INFO 2025-01-22 15:51:48,203 system Loaded component: context_manager
+INFO 2025-01-22 15:51:48,203 system Loaded component: code_generator
+INFO 2025-01-22 15:51:48,204 system Initialized component: project_analyzer
+INFO 2025-01-22 15:51:48,205 system Initialized component: context_manager
+INFO 2025-01-22 15:51:48,308 system Initialized component: code_generator
+INFO 2025-01-22 15:51:48,309 system AI System initialized successfully
+INFO 2025-01-22 15:51:48,351 autoreload Watching for file changes with StatReloader
+WARNING 2025-01-22 15:52:13,213 signals Celery tasks not available. Feature implementation will be synchronous.
+INFO 2025-01-22 15:52:13,214 system Loaded component: project_analyzer
+INFO 2025-01-22 15:52:13,214 system Loaded component: context_manager
+INFO 2025-01-22 15:52:13,214 system Loaded component: code_generator
+INFO 2025-01-22 15:52:13,214 system Initialized component: project_analyzer
+INFO 2025-01-22 15:52:13,215 system Initialized component: context_manager
+INFO 2025-01-22 15:52:13,302 system Initialized component: code_generator
+INFO 2025-01-22 15:52:13,302 system AI System initialized successfully
+WARNING 2025-01-22 15:52:14,200 signals Celery tasks not available. Feature implementation will be synchronous.
+INFO 2025-01-22 15:52:14,201 system Loaded component: project_analyzer
+INFO 2025-01-22 15:52:14,201 system Loaded component: context_manager
+INFO 2025-01-22 15:52:14,201 system Loaded component: code_generator
+INFO 2025-01-22 15:52:14,201 system Initialized component: project_analyzer
+INFO 2025-01-22 15:52:14,201 system Initialized component: context_manager
+INFO 2025-01-22 15:52:14,300 system Initialized component: code_generator
+INFO 2025-01-22 15:52:14,300 system AI System initialized successfully
+INFO 2025-01-22 15:52:14,332 autoreload Watching for file changes with StatReloader
+INFO 2025-01-22 15:58:29,960 autoreload C:\Users\Hassan\PycharmProjects\LedgerLink\customer_services\views.py changed, reloading.
+WARNING 2025-01-22 15:58:31,140 signals Celery tasks not available. Feature implementation will be synchronous.
+INFO 2025-01-22 15:58:31,141 system Loaded component: project_analyzer
+INFO 2025-01-22 15:58:31,141 system Loaded component: context_manager
+INFO 2025-01-22 15:58:31,142 system Loaded component: code_generator
+INFO 2025-01-22 15:58:31,142 system Initialized component: project_analyzer
+INFO 2025-01-22 15:58:31,142 system Initialized component: context_manager
+INFO 2025-01-22 15:58:31,220 system Initialized component: code_generator
+INFO 2025-01-22 15:58:31,221 system AI System initialized successfully
+INFO 2025-01-22 15:58:31,251 autoreload Watching for file changes with StatReloader
+INFO 2025-01-22 15:58:58,355 autoreload C:\Users\Hassan\PycharmProjects\LedgerLink\customer_services\urls.py changed, reloading.
+WARNING 2025-01-22 15:58:59,445 signals Celery tasks not available. Feature implementation will be synchronous.
+INFO 2025-01-22 15:58:59,446 system Loaded component: project_analyzer
+INFO 2025-01-22 15:58:59,446 system Loaded component: context_manager
+INFO 2025-01-22 15:58:59,446 system Loaded component: code_generator
+INFO 2025-01-22 15:58:59,447 system Initialized component: project_analyzer
+INFO 2025-01-22 15:58:59,447 system Initialized component: context_manager
+INFO 2025-01-22 15:58:59,528 system Initialized component: code_generator
+INFO 2025-01-22 15:58:59,528 system AI System initialized successfully
+INFO 2025-01-22 15:58:59,558 autoreload Watching for file changes with StatReloader
+INFO 2025-01-22 16:21:32,813 autoreload C:\Users\Hassan\PycharmProjects\LedgerLink\orders\views.py changed, reloading.
+WARNING 2025-01-22 16:21:34,541 signals Celery tasks not available. Feature implementation will be synchronous.
+INFO 2025-01-22 16:21:34,542 system Loaded component: project_analyzer
+INFO 2025-01-22 16:21:34,543 system Loaded component: context_manager
+INFO 2025-01-22 16:21:34,543 system Loaded component: code_generator
+INFO 2025-01-22 16:21:34,543 system Initialized component: project_analyzer
+INFO 2025-01-22 16:21:34,543 system Initialized component: context_manager
+INFO 2025-01-22 16:21:34,649 system Initialized component: code_generator
+INFO 2025-01-22 16:21:34,650 system AI System initialized successfully
+INFO 2025-01-22 16:21:34,691 autoreload Watching for file changes with StatReloader
+INFO 2025-01-22 16:21:58,456 autoreload C:\Users\Hassan\PycharmProjects\LedgerLink\orders\urls.py changed, reloading.
+WARNING 2025-01-22 16:21:59,968 signals Celery tasks not available. Feature implementation will be synchronous.
+INFO 2025-01-22 16:21:59,969 system Loaded component: project_analyzer
+INFO 2025-01-22 16:21:59,969 system Loaded component: context_manager
+INFO 2025-01-22 16:21:59,969 system Loaded component: code_generator
+INFO 2025-01-22 16:21:59,970 system Initialized component: project_analyzer
+INFO 2025-01-22 16:21:59,970 system Initialized component: context_manager
+INFO 2025-01-22 16:22:00,073 system Initialized component: code_generator
+INFO 2025-01-22 16:22:00,073 system AI System initialized successfully
+INFO 2025-01-22 16:22:00,111 autoreload Watching for file changes with StatReloader
+WARNING 2025-01-22 18:35:39,427 log Not Found: /products/api/
+WARNING 2025-01-22 18:35:40,441 log Not Found: /products/api/
+WARNING 2025-01-22 18:35:42,460 log Not Found: /products/api/
+WARNING 2025-01-22 18:35:46,484 log Not Found: /products/api/
+INFO 2025-01-22 18:36:54,364 autoreload C:\Users\Hassan\PycharmProjects\LedgerLink\products\models.py changed, reloading.
+WARNING 2025-01-22 18:36:55,811 signals Celery tasks not available. Feature implementation will be synchronous.
+INFO 2025-01-22 18:36:55,812 system Loaded component: project_analyzer
+INFO 2025-01-22 18:36:55,812 system Loaded component: context_manager
+INFO 2025-01-22 18:36:55,812 system Loaded component: code_generator
+INFO 2025-01-22 18:36:55,813 system Initialized component: project_analyzer
+INFO 2025-01-22 18:36:55,813 system Initialized component: context_manager
+INFO 2025-01-22 18:36:55,896 system Initialized component: code_generator
+INFO 2025-01-22 18:36:55,896 system AI System initialized successfully
+INFO 2025-01-22 18:36:55,929 autoreload Watching for file changes with StatReloader
+INFO 2025-01-22 18:38:20,571 autoreload C:\Users\Hassan\PycharmProjects\LedgerLink\products\apps.py changed, reloading.
+WARNING 2025-01-22 18:38:21,755 signals Celery tasks not available. Feature implementation will be synchronous.
+INFO 2025-01-22 18:38:21,756 system Loaded component: project_analyzer
+INFO 2025-01-22 18:38:21,756 system Loaded component: context_manager
+INFO 2025-01-22 18:38:21,756 system Loaded component: code_generator
+INFO 2025-01-22 18:38:21,756 system Initialized component: project_analyzer
+INFO 2025-01-22 18:38:21,757 system Initialized component: context_manager
+INFO 2025-01-22 18:38:21,851 system Initialized component: code_generator
+INFO 2025-01-22 18:38:21,851 system AI System initialized successfully
+INFO 2025-01-22 18:38:21,882 autoreload Watching for file changes with StatReloader
+WARNING 2025-01-22 18:38:52,946 signals Celery tasks not available. Feature implementation will be synchronous.
+INFO 2025-01-22 18:38:52,946 system Loaded component: project_analyzer
+INFO 2025-01-22 18:38:52,947 system Loaded component: context_manager
+INFO 2025-01-22 18:38:52,947 system Loaded component: code_generator
+INFO 2025-01-22 18:38:52,947 system Initialized component: project_analyzer
+INFO 2025-01-22 18:38:52,947 system Initialized component: context_manager
+INFO 2025-01-22 18:38:53,036 system Initialized component: code_generator
+INFO 2025-01-22 18:38:53,036 system AI System initialized successfully
+INFO 2025-01-22 18:39:00,469 autoreload C:\Users\Hassan\PycharmProjects\LedgerLink\products\models.py changed, reloading.
+WARNING 2025-01-22 18:39:01,917 signals Celery tasks not available. Feature implementation will be synchronous.
+INFO 2025-01-22 18:39:01,918 system Loaded component: project_analyzer
+INFO 2025-01-22 18:39:01,918 system Loaded component: context_manager
+INFO 2025-01-22 18:39:01,919 system Loaded component: code_generator
+INFO 2025-01-22 18:39:01,919 system Initialized component: project_analyzer
+INFO 2025-01-22 18:39:01,919 system Initialized component: context_manager
+INFO 2025-01-22 18:39:02,026 system Initialized component: code_generator
+INFO 2025-01-22 18:39:02,027 system AI System initialized successfully
+INFO 2025-01-22 18:39:02,067 autoreload Watching for file changes with StatReloader
+INFO 2025-01-22 18:39:06,044 autoreload C:\Users\Hassan\PycharmProjects\LedgerLink\products\admin.py changed, reloading.
+WARNING 2025-01-22 18:39:07,420 signals Celery tasks not available. Feature implementation will be synchronous.
+INFO 2025-01-22 18:39:07,421 system Loaded component: project_analyzer
+INFO 2025-01-22 18:39:07,421 system Loaded component: context_manager
+INFO 2025-01-22 18:39:07,422 system Loaded component: code_generator
+INFO 2025-01-22 18:39:07,422 system Initialized component: project_analyzer
+INFO 2025-01-22 18:39:07,422 system Initialized component: context_manager
+INFO 2025-01-22 18:39:07,513 system Initialized component: code_generator
+INFO 2025-01-22 18:39:07,514 system AI System initialized successfully
+INFO 2025-01-22 18:39:07,548 autoreload Watching for file changes with StatReloader
+WARNING 2025-01-22 18:39:38,625 signals Celery tasks not available. Feature implementation will be synchronous.
+INFO 2025-01-22 18:39:38,626 system Loaded component: project_analyzer
+INFO 2025-01-22 18:39:38,627 system Loaded component: context_manager
+INFO 2025-01-22 18:39:38,627 system Loaded component: code_generator
+INFO 2025-01-22 18:39:38,627 system Initialized component: project_analyzer
+INFO 2025-01-22 18:39:38,627 system Initialized component: context_manager
+INFO 2025-01-22 18:39:38,732 system Initialized component: code_generator
+INFO 2025-01-22 18:39:38,732 system AI System initialized successfully
+WARNING 2025-01-22 18:39:41,303 signals Celery tasks not available. Feature implementation will be synchronous.
+INFO 2025-01-22 18:39:41,305 system Loaded component: project_analyzer
+INFO 2025-01-22 18:39:41,305 system Loaded component: context_manager
+INFO 2025-01-22 18:39:41,305 system Loaded component: code_generator
+INFO 2025-01-22 18:39:41,306 system Initialized component: project_analyzer
+INFO 2025-01-22 18:39:41,306 system Initialized component: context_manager
+INFO 2025-01-22 18:39:41,423 system Initialized component: code_generator
+INFO 2025-01-22 18:39:41,423 system AI System initialized successfully
+WARNING 2025-01-22 18:40:20,102 signals Celery tasks not available. Feature implementation will be synchronous.
+INFO 2025-01-22 18:40:20,103 system Loaded component: project_analyzer
+INFO 2025-01-22 18:40:20,104 system Loaded component: context_manager
+INFO 2025-01-22 18:40:20,104 system Loaded component: code_generator
+INFO 2025-01-22 18:40:20,104 system Initialized component: project_analyzer
+INFO 2025-01-22 18:40:20,104 system Initialized component: context_manager
+INFO 2025-01-22 18:40:20,214 system Initialized component: code_generator
+INFO 2025-01-22 18:40:20,214 system AI System initialized successfully
+INFO 2025-01-22 18:40:52,250 autoreload C:\Users\Hassan\PycharmProjects\LedgerLink\products\models.py changed, reloading.
+WARNING 2025-01-22 18:40:53,455 signals Celery tasks not available. Feature implementation will be synchronous.
+INFO 2025-01-22 18:40:53,455 system Loaded component: project_analyzer
+INFO 2025-01-22 18:40:53,456 system Loaded component: context_manager
+INFO 2025-01-22 18:40:53,456 system Loaded component: code_generator
+INFO 2025-01-22 18:40:53,457 system Initialized component: project_analyzer
+INFO 2025-01-22 18:40:53,457 system Initialized component: context_manager
+INFO 2025-01-22 18:40:53,547 system Initialized component: code_generator
+INFO 2025-01-22 18:40:53,547 system AI System initialized successfully
+INFO 2025-01-22 18:40:53,581 autoreload Watching for file changes with StatReloader
+WARNING 2025-01-22 18:41:02,043 signals Celery tasks not available. Feature implementation will be synchronous.
+INFO 2025-01-22 18:41:02,045 system Loaded component: project_analyzer
+INFO 2025-01-22 18:41:02,045 system Loaded component: context_manager
+INFO 2025-01-22 18:41:02,045 system Loaded component: code_generator
+INFO 2025-01-22 18:41:02,046 system Initialized component: project_analyzer
+INFO 2025-01-22 18:41:02,046 system Initialized component: context_manager
+INFO 2025-01-22 18:41:02,135 system Initialized component: code_generator
+INFO 2025-01-22 18:41:02,136 system AI System initialized successfully
+WARNING 2025-01-22 18:41:05,059 signals Celery tasks not available. Feature implementation will be synchronous.
+INFO 2025-01-22 18:41:05,061 system Loaded component: project_analyzer
+INFO 2025-01-22 18:41:05,061 system Loaded component: context_manager
+INFO 2025-01-22 18:41:05,062 system Loaded component: code_generator
+INFO 2025-01-22 18:41:05,062 system Initialized component: project_analyzer
+INFO 2025-01-22 18:41:05,063 system Initialized component: context_manager
+INFO 2025-01-22 18:41:05,213 system Initialized component: code_generator
+INFO 2025-01-22 18:41:05,214 system AI System initialized successfully
+WARNING 2025-01-22 18:41:36,154 signals Celery tasks not available. Feature implementation will be synchronous.
+INFO 2025-01-22 18:41:36,155 system Loaded component: project_analyzer
+INFO 2025-01-22 18:41:36,156 system Loaded component: context_manager
+INFO 2025-01-22 18:41:36,156 system Loaded component: code_generator
+INFO 2025-01-22 18:41:36,156 system Initialized component: project_analyzer
+INFO 2025-01-22 18:41:36,156 system Initialized component: context_manager
+INFO 2025-01-22 18:41:36,268 system Initialized component: code_generator
+INFO 2025-01-22 18:41:36,268 system AI System initialized successfully
+INFO 2025-01-22 18:46:33,939 autoreload C:\Users\Hassan\PycharmProjects\LedgerLink\products\models.py changed, reloading.
+WARNING 2025-01-22 18:46:35,327 signals Celery tasks not available. Feature implementation will be synchronous.
+INFO 2025-01-22 18:46:35,328 system Loaded component: project_analyzer
+INFO 2025-01-22 18:46:35,328 system Loaded component: context_manager
+INFO 2025-01-22 18:46:35,329 system Loaded component: code_generator
+INFO 2025-01-22 18:46:35,329 system Initialized component: project_analyzer
+INFO 2025-01-22 18:46:35,330 system Initialized component: context_manager
+INFO 2025-01-22 18:46:35,426 system Initialized component: code_generator
+INFO 2025-01-22 18:46:35,426 system AI System initialized successfully
+INFO 2025-01-22 18:46:35,462 autoreload Watching for file changes with StatReloader
+INFO 2025-01-22 18:47:33,756 autoreload C:\Users\Hassan\PycharmProjects\LedgerLink\products\models.py changed, reloading.
+WARNING 2025-01-22 18:47:34,912 signals Celery tasks not available. Feature implementation will be synchronous.
+INFO 2025-01-22 18:47:34,913 system Loaded component: project_analyzer
+INFO 2025-01-22 18:47:34,913 system Loaded component: context_manager
+INFO 2025-01-22 18:47:34,914 system Loaded component: code_generator
+INFO 2025-01-22 18:47:34,914 system Initialized component: project_analyzer
+INFO 2025-01-22 18:47:34,914 system Initialized component: context_manager
+INFO 2025-01-22 18:47:35,009 system Initialized component: code_generator
+INFO 2025-01-22 18:47:35,009 system AI System initialized successfully
+INFO 2025-01-22 18:47:35,047 autoreload Watching for file changes with StatReloader
+INFO 2025-01-22 18:47:56,742 autoreload C:\Users\Hassan\PycharmProjects\LedgerLink\products\models.py changed, reloading.
+WARNING 2025-01-22 18:47:57,806 signals Celery tasks not available. Feature implementation will be synchronous.
+INFO 2025-01-22 18:47:57,807 system Loaded component: project_analyzer
+INFO 2025-01-22 18:47:57,807 system Loaded component: context_manager
+INFO 2025-01-22 18:47:57,808 system Loaded component: code_generator
+INFO 2025-01-22 18:47:57,808 system Initialized component: project_analyzer
+INFO 2025-01-22 18:47:57,808 system Initialized component: context_manager
+INFO 2025-01-22 18:47:57,888 system Initialized component: code_generator
+INFO 2025-01-22 18:47:57,889 system AI System initialized successfully
+INFO 2025-01-22 18:47:57,919 autoreload Watching for file changes with StatReloader
+INFO 2025-01-22 18:48:08,289 autoreload C:\Users\Hassan\PycharmProjects\LedgerLink\products\apps.py changed, reloading.
+WARNING 2025-01-22 18:48:09,385 signals Celery tasks not available. Feature implementation will be synchronous.
+INFO 2025-01-22 18:48:09,386 system Loaded component: project_analyzer
+INFO 2025-01-22 18:48:09,386 system Loaded component: context_manager
+INFO 2025-01-22 18:48:09,386 system Loaded component: code_generator
+INFO 2025-01-22 18:48:09,386 system Initialized component: project_analyzer
+INFO 2025-01-22 18:48:09,386 system Initialized component: context_manager
+INFO 2025-01-22 18:48:09,471 system Initialized component: code_generator
+INFO 2025-01-22 18:48:09,471 system AI System initialized successfully
+INFO 2025-01-22 18:48:09,502 autoreload Watching for file changes with StatReloader
+INFO 2025-01-22 18:48:18,925 autoreload C:\Users\Hassan\PycharmProjects\LedgerLink\products\admin.py changed, reloading.
+WARNING 2025-01-22 18:48:20,477 signals Celery tasks not available. Feature implementation will be synchronous.
+INFO 2025-01-22 18:48:20,478 system Loaded component: project_analyzer
+INFO 2025-01-22 18:48:20,478 system Loaded component: context_manager
+INFO 2025-01-22 18:48:20,478 system Loaded component: code_generator
+INFO 2025-01-22 18:48:20,479 system Initialized component: project_analyzer
+INFO 2025-01-22 18:48:20,479 system Initialized component: context_manager
+INFO 2025-01-22 18:48:20,612 system Initialized component: code_generator
+INFO 2025-01-22 18:48:20,612 system AI System initialized successfully
+INFO 2025-01-22 18:48:20,661 autoreload Watching for file changes with StatReloader
+INFO 2025-01-22 18:48:29,868 autoreload C:\Users\Hassan\PycharmProjects\LedgerLink\products\urls.py changed, reloading.
+WARNING 2025-01-22 18:48:31,263 signals Celery tasks not available. Feature implementation will be synchronous.
+INFO 2025-01-22 18:48:31,264 system Loaded component: project_analyzer
+INFO 2025-01-22 18:48:31,265 system Loaded component: context_manager
+INFO 2025-01-22 18:48:31,265 system Loaded component: code_generator
+INFO 2025-01-22 18:48:31,266 system Initialized component: project_analyzer
+INFO 2025-01-22 18:48:31,266 system Initialized component: context_manager
+INFO 2025-01-22 18:48:31,369 system Initialized component: code_generator
+INFO 2025-01-22 18:48:31,369 system AI System initialized successfully
+INFO 2025-01-22 18:48:31,409 autoreload Watching for file changes with StatReloader
+INFO 2025-01-22 18:50:33,199 autoreload C:\Users\Hassan\PycharmProjects\LedgerLink\products\views.py changed, reloading.
+WARNING 2025-01-22 18:50:34,435 signals Celery tasks not available. Feature implementation will be synchronous.
+INFO 2025-01-22 18:50:34,435 system Loaded component: project_analyzer
+INFO 2025-01-22 18:50:34,436 system Loaded component: context_manager
+INFO 2025-01-22 18:50:34,436 system Loaded component: code_generator
+INFO 2025-01-22 18:50:34,436 system Initialized component: project_analyzer
+INFO 2025-01-22 18:50:34,437 system Initialized component: context_manager
+INFO 2025-01-22 18:50:34,550 system Initialized component: code_generator
+INFO 2025-01-22 18:50:34,550 system AI System initialized successfully
+INFO 2025-01-22 18:50:34,588 autoreload Watching for file changes with StatReloader
+WARNING 2025-01-22 18:54:45,147 signals Celery tasks not available. Feature implementation will be synchronous.
+INFO 2025-01-22 18:54:45,148 system Loaded component: project_analyzer
+INFO 2025-01-22 18:54:45,148 system Loaded component: context_manager
+INFO 2025-01-22 18:54:45,149 system Loaded component: code_generator
+INFO 2025-01-22 18:54:45,149 system Initialized component: project_analyzer
+INFO 2025-01-22 18:54:45,149 system Initialized component: context_manager
+INFO 2025-01-22 18:54:45,236 system Initialized component: code_generator
+INFO 2025-01-22 18:54:45,237 system AI System initialized successfully
+WARNING 2025-01-22 18:54:46,141 signals Celery tasks not available. Feature implementation will be synchronous.
+INFO 2025-01-22 18:54:46,142 system Loaded component: project_analyzer
+INFO 2025-01-22 18:54:46,142 system Loaded component: context_manager
+INFO 2025-01-22 18:54:46,143 system Loaded component: code_generator
+INFO 2025-01-22 18:54:46,143 system Initialized component: project_analyzer
+INFO 2025-01-22 18:54:46,143 system Initialized component: context_manager
+INFO 2025-01-22 18:54:46,231 system Initialized component: code_generator
+INFO 2025-01-22 18:54:46,231 system AI System initialized successfully
+INFO 2025-01-22 18:54:46,265 autoreload Watching for file changes with StatReloader
+WARNING 2025-01-22 18:55:26,883 log Not Found: /products/api/
+WARNING 2025-01-22 18:55:27,896 log Not Found: /products/api/
+WARNING 2025-01-22 18:55:29,910 log Not Found: /products/api/
