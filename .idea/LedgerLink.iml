@@ -31,7 +31,6 @@
     <orderEntry type="library" name="jquery.dataTables" level="application" />
     <orderEntry type="library" name="select2" level="application" />
     <orderEntry type="library" name="dataTables.tailwind" level="application" />
-    <orderEntry type="module" module-name="LedgerLink_client" />
   </component>
   <component name="PackageRequirementsSettings">
     <option name="versionSpecifier" value="Greater or equal (&gt;=x.y.z)" />

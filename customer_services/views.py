@@ -1,31 +1,157 @@
-# customer_services/views.py
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib import messages
 from django.http import JsonResponse
 from django.db.models import Q, Count
 from django.core.exceptions import ValidationError
-from rest_framework import viewsets, filters
-from rest_framework.permissions import AllowAny
-from django_filters import rest_framework as django_filters
 from products.models import Product
 from services.models import Service
 from customers.models import Customer
 from .models import CustomerService
 from .forms import CustomerServiceForm
-from .serializers import CustomerServiceSerializer
 
-# Keep existing template-based views
+
 class CustomerServiceListView(ListView):
     model = CustomerService
     template_name = 'customer_services/customer_service_list.html'
     context_object_name = 'customer_services'
     paginate_by = 10
 
+    # Define default columns
+    COLUMN_DEFINITIONS = {
+        'customer__company_name': {
+            'label': 'Customer',
+            'type': 'text',
+            'sortable': True,
+            'default_visible': True
+        },
+        'service__service_name': {
+            'label': 'Service',
+            'type': 'text',
+            'sortable': True,
+            'default_visible': True
+        },
+        'unit_price': {
+            'label': 'Unit Price',
+            'type': 'decimal',
+            'sortable': True,
+            'default_visible': True
+        },
+        'skus__count': {
+            'label': 'SKUs',
+            'type': 'number',
+            'sortable': False,
+            'default_visible': True
+        },
+        'created_at': {
+            'label': 'Created',
+            'type': 'datetime',
+            'sortable': True,
+            'default_visible': True
+        },
+        'updated_at': {
+            'label': 'Updated',
+            'type': 'datetime',
+            'sortable': True,
+            'default_visible': False
+        }
+    }
+
+    def get_queryset(self):
+        queryset = CustomerService.objects.select_related(
+            'customer', 'service'
+        ).prefetch_related('skus')
+
+        # Apply search if provided
+        search_query = self.request.GET.get('q')
+        if search_query:
+            queryset = queryset.filter(
+                Q(customer__company_name__icontains=search_query) |
+                Q(service__service_name__icontains=search_query) |
+                Q(skus__sku__icontains=search_query)
+            ).distinct()
+
+        # Apply customer filter
+        customer_id = self.request.GET.get('customer')
+        if customer_id:
+            queryset = queryset.filter(customer_id=customer_id)
+
+        # Apply service filter
+        service_id = self.request.GET.get('service')
+        if service_id:
+            queryset = queryset.filter(service_id=service_id)
+
+        # Apply sorting
+        sort_field = self.request.GET.get('sort')
+        sort_direction = self.request.GET.get('direction', 'asc')
+
+        if sort_field and sort_field in self.COLUMN_DEFINITIONS:
+            if sort_direction == 'desc':
+                sort_field = f'-{sort_field}'
+            queryset = queryset.order_by(sort_field)
+        else:
+            # Default sorting
+            queryset = queryset.order_by('-created_at')
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Add customers and services for filters
+        context['customers'] = Customer.objects.all().order_by('company_name')
+        context['services'] = Service.objects.all().order_by('service_name')
+
+        # Add column definitions
+        context['columns'] = self.COLUMN_DEFINITIONS
+
+        # Get selected columns or use defaults
+        selected_columns = self.request.GET.getlist('columns')
+        if not selected_columns:
+            selected_columns = [
+                col for col, props in self.COLUMN_DEFINITIONS.items()
+                if props.get('default_visible', False)
+            ]
+        context['selected_columns'] = selected_columns
+
+        # Add current filters
+        context['current_filters'] = []
+
+        # Add sorting information
+        context['current_sort'] = {
+            'field': self.request.GET.get('sort', ''),
+            'direction': self.request.GET.get('direction', 'asc')
+        }
+
+        return context
+
+
 class CustomerServiceDetailView(DetailView):
     model = CustomerService
     template_name = 'customer_services/customer_service_detail.html'
     context_object_name = 'customer_service'
+
+    def get_queryset(self):
+        return CustomerService.objects.select_related(
+            'customer', 'service'
+        ).prefetch_related('skus')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        customer_service = self.get_object()
+
+        # Add billing information flag if service is used in billing
+        context['billing_info'] = False  # You can implement actual billing check logic here
+
+        # Add SKU statistics without the active filter
+        context['sku_stats'] = {
+            'total': customer_service.skus.count(),
+            # Remove the active filter since the field doesn't exist
+            # 'active': customer_service.skus.filter(active=True).count(),
+        }
+
+        return context
+
 
 class CustomerServiceCreateView(CreateView):
     model = CustomerService
@@ -33,9 +159,21 @@ class CustomerServiceCreateView(CreateView):
     template_name = 'customer_services/customer_service_form.html'
     success_url = reverse_lazy('customer_services:customer_service_list')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['customers'] = Customer.objects.all().order_by('company_name')
+        context['services'] = Service.objects.all().order_by('service_name')
+        return context
+
     def form_valid(self, form):
-        messages.success(self.request, 'Customer Service created successfully.')
-        return super().form_valid(form)
+        try:
+            response = super().form_valid(form)
+            messages.success(self.request, 'Customer Service created successfully.')
+            return response
+        except ValidationError as e:
+            form.add_error(None, e)
+            return self.form_invalid(form)
+
 
 class CustomerServiceUpdateView(UpdateView):
     model = CustomerService
@@ -43,18 +181,42 @@ class CustomerServiceUpdateView(UpdateView):
     template_name = 'customer_services/customer_service_form.html'
     success_url = reverse_lazy('customer_services:customer_service_list')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['customers'] = Customer.objects.all().order_by('company_name')
+        context['services'] = Service.objects.all().order_by('service_name')
+        return context
+
     def form_valid(self, form):
-        messages.success(self.request, 'Customer Service updated successfully.')
-        return super().form_valid(form)
+        try:
+            response = super().form_valid(form)
+            messages.success(self.request, 'Customer Service updated successfully.')
+            return response
+        except ValidationError as e:
+            form.add_error(None, e)
+            return self.form_invalid(form)
+
 
 class CustomerServiceDeleteView(DeleteView):
     model = CustomerService
     template_name = 'customer_services/customer_service_confirm_delete.html'
     success_url = reverse_lazy('customer_services:customer_service_list')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Add billing information flag if service is used in billing
+        context['billing_info'] = False  # You can implement actual billing check logic here
+        return context
+
     def delete(self, request, *args, **kwargs):
-        messages.success(self.request, 'Customer Service deleted successfully.')
-        return super().delete(request, *args, **kwargs)
+        try:
+            response = super().delete(request, *args, **kwargs)
+            messages.success(self.request, 'Customer Service deleted successfully.')
+            return response
+        except Exception as e:
+            messages.error(self.request, f'Error deleting customer service: {str(e)}')
+            return self.get(request, *args, **kwargs)
+
 
 def get_customer_skus(request, customer_id):
     """API endpoint to get SKUs for a specific customer."""
@@ -70,91 +232,48 @@ def get_customer_skus(request, customer_id):
             status=400
         )
 
-# Add new API views
-class CustomerServiceFilter(django_filters.FilterSet):
-    """Filter set for advanced customer service filtering."""
-    customer = django_filters.ModelChoiceFilter(queryset=Customer.objects.all())
-    service = django_filters.ModelChoiceFilter(queryset=Service.objects.all())
-    unit_price_min = django_filters.NumberFilter(field_name='unit_price', lookup_expr='gte')
-    unit_price_max = django_filters.NumberFilter(field_name='unit_price', lookup_expr='lte')
-    created_after = django_filters.DateTimeFilter(field_name='created_at', lookup_expr='gte')
-    created_before = django_filters.DateTimeFilter(field_name='created_at', lookup_expr='lte')
-    updated_after = django_filters.DateTimeFilter(field_name='updated_at', lookup_expr='gte')
-    updated_before = django_filters.DateTimeFilter(field_name='updated_at', lookup_expr='lte')
-    has_skus = django_filters.BooleanFilter(method='filter_has_skus')
 
-    class Meta:
-        model = CustomerService
-        fields = ['customer', 'service']
-
-    def filter_has_skus(self, queryset, name, value):
-        """Filter services based on whether they have SKUs assigned."""
-        if value:
-            return queryset.annotate(sku_count=Count('skus')).filter(sku_count__gt=0)
-        return queryset.annotate(sku_count=Count('skus')).filter(sku_count=0)
-
-class CustomerServiceViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint for customer services with advanced filtering, searching, and sorting.
-    
-    Filter parameters:
-    - customer: Filter by customer ID
-    - service: Filter by service ID
-    - unit_price_min: Filter by minimum unit price
-    - unit_price_max: Filter by maximum unit price
-    - created_after: Filter by creation date (greater than or equal)
-    - created_before: Filter by creation date (less than or equal)
-    - updated_after: Filter by update date (greater than or equal)
-    - updated_before: Filter by update date (less than or equal)
-    - has_skus: Filter by whether the service has SKUs assigned
-    
-    Search:
-    - Searches across customer and service names
-    
-    Sorting:
-    - Sort by any field using the ordering parameter
-    - Prefix with '-' for descending order
-    Example: ?ordering=-created_at
-    """
-    queryset = CustomerService.objects.select_related(
-        'customer', 'service'
-    ).prefetch_related('skus')
-    serializer_class = CustomerServiceSerializer
-    permission_classes = [AllowAny]
-    filterset_class = CustomerServiceFilter
-    filter_backends = [
-        django_filters.DjangoFilterBackend,
-        filters.SearchFilter,
-        filters.OrderingFilter,
+# Filter operators for different field types
+FILTER_OPERATORS = {
+    'text': [
+        {'value': 'contains', 'label': 'Contains'},
+        {'value': 'not_contains', 'label': 'Does not contain'},
+        {'value': 'equals', 'label': 'Equals'},
+        {'value': 'not_equals', 'label': 'Does not equal'},
+        {'value': 'starts_with', 'label': 'Starts with'},
+        {'value': 'ends_with', 'label': 'Ends with'},
+        {'value': 'is_empty', 'label': 'Is empty'},
+        {'value': 'is_not_empty', 'label': 'Is not empty'}
+    ],
+    'number': [
+        {'value': 'equals', 'label': 'Equals'},
+        {'value': 'not_equals', 'label': 'Does not equal'},
+        {'value': 'greater_than', 'label': 'Greater than'},
+        {'value': 'less_than', 'label': 'Less than'},
+        {'value': 'greater_equal', 'label': 'Greater than or equal'},
+        {'value': 'less_equal', 'label': 'Less than or equal'},
+        {'value': 'between', 'label': 'Between'},
+        {'value': 'is_empty', 'label': 'Is empty'},
+        {'value': 'is_not_empty', 'label': 'Is not empty'}
+    ],
+    'decimal': [
+        {'value': 'equals', 'label': 'Equals'},
+        {'value': 'not_equals', 'label': 'Does not equal'},
+        {'value': 'greater_than', 'label': 'Greater than'},
+        {'value': 'less_than', 'label': 'Less than'},
+        {'value': 'greater_equal', 'label': 'Greater than or equal'},
+        {'value': 'less_equal', 'label': 'Less than or equal'},
+        {'value': 'between', 'label': 'Between'},
+        {'value': 'is_empty', 'label': 'Is empty'},
+        {'value': 'is_not_empty', 'label': 'Is not empty'}
+    ],
+    'datetime': [
+        {'value': 'equals', 'label': 'Equals'},
+        {'value': 'not_equals', 'label': 'Does not equal'},
+        {'value': 'before', 'label': 'Before'},
+        {'value': 'after', 'label': 'After'},
+        {'value': 'between', 'label': 'Between'},
+        {'value': 'is_empty', 'label': 'Is empty'},
+        {'value': 'is_not_empty', 'label': 'Is not empty'}
     ]
-    search_fields = [
-        'customer__company_name',
-        'service__service_name',
-        'skus__sku'
-    ]
-    ordering_fields = [
-        'customer__company_name',
-        'service__service_name',
-        'unit_price',
-        'created_at',
-        'updated_at'
-    ]
-    ordering = ['-created_at']  # Default ordering
-
-    def get_queryset(self):
-        """
-        Optionally restricts the returned customer services by filtering against
-        query parameters in the URL.
-        """
-        queryset = super().get_queryset()
-        
-        # Example of custom filtering
-        query = self.request.query_params.get('q', None)
-        if query:
-            queryset = queryset.filter(
-                Q(customer__company_name__icontains=query) |
-                Q(service__service_name__icontains=query) |
-                Q(skus__sku__icontains=query)
-            ).distinct()
-        
-        return queryset
+}

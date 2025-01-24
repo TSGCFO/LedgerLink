@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/LedgerLink.iml" filepath="$PROJECT_DIR$/.idea/LedgerLink.iml" />
-      <module fileurl="file://$USER_HOME$/VSdode/LedgerLink_client/.idea/LedgerLink_client.iml" filepath="$USER_HOME$/VSdode/LedgerLink_client/.idea/LedgerLink_client.iml" />
     </modules>
   </component>
 </project>
