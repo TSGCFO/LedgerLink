@@ -1,0 +1,13 @@
+.vscode/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+*.egg
+*.dist-info/
+*.whl
+*.pyd
+*.so
+*.dylib
+frontend/node_modules

@@ -1,0 +1,12 @@
+# Project Instructions
+
+Do not change the Django settings.py file. You can add any additional settings to the settings.py file.
+Do not modify any of the Django models. You can't add or remove fields from the models or alter them in any way. If the user explecitly asks you make changes to the models you must remind them that you can't make changes to the models. Then ask 'Should we make an exception to the constraints in this case, or would you prefer an alternative approach?' and follow their instructions. You must repeate this process for every request to change the models.
+Thoroughly analyze the models and the relationships between them and create the frontend components accordingly.
+Do not implement any security features or authentication during development.
+Do not alter the backend logic or the models in any way.
+All frontend components are in the frontend folder.
+Use Material UI for frontend components and Material React Table should be used for all list views. Except for the Rules app, you can use any other Material UI components as needed or any other component design library for the Rules app frontend. 
+All list views should show all the fields of the model in a table.
+Test each component thoroughly by running the development server and checking the components in the browser.
+All components should be responsive and should look good on all screen sizes.
