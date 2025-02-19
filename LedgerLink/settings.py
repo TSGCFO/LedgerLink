@@ -83,11 +83,11 @@ WSGI_APPLICATION = 'LedgerLink.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'railway',
+        'NAME': 'postgres',
         'USER': 'postgres',
-        'PASSWORD': 'aDJUldQcwCqeffeOhIxzolzcWNXyEikC',
-        'HOST': 'roundhouse.proxy.rlwy.net',
-        'PORT': '47155',
+        'PASSWORD': 'Hassan8488$',
+        'HOST': 'db.dorunzumqoeiozqiyiux.supabase.co',
+        'PORT': '5432',
     }
 }
 

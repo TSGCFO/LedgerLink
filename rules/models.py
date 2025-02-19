@@ -186,7 +186,8 @@ class AdvancedRule(Rule):
         'weight_based',  # Multiply by weight
         'volume_based',  # Multiply by volume
         'tiered_percentage',  # Apply percentage based on value tiers
-        'product_specific'  # Apply specific rates per product
+        'product_specific',  # Apply specific rates per product
+        'case_based_tier'  # New type for case-based calculations
     ]
 
     conditions = models.JSONField(
@@ -201,6 +202,12 @@ class AdvancedRule(Rule):
         help_text="Calculation steps as JSON: [{'type': 'calculation_type', 'value': number}]"
     )
 
+    tier_config = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Configuration for tiered calculations: {'ranges': [{'min': x, 'max': y, 'multiplier': z}], 'excluded_skus': []}"
+    )
+
     class Meta:
         verbose_name = "Advanced Rule"
         verbose_name_plural = "Advanced Rules"
@@ -208,6 +215,57 @@ class AdvancedRule(Rule):
     def clean(self):
         """Validate advanced rule structure"""
         super().clean()
+
+        # Validate tier configuration for case_based_tier
+        if any(calc.get('type') == 'case_based_tier' for calc in self.calculations):
+            if not self.tier_config:
+                raise ValidationError({
+                    'tier_config': 'Tier configuration is required for case-based tier calculations'
+                })
+
+            if 'ranges' not in self.tier_config:
+                raise ValidationError({
+                    'tier_config': 'Ranges must be specified in tier configuration'
+                })
+
+            ranges = self.tier_config.get('ranges', [])
+            if not isinstance(ranges, list):
+                raise ValidationError({
+                    'tier_config': 'Ranges must be a list of tier configurations'
+                })
+
+            for tier in ranges:
+                if not all(k in tier for k in ('min', 'max', 'multiplier')):
+                    raise ValidationError({
+                        'tier_config': 'Each tier must specify min, max, and multiplier values'
+                    })
+
+                try:
+                    min_val = float(tier['min'])
+                    max_val = float(tier['max'])
+                    multiplier = float(tier['multiplier'])
+
+                    if min_val < 0 or max_val < 0 or multiplier < 0:
+                        raise ValidationError({
+                            'tier_config': 'Min, max, and multiplier values must be non-negative'
+                        })
+
+                    if min_val > max_val:
+                        raise ValidationError({
+                            'tier_config': f'Min value ({min_val}) cannot be greater than max value ({max_val})'
+                        })
+
+                except (TypeError, ValueError):
+                    raise ValidationError({
+                        'tier_config': 'Min, max, and multiplier values must be valid numbers'
+                    })
+
+            # Validate excluded_skus if present
+            excluded_skus = self.tier_config.get('excluded_skus', [])
+            if excluded_skus and not isinstance(excluded_skus, list):
+                raise ValidationError({
+                    'tier_config': 'excluded_skus must be a list of SKU strings'
+                })
 
         # Validate conditions
         if self.conditions:

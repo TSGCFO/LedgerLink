@@ -356,6 +356,31 @@ class RuleEvaluator:
             logger.error(f"Error evaluating rule group: {str(e)}")
             return False
 
+    @staticmethod
+    def evaluate_case_based_rule(rule, order):
+        try:
+            excluded_skus = rule.tier_config.get('excluded_skus', [])
+            
+            # Get case summary
+            case_summary = order.get_case_summary(exclude_skus=excluded_skus)
+            total_cases = case_summary['total_cases']
+            
+            # Early return if no cases or only excluded SKUs
+            if total_cases == 0 or order.has_only_excluded_skus(excluded_skus):
+                return False, 0, None
+            
+            # Find applicable tier
+            tier_ranges = rule.tier_config.get('ranges', [])
+            for tier in tier_ranges:
+                if tier['min'] <= total_cases <= tier['max']:
+                    return True, Decimal(str(tier['multiplier'])), case_summary
+            
+            return False, 0, case_summary
+            
+        except Exception as e:
+            logger.error(f"Error evaluating case-based rule: {str(e)}")
+            return False, 0, None
+
 
 class BillingCalculator:
     """
@@ -407,6 +432,31 @@ class BillingCalculator:
     def calculate_service_cost(self, customer_service: CustomerService, order: Order) -> Decimal:
         """Calculate the cost for a service"""
         try:
+            if customer_service.service.charge_type == 'case_based_tier':
+                rule = customer_service.advanced_rules.first()
+                if not rule:
+                    return Decimal('0')
+                
+                applies, multiplier, case_summary = RuleEvaluator.evaluate_case_based_rule(
+                    rule, order
+                )
+                
+                if applies:
+                    cost = customer_service.unit_price * multiplier
+                    
+                    # Log detailed breakdown for auditing
+                    logger.info(
+                        f"Case-based calculation for Order {order.transaction_id}:\n"
+                        f"Service: {customer_service.service.service_name}\n"
+                        f"Base Price: ${customer_service.unit_price}\n"
+                        f"Multiplier: {multiplier}\n"
+                        f"Total Cost: ${cost}\n"
+                        f"Case Summary: {case_summary}"
+                    )
+                    
+                    return cost
+                return Decimal('0')
+
             if not customer_service.unit_price:
                 logger.warning(f"No unit price set for customer service {customer_service}")
                 return Decimal('0')

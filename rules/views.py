@@ -122,20 +122,23 @@ from rest_framework.views import APIView
 
 # New API endpoint for creating rules
 @api_view(['POST', 'PUT'])
-@permission_classes([AllowAny])
 def create_or_update_rule(request, group_id=None, pk=None):
     """Create or update a rule via API"""
     try:
         if request.method == 'PUT':
             # Update existing rule
-            rule = get_object_or_404(Rule, id=pk)
+            rule = get_object_or_404(AdvancedRule, id=pk)
             rule.field = request.data.get('field', rule.field)
             rule.operator = request.data.get('operator', rule.operator)
             rule.value = request.data.get('value', rule.value)
             rule.adjustment_amount = request.data.get('adjustment_amount', rule.adjustment_amount)
+            rule.conditions = request.data.get('conditions', rule.conditions)
+            rule.calculations = request.data.get('calculations', rule.calculations)
+            if 'tier_config' in request.data:
+                rule.tier_config = request.data['tier_config']
             rule.save()
             
-            logger.info(f"Rule {pk} updated successfully", extra={
+            logger.info(f"Advanced rule {pk} updated successfully", extra={
                 'rule_id': pk,
                 'field': rule.field,
                 'operator': rule.operator,
@@ -148,19 +151,30 @@ def create_or_update_rule(request, group_id=None, pk=None):
                 'operator': rule.operator,
                 'value': rule.value,
                 'adjustment_amount': str(rule.adjustment_amount) if rule.adjustment_amount else None,
+                'conditions': rule.conditions,
+                'calculations': rule.calculations,
+                'tier_config': rule.tier_config,
             })
         else:
             # Create new rule
             rule_group = get_object_or_404(RuleGroup, id=group_id)
-            rule = Rule.objects.create(
-                rule_group=rule_group,
-                field=request.data.get('field'),
-                operator=request.data.get('operator'),
-                value=request.data.get('value'),
-                adjustment_amount=request.data.get('adjustment_amount')
-            )
+            rule_data = {
+                'rule_group': rule_group,
+                'field': request.data.get('field'),
+                'operator': request.data.get('operator'),
+                'value': request.data.get('value'),
+                'adjustment_amount': request.data.get('adjustment_amount'),
+                'conditions': request.data.get('conditions', {}),
+                'calculations': request.data.get('calculations', []),
+            }
             
-            logger.info(f"New rule created for group {group_id}", extra={
+            # Add tier_config if present
+            if 'tier_config' in request.data:
+                rule_data['tier_config'] = request.data['tier_config']
+            
+            rule = AdvancedRule.objects.create(**rule_data)
+            
+            logger.info(f"New advanced rule created for group {group_id}", extra={
                 'group_id': group_id,
                 'rule_id': rule.id,
                 'field': rule.field,
@@ -174,6 +188,9 @@ def create_or_update_rule(request, group_id=None, pk=None):
                 'operator': rule.operator,
                 'value': rule.value,
                 'adjustment_amount': str(rule.adjustment_amount) if rule.adjustment_amount else None,
+                'conditions': rule.conditions,
+                'calculations': rule.calculations,
+                'tier_config': rule.tier_config,
             }, status=status.HTTP_201_CREATED)
     
     except ValidationError as e:
@@ -331,15 +348,16 @@ def get_advanced_rules(request, group_id):
     """Get all advanced rules for a rule group"""
     try:
         rule_group = get_object_or_404(RuleGroup, id=group_id)
-        rules = rule_group.rules.filter(advancedrule__isnull=False)
+        rules = AdvancedRule.objects.filter(rule_group=rule_group)
         data = [{
             'id': rule.id,
             'field': rule.field,
             'operator': rule.operator,
             'value': rule.value,
             'adjustment_amount': str(rule.adjustment_amount) if rule.adjustment_amount else None,
-            'conditions': rule.advancedrule.conditions,
-            'calculations': rule.advancedrule.calculations,
+            'conditions': rule.conditions,
+            'calculations': rule.calculations,
+            'tier_config': rule.tier_config if hasattr(rule, 'tier_config') else None,
         } for rule in rules]
         return Response(data)
     except Exception as e:
@@ -348,99 +366,6 @@ def get_advanced_rules(request, group_id):
             {'error': str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-
-    def get(self, request):
-        """List all rule groups"""
-        try:
-            rule_groups = RuleGroup.objects.select_related(
-                'customer_service',
-                'customer_service__customer',
-                'customer_service__service'
-            ).all()
-            
-            data = [{
-                'id': group.id,
-                'customer_service': {
-                    'id': group.customer_service_id,
-                    'name': str(group.customer_service),
-                    'customer': {
-                        'id': group.customer_service.customer.id,
-                        'name': group.customer_service.customer.company_name
-                    },
-                    'service': {
-                        'id': group.customer_service.service.id,
-                        'name': group.customer_service.service.service_name
-                    }
-                },
-                'logic_operator': group.logic_operator,
-                'rules': [{
-                    'id': rule.id,
-                    'field': rule.field,
-                    'operator': rule.operator,
-                    'value': rule.value,
-                    'adjustment_amount': str(rule.adjustment_amount) if rule.adjustment_amount else None,
-                    'advancedrule': hasattr(rule, 'advancedrule'),
-                    'conditions': rule.advancedrule.conditions if hasattr(rule, 'advancedrule') else None,
-                    'calculations': rule.advancedrule.calculations if hasattr(rule, 'advancedrule') else None,
-                } for rule in group.rules.all()]
-            } for group in rule_groups]
-            
-            return Response(data)
-        except Exception as e:
-            logger.error(f"Error fetching rule groups: {str(e)}")
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
-    def post(self, request):
-        """Create a new rule group"""
-        try:
-            customer_service_id = request.data.get('customer_service')
-            logic_operator = request.data.get('logic_operator', 'AND')
-
-            if not customer_service_id:
-                return Response(
-                    {'error': 'Customer service is required'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-            if logic_operator not in dict(RuleGroup.LOGIC_CHOICES):
-                return Response(
-                    {'error': 'Invalid logic operator'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-            customer_service = get_object_or_404(CustomerService, id=customer_service_id)
-            
-            rule_group = RuleGroup.objects.create(
-                customer_service=customer_service,
-                logic_operator=logic_operator
-            )
-            
-            return Response({
-                'id': rule_group.id,
-                'customer_service': {
-                    'id': rule_group.customer_service_id,
-                    'name': str(rule_group.customer_service),
-                    'customer': {
-                        'id': rule_group.customer_service.customer.id,
-                        'name': rule_group.customer_service.customer.company_name
-                    },
-                    'service': {
-                        'id': rule_group.customer_service.service.id,
-                        'name': rule_group.customer_service.service.service_name
-                    }
-                },
-                'logic_operator': rule_group.logic_operator,
-                'rules': []
-            }, status=status.HTTP_201_CREATED)
-        except Exception as e:
-            logger.error(f"Error creating rule group: {str(e)}")
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
 
 # Rule Group Views
 class RuleGroupListView(LoginRequiredMixin, ListView):
@@ -704,16 +629,62 @@ def validate_calculations(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Create temporary advanced rule for validation
-        rule = AdvancedRule(calculations=calculations)
-        rule.clean()
+        for calc in calculations:
+            if not isinstance(calc, dict):
+                raise ValidationError('Each calculation must be a dictionary')
+            
+            if 'type' not in calc:
+                raise ValidationError('Calculation type is required')
+                
+            if calc['type'] not in AdvancedRule.CALCULATION_TYPES:
+                raise ValidationError(f'Invalid calculation type: {calc["type"]}')
+            
+            # Special handling for case_based_tier
+            if calc['type'] == 'case_based_tier':
+                if 'tier_config' not in calc:
+                    raise ValidationError('tier_config is required for case_based_tier')
+                    
+                tier_config = calc['tier_config']
+                if not isinstance(tier_config, dict):
+                    raise ValidationError('tier_config must be a dictionary')
+                    
+                if 'ranges' not in tier_config:
+                    raise ValidationError('ranges are required in tier_config')
+                    
+                ranges = tier_config['ranges']
+                if not isinstance(ranges, list):
+                    raise ValidationError('ranges must be a list')
+                    
+                for tier in ranges:
+                    if not all(k in tier for k in ('min', 'max', 'multiplier')):
+                        raise ValidationError('Each tier must have min, max, and multiplier')
+                        
+                    if tier['min'] > tier['max']:
+                        raise ValidationError(f'Min value ({tier["min"]}) cannot be greater than max value ({tier["max"]})')
+                        
+                    if tier['multiplier'] <= 0:
+                        raise ValidationError('Multiplier must be greater than 0')
+            else:
+                # For other calculation types
+                if 'value' not in calc:
+                    raise ValidationError('value is required for calculation')
+                try:
+                    float(calc['value'])
+                except (ValueError, TypeError):
+                    raise ValidationError('value must be a number')
+
         return Response({'valid': True})
     except ValidationError as e:
-        return Response({'valid': False, 'errors': e.messages},
-                       status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {'valid': False, 'errors': e.messages if hasattr(e, 'messages') else [str(e)]},
+            status=status.HTTP_400_BAD_REQUEST
+        )
     except Exception as e:
-        return Response({'error': str(e)},
-                       status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        logger.error(f"Error validating calculations: {str(e)}")
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 @api_view(['GET'])
 def get_conditions_schema(request):
@@ -775,7 +746,8 @@ def get_calculation_types(request):
         'weight_based': 'Multiply by weight',
         'volume_based': 'Multiply by volume',
         'tiered_percentage': 'Apply percentage based on value tiers',
-        'product_specific': 'Apply specific rates per product'
+        'product_specific': 'Apply specific rates per product',
+        'case_based_tier': 'Apply case-based tier pricing'
     }
     return Response(types)
 

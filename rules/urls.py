@@ -22,6 +22,9 @@ urlpatterns = [
     path('rule/<int:pk>/delete/api/', views.delete_rule, name='api_delete_rule'),
     path('group/<int:pk>/delete/api/', views.delete_rule_group, name='api_delete_rule_group'),
     path('group/<int:group_id>/advanced-rules/', views.get_advanced_rules, name='get_advanced_rules'),
+    path('group/<int:group_id>/advanced-rule/create/', views.create_or_update_rule, name='api_create_advanced_rule'),
+    path('advanced-rule/<int:pk>/edit/', views.create_or_update_rule, name='api_update_advanced_rule'),
+    path('advanced-rule/<int:pk>/delete/', views.delete_rule, name='api_delete_advanced_rule'),
 
     # Rule Group URLs
     path('',

@@ -340,7 +340,13 @@ const rulesService = {
       logDebug('getCalculationTypes', 'Fetching calculation types');
       const data = await rulesApi.getCalculationTypes();
       logDebug('getCalculationTypes', 'Raw calculation types:', data);
-      const result = transformChoices(data, 'calculationTypes');
+      
+      // Transform the data into the expected format
+      const result = Object.entries(data).map(([value, label]) => ({
+        value,
+        label
+      }));
+      
       logDebug('getCalculationTypes', 'Transformed calculation types:', result);
       return result;
     } catch (error) {

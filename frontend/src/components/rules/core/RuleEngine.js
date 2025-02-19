@@ -87,14 +87,85 @@ class RuleEngine {
   }
 
   /**
-   * Calculates adjustments based on rule evaluation
+   * Evaluates case-based tier rules
    */
-  calculateAdjustments(rule, baseAmount) {
-    if (!rule.adjustment_amount) return baseAmount;
+  evaluateCaseBasedTier(rule, context) {
+    try {
+      const { tier_config } = rule;
+      if (!tier_config || !tier_config.ranges) {
+        return { success: false, reason: 'Missing tier configuration' };
+      }
 
+      // Get total cases excluding specified SKUs
+      const totalCases = this.calculateTotalCases(context, tier_config.excluded_skus);
+      
+      // Find applicable tier
+      const applicableTier = tier_config.ranges.find(
+        tier => totalCases >= tier.min && totalCases <= tier.max
+      );
+
+      if (applicableTier) {
+        return {
+          success: true,
+          reason: `Matches tier: ${totalCases} cases falls between ${applicableTier.min} and ${applicableTier.max}`,
+          multiplier: applicableTier.multiplier
+        };
+      }
+
+      return {
+        success: false,
+        reason: `No matching tier for ${totalCases} cases`
+      };
+    } catch (error) {
+      return {
+        success: false,
+        reason: `Case-based tier evaluation error: ${error.message}`
+      };
+    }
+  }
+
+  /**
+   * Calculates total cases from context, excluding specified SKUs
+   */
+  calculateTotalCases(context, excludedSkus = []) {
+    try {
+      const { sku_quantity } = context;
+      if (!sku_quantity) return 0;
+
+      let totalCases = 0;
+      const normalizedExcluded = new Set(
+        excludedSkus.map(sku => sku.toUpperCase().trim())
+      );
+
+      Object.entries(sku_quantity).forEach(([sku, data]) => {
+        if (!normalizedExcluded.has(sku.toUpperCase().trim())) {
+          totalCases += (data.cases || 0);
+        }
+      });
+
+      return totalCases;
+    } catch (error) {
+      console.error('Error calculating total cases:', error);
+      return 0;
+    }
+  }
+
+  /**
+   * Enhanced calculateAdjustments to handle case-based tiers
+   */
+  calculateAdjustments(rule, baseAmount, context) {
+    if (rule.calculations?.some(calc => calc.type === 'case_based_tier')) {
+      const evaluation = this.evaluateCaseBasedTier(rule, context);
+      if (evaluation.success) {
+        return baseAmount * evaluation.multiplier;
+      }
+      return baseAmount;
+    }
+
+    // Original adjustment logic
+    if (!rule.adjustment_amount) return baseAmount;
     const amount = Number(rule.adjustment_amount);
     if (isNaN(amount)) return baseAmount;
-
     return baseAmount + amount;
   }
 }

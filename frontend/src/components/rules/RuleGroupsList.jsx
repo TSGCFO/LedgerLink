@@ -97,14 +97,10 @@ const RuleGroupsList = ({ groups, onSelect, onUpdate, onDelete, onCreateNew }) =
     autoResetPageIndex: true,
     state: {
       rowSelection,
+      isLoading: !groups
     },
     onRowSelectionChange: setRowSelection,
     enableRowSelection: false,
-    displayColumnDefOptions: {
-      'mrt-row-actions': {
-        size: 120,
-      },
-    },
     muiTableProps: {
       sx: {
         tableLayout: 'auto',
@@ -146,11 +142,7 @@ const RuleGroupsList = ({ groups, onSelect, onUpdate, onDelete, onCreateNew }) =
       },
     }),
     initialState: {
-      pagination: { pageSize: 10 },
-      isLoading: !groups
-    },
-    state: {
-      isLoading: !groups,
+      pagination: { pageSize: 10 }
     },
     muiTablePaperProps: {
       elevation: 0,
