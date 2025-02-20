@@ -436,6 +436,62 @@ export const cadShippingApi = {
   getCarriers: () => request('/shipping/cad/carriers/'),
 };
 
+/**
+ * Billing API endpoints
+ */
+export const billingApi = {
+  list: async (params = {}) => {
+    try {
+      const queryParams = new URLSearchParams();
+      if (params.search) queryParams.append('search', params.search);
+      if (params.customer) queryParams.append('customer', params.customer);
+      if (params.start_date) queryParams.append('start_date', params.start_date);
+      if (params.end_date) queryParams.append('end_date', params.end_date);
+      const query = queryParams.toString() ? `?${queryParams.toString()}` : '';
+      
+      const response = await request(`/billing/api/reports/${query}`, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      return {
+        success: true,
+        data: response
+      };
+    } catch (error) {
+      logger.error('API Error: GET /billing/api/reports/', {
+        message: error.message,
+        status: error.status,
+        originalError: error
+      });
+      throw error;
+    }
+  },
+  get: (id) => request(`/billing/api/reports/${id}/`),
+  create: (data) => request('/billing/api/reports/', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  update: (id, data) => request(`/billing/api/reports/${id}/`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+  delete: (id) => request(`/billing/api/reports/${id}/`, {
+    method: 'DELETE',
+  }),
+  generateReport: (data) => request('/billing/api/generate-report/', {
+    method: 'POST',
+    body: JSON.stringify(data),
+    credentials: 'include',  // Include credentials in the request
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+  }),
+};
+
 export const handleApiError = (error) => {
   if (!error) {
     logger.error('Unknown API error', { error: 'No error object provided' });
@@ -493,5 +549,6 @@ export default {
   cadShippingApi,
   usShippingApi,
   rulesApi,
+  billingApi,
   handleApiError,
 };

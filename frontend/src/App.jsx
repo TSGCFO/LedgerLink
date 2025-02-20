@@ -56,6 +56,8 @@ import MaterialForm from './components/materials/MaterialForm';
 import BoxPriceList from './components/materials/BoxPriceList';
 import BoxPriceForm from './components/materials/BoxPriceForm';
 import BulkOperations from './components/bulk-operations/BulkOperations';
+import BillingList from './components/billing/BillingList';
+import BillingForm from './components/billing/BillingForm';
 
 // Create theme
 const theme = createTheme({
@@ -196,6 +198,12 @@ function App() {
                     </ListItemIcon>
                     <ListItemText primary="Bulk Operations" />
                   </ListItem>
+                  <ListItem button component={Link} to="/billing">
+                    <ListItemIcon>
+                      <DescriptionIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Billing" />
+                  </ListItem>
                 </List>
               </Box>
             </Drawer>
@@ -259,6 +267,9 @@ function App() {
                 <Route path="/shipping/us/new" element={<ProtectedRoute><USShippingForm /></ProtectedRoute>} />
                 <Route path="/shipping/us/:id/edit" element={<ProtectedRoute><USShippingForm /></ProtectedRoute>} />
                 <Route path="/bulk-operations" element={<ProtectedRoute><BulkOperations /></ProtectedRoute>} />
+                <Route path="/billing" element={<ProtectedRoute><BillingList /></ProtectedRoute>} />
+                <Route path="/billing/new" element={<ProtectedRoute><BillingForm /></ProtectedRoute>} />
+                <Route path="/billing/:id/edit" element={<ProtectedRoute><BillingForm /></ProtectedRoute>} />
               </Routes>
             </Container>
           </Box>
