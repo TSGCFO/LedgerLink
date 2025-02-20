@@ -3,7 +3,7 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 from decimal import Decimal
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, Any
 import json
 from django.core.exceptions import ValidationError
 from django.db.models import Q
@@ -429,6 +429,75 @@ class BillingCalculator:
             logger.error(f"Validation error: {str(e)}")
             raise
 
+    def generate_report(self) -> BillingReport:
+        """Generate the billing report"""
+        try:
+            self.validate_input()
+
+            orders = Order.objects.filter(
+                customer_id=self.customer_id,
+                close_date__range=(self.start_date, self.end_date)
+            ).select_related('customer')
+
+            if not orders:
+                logger.info(f"No orders found for customer {self.customer_id} in date range")
+                return self.report
+
+            customer_services = CustomerService.objects.filter(
+                customer_id=self.customer_id
+            ).select_related('service')
+
+            for order in orders:
+                try:
+                    order_cost = OrderCost(order_id=order.transaction_id)
+                    applied_single_services = set()
+
+                    for cs in customer_services:
+                        if cs.service.charge_type == 'single' and cs.service.id in applied_single_services:
+                            continue
+
+                        rule_groups = RuleGroup.objects.filter(customer_service=cs)
+                        service_applies = False
+
+                        if not rule_groups.exists():
+                            service_applies = True  # If no rules, service always applies
+                        else:
+                            for rule_group in rule_groups:
+                                if RuleEvaluator.evaluate_rule_group(rule_group, order):
+                                    service_applies = True
+                                    break
+
+                        if service_applies:
+                            cost = self.calculate_service_cost(cs, order)
+
+                            service_cost = ServiceCost(
+                                service_id=cs.service.id,
+                                service_name=cs.service.service_name,
+                                amount=cost
+                            )
+                            order_cost.service_costs.append(service_cost)
+                            order_cost.total_amount += cost
+
+                            self.report.service_totals[cs.service.id] = (
+                                    self.report.service_totals.get(cs.service.id, Decimal('0')) + cost
+                            )
+
+                            if cs.service.charge_type == 'single':
+                                applied_single_services.add(cs.service.id)
+
+                    self.report.order_costs.append(order_cost)
+                    self.report.total_amount += order_cost.total_amount
+
+                except Exception as e:
+                    logger.error(f"Error processing order {order.transaction_id}: {str(e)}")
+                    continue
+
+            return self.report
+
+        except Exception as e:
+            logger.error(f"Error generating report: {str(e)}")
+            raise
+
     def calculate_service_cost(self, customer_service: CustomerService, order: Order) -> Decimal:
         """Calculate the cost for a service"""
         try:
@@ -672,75 +741,6 @@ class BillingCalculator:
             logger.error(f"Error calculating service cost: {str(e)}")
             return Decimal('0')
 
-    def generate_report(self) -> BillingReport:
-        """Generate the billing report"""
-        try:
-            self.validate_input()
-
-            orders = Order.objects.filter(
-                customer_id=self.customer_id,
-                close_date__range=(self.start_date, self.end_date)
-            ).select_related('customer')
-
-            if not orders:
-                logger.info(f"No orders found for customer {self.customer_id} in date range")
-                return self.report
-
-            customer_services = CustomerService.objects.filter(
-                customer_id=self.customer_id
-            ).select_related('service')
-
-            for order in orders:
-                try:
-                    order_cost = OrderCost(order_id=order.transaction_id)
-                    applied_single_services = set()
-
-                    for cs in customer_services:
-                        if cs.service.charge_type == 'single' and cs.service.id in applied_single_services:
-                            continue
-
-                        rule_groups = RuleGroup.objects.filter(customer_service=cs)
-                        service_applies = False
-
-                        if not rule_groups.exists():
-                            service_applies = True  # If no rules, service always applies
-                        else:
-                            for rule_group in rule_groups:
-                                if RuleEvaluator.evaluate_rule_group(rule_group, order):
-                                    service_applies = True
-                                    break
-
-                        if service_applies:
-                            cost = self.calculate_service_cost(cs, order)
-
-                            service_cost = ServiceCost(
-                                service_id=cs.service.id,
-                                service_name=cs.service.service_name,
-                                amount=cost
-                            )
-                            order_cost.service_costs.append(service_cost)
-                            order_cost.total_amount += cost
-
-                            self.report.service_totals[cs.service.id] = (
-                                    self.report.service_totals.get(cs.service.id, Decimal('0')) + cost
-                            )
-
-                            if cs.service.charge_type == 'single':
-                                applied_single_services.add(cs.service.id)
-
-                    self.report.order_costs.append(order_cost)
-                    self.report.total_amount += order_cost.total_amount
-
-                except Exception as e:
-                    logger.error(f"Error processing order {order.transaction_id}: {str(e)}")
-                    continue
-
-            return self.report
-
-        except Exception as e:
-            logger.error(f"Error generating report: {str(e)}")
-            raise
-
     # In billing_calculator.py, update the to_dict method
     def to_dict(self) -> dict:
         """Convert the report to a dictionary format"""
@@ -829,11 +829,9 @@ def generate_billing_report(
         start_date: Union[datetime, str],
         end_date: Union[datetime, str],
         output_format: str = 'json'
-) -> str:
+) -> Dict[str, Any]:
     """
-    Generates a billing report for a specified customer over a specified date range 
-    and returns the report in the desired format. The report can be generated either as a 
-    JSON or CSV file depending on the output format specified.
+    Generates a billing report for a specified customer over a specified date range.
 
     :param customer_id: Identifier of the customer for whom the billing report is being generated.
     :type customer_id: int
@@ -843,8 +841,8 @@ def generate_billing_report(
     :type end_date: Union[datetime, str]
     :param output_format: Format in which the report will be returned. Options are "json" (default) or "csv".
     :type output_format: str
-    :return: A string representation of the billing report in the specified format.
-    :rtype: str
+    :return: A dictionary containing the billing report data
+    :rtype: Dict[str, Any]
     """
     try:
         logger.info(f"Generating report for customer {customer_id} from {start_date} to {end_date}")
@@ -857,9 +855,8 @@ def generate_billing_report(
         calculator = BillingCalculator(customer_id, start_date, end_date)
         calculator.generate_report()
 
-        if output_format.lower() == 'csv':
-            return calculator.to_csv()
-        return calculator.to_json()
+        # Return the dictionary representation directly
+        return calculator.to_dict()
 
     except Exception as e:
         logger.error(f"Error in generate_billing_report: {str(e)}")

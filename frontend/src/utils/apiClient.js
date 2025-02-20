@@ -456,10 +456,7 @@ export const billingApi = {
         },
       });
       
-      return {
-        success: true,
-        data: response
-      };
+      return response;
     } catch (error) {
       logger.error('API Error: GET /billing/api/reports/', {
         message: error.message,
@@ -469,27 +466,27 @@ export const billingApi = {
       throw error;
     }
   },
+  generateReport: async (data) => {
+    try {
+      const response = await request('/billing/api/generate-report/', {
+        method: 'POST',
+        body: JSON.stringify(data)
+      });
+
+      return response;
+    } catch (error) {
+      logger.error('API Error: POST /billing/api/generate-report/', {
+        message: error.message,
+        data: data,
+        error: error
+      });
+      throw error;
+    }
+  },
   get: (id) => request(`/billing/api/reports/${id}/`),
-  create: (data) => request('/billing/api/reports/', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  }),
-  update: (id, data) => request(`/billing/api/reports/${id}/`, {
-    method: 'PUT',
-    body: JSON.stringify(data),
-  }),
   delete: (id) => request(`/billing/api/reports/${id}/`, {
     method: 'DELETE',
-  }),
-  generateReport: (data) => request('/billing/api/generate-report/', {
-    method: 'POST',
-    body: JSON.stringify(data),
-    credentials: 'include',  // Include credentials in the request
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    },
-  }),
+  })
 };
 
 export const handleApiError = (error) => {

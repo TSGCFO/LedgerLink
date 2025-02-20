@@ -10,6 +10,12 @@ import {
   Chip,
   TextField,
   Tooltip,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Typography,
+  CircularProgress,
 } from '@mui/material';
 import {
   Edit as EditIcon,
@@ -26,41 +32,16 @@ import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 const BillingList = () => {
   const [reports, setReports] = useState([]);
   const [customers, setCustomers] = useState([]);
+  const [selectedCustomer, setSelectedCustomer] = useState('');
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [billingData, setBillingData] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState('');
-  const navigate = useNavigate();
 
   useEffect(() => {
-    fetchReports();
     fetchCustomers();
   }, []);
-
-  const fetchReports = async (filters = {}) => {
-    try {
-      const params = {
-        ...filters,
-        start_date: startDate?.toISOString().split('T')[0],
-        end_date: endDate?.toISOString().split('T')[0],
-      };
-      
-      const response = await billingApi.list(params);
-      console.log('Billing reports response:', response);
-      
-      if (response.success) {
-        const reportData = response.data?.data || [];
-        console.log('Setting reports:', reportData);
-        setReports(reportData);
-      } else {
-        console.error('Failed to fetch reports:', response.error);
-        setError(response.error || 'Failed to fetch reports');
-      }
-    } catch (error) {
-      console.error('Error fetching reports:', error);
-      setError(handleApiError(error));
-    }
-  };
 
   const fetchCustomers = async () => {
     try {
@@ -73,50 +54,56 @@ const BillingList = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this billing report?')) {
-      try {
-        const response = await billingApi.delete(id);
-        if (response.success) {
-          setSuccessMessage('Billing report deleted successfully');
-          fetchReports();
-        }
-      } catch (error) {
-        setError(handleApiError(error));
-      }
+  const handleCalculate = async () => {
+    if (!selectedCustomer || !startDate || !endDate) {
+      setError('Please select a customer and date range');
+      return;
     }
-  };
 
-  const handleDownload = async (id, format = 'json') => {
+    if (startDate > endDate) {
+      setError('Start date must be before end date');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
     try {
       const response = await billingApi.generateReport({
-        report_id: id,
-        output_format: format
+        customer: selectedCustomer,
+        start_date: startDate.toISOString().split('T')[0],
+        end_date: endDate.toISOString().split('T')[0],
+        output_format: 'preview'
       });
-      
-      // Handle the downloaded file based on format
-      const blob = new Blob([response.data], {
-        type: format === 'csv' ? 'text/csv' : 'application/json'
-      });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `billing-report-${id}.${format}`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+
+      if (response.success && response.data?.preview_data) {
+        // Transform the data for the table
+        const transformedData = response.data.preview_data.orders.map(order => {
+          const row = {
+            order_id: order.order_id,
+            total_amount: order.total_amount,
+            services: order.services, // Keep the full services array for column generation
+          };
+          
+          // Add service amounts as columns
+          order.services.forEach(service => {
+            row[`service_${service.service_id}`] = service.amount;
+          });
+          
+          return row;
+        });
+
+        setBillingData(transformedData);
+      }
     } catch (error) {
       setError(handleApiError(error));
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleCloseError = () => {
     setError(null);
-  };
-
-  const handleCloseSuccess = () => {
-    setSuccessMessage('');
   };
 
   const formatCurrency = (amount) => {
@@ -126,98 +113,49 @@ const BillingList = () => {
     }).format(amount || 0);
   };
 
-  const columns = useMemo(
-    () => [
+  const columns = useMemo(() => {
+    if (!billingData.length) return [];
+
+    // Start with the basic columns
+    const baseColumns = [
       {
-        accessorKey: 'customer_details.company_name',
-        header: 'Customer',
-        size: 200,
-        Cell: ({ row }) => row.original.customer_details?.company_name || 'N/A',
-        filterVariant: 'select',
-        filterSelectOptions: customers.map(customer => ({
-          text: customer.company_name,
-          value: customer.id,
-        })),
-      },
-      {
-        accessorKey: 'start_date',
-        header: 'Start Date',
+        accessorKey: 'order_id',
+        header: 'Order ID',
         size: 120,
-        Cell: ({ cell }) => cell.getValue() ? new Date(cell.getValue()).toLocaleDateString() : 'N/A',
-      },
-      {
-        accessorKey: 'end_date',
-        header: 'End Date',
-        size: 120,
-        Cell: ({ cell }) => cell.getValue() ? new Date(cell.getValue()).toLocaleDateString() : 'N/A',
       },
       {
         accessorKey: 'total_amount',
         header: 'Total Amount',
-        size: 120,
+        size: 150,
         Cell: ({ cell }) => formatCurrency(cell.getValue()),
         Footer: ({ table }) => {
           const total = table.getFilteredRowModel().rows.reduce(
-            (sum, row) => sum + (parseFloat(row.original.total_amount) || 0),
+            (sum, row) => sum + parseFloat(row.original.total_amount || 0),
             0
           );
           return <strong>{formatCurrency(total)}</strong>;
         },
       },
-      {
-        accessorKey: 'generated_at',
-        header: 'Generated',
-        size: 150,
-        Cell: ({ cell }) => cell.getValue() ? new Date(cell.getValue()).toLocaleString() : 'N/A',
+    ];
+
+    // Add service columns dynamically based on the first row's services
+    const firstRow = billingData[0];
+    const serviceColumns = firstRow.services.map(service => ({
+      accessorKey: `service_${service.service_id}`,
+      header: service.service_name,
+      size: 150,
+      Cell: ({ cell }) => formatCurrency(cell.getValue()),
+      Footer: ({ table }) => {
+        const total = table.getFilteredRowModel().rows.reduce(
+          (sum, row) => sum + parseFloat(row[`service_${service.service_id}`] || 0),
+          0
+        );
+        return <strong>{formatCurrency(total)}</strong>;
       },
-      {
-        id: 'actions',
-        header: 'Actions',
-        size: 200,
-        Cell: ({ row: { original } }) => (
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Tooltip title="View Details">
-              <IconButton
-                onClick={() => navigate(`/billing/${original.id}/edit`)}
-                color="primary"
-                size="small"
-              >
-                <EditIcon />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Download JSON">
-              <IconButton
-                onClick={() => handleDownload(original.id, 'json')}
-                color="secondary"
-                size="small"
-              >
-                <DownloadIcon />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Download CSV">
-              <IconButton
-                onClick={() => handleDownload(original.id, 'csv')}
-                color="info"
-                size="small"
-              >
-                <DownloadIcon />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Delete">
-              <IconButton
-                onClick={() => handleDelete(original.id)}
-                color="error"
-                size="small"
-              >
-                <DeleteIcon />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        ),
-      },
-    ],
-    [customers, navigate]
-  );
+    }));
+
+    return [...baseColumns, ...serviceColumns];
+  }, [billingData]);
 
   return (
     <Box sx={{ width: '100%', mb: 2 }}>
@@ -231,77 +169,86 @@ const BillingList = () => {
         </Alert>
       </Snackbar>
 
-      <Snackbar
-        open={Boolean(successMessage)}
-        autoHideDuration={6000}
-        onClose={handleCloseSuccess}
-      >
-        <Alert onClose={handleCloseSuccess} severity="success">
-          {successMessage}
-        </Alert>
-      </Snackbar>
-
       <Paper sx={{ width: '100%', mb: 2, p: 2 }}>
-        <Box sx={{ mb: 2, display: 'flex', gap: 2 }}>
-          <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <DatePicker
-              label="Start Date"
-              value={startDate}
-              onChange={(newValue) => {
-                setStartDate(newValue);
-                fetchReports();
-              }}
-              renderInput={(params) => <TextField {...params} size="small" />}
-            />
-            <DatePicker
-              label="End Date"
-              value={endDate}
-              onChange={(newValue) => {
-                setEndDate(newValue);
-                fetchReports();
-              }}
-              renderInput={(params) => <TextField {...params} size="small" />}
-            />
-          </LocalizationProvider>
-        </Box>
+        <Typography variant="h6" gutterBottom>
+          Generate Billing Report
+        </Typography>
 
-        <MaterialReactTable
-          columns={columns}
-          data={reports}
-          enableColumnFiltering
-          enableGlobalFilter
-          enablePagination
-          enableSorting
-          enableColumnResizing
-          columnResizeMode="onChange"
-          muiToolbarAlertBannerProps={
-            error
-              ? {
-                  color: 'error',
-                  children: error,
-                }
-              : undefined
-          }
-          renderTopToolbarCustomActions={() => (
+        <Grid container spacing={3} sx={{ mb: 3 }}>
+          <Grid item xs={12} md={4}>
+            <FormControl fullWidth>
+              <InputLabel>Customer</InputLabel>
+              <Select
+                value={selectedCustomer}
+                onChange={(e) => setSelectedCustomer(e.target.value)}
+                label="Customer"
+              >
+                {customers.map((customer) => (
+                  <MenuItem key={customer.id} value={customer.id}>
+                    {customer.company_name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+
+          <Grid item xs={12} md={3}>
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <DatePicker
+                label="Start Date"
+                value={startDate}
+                onChange={setStartDate}
+                renderInput={(params) => <TextField {...params} fullWidth />}
+              />
+            </LocalizationProvider>
+          </Grid>
+
+          <Grid item xs={12} md={3}>
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <DatePicker
+                label="End Date"
+                value={endDate}
+                onChange={setEndDate}
+                renderInput={(params) => <TextField {...params} fullWidth />}
+              />
+            </LocalizationProvider>
+          </Grid>
+
+          <Grid item xs={12} md={2}>
             <Button
               variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => navigate('/billing/new')}
+              onClick={handleCalculate}
+              disabled={loading}
+              fullWidth
+              sx={{ height: '56px' }}
             >
-              New Billing Report
+              {loading ? <CircularProgress size={24} /> : 'Calculate'}
             </Button>
-          )}
-          muiTableProps={{
-            sx: {
-              tableLayout: 'auto',
-            },
-          }}
-          initialState={{
-            density: 'compact',
-            pagination: { pageSize: 10 },
-            sorting: [{ id: 'generated_at', desc: true }],
-          }}
-        />
+          </Grid>
+        </Grid>
+
+        {billingData.length > 0 && (
+          <MaterialReactTable
+            columns={columns}
+            data={billingData}
+            enableColumnFiltering
+            enableGlobalFilter
+            enablePagination
+            enableSorting
+            enableColumnResizing
+            columnResizeMode="onChange"
+            muiTableProps={{
+              sx: {
+                tableLayout: 'auto',
+              },
+            }}
+            initialState={{
+              density: 'compact',
+              pagination: { pageSize: 10 },
+              sorting: [{ id: 'order_id', desc: false }],
+            }}
+          />
+        )}
       </Paper>
     </Box>
   );

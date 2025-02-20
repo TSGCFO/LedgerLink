@@ -25,6 +25,9 @@ import {
   TableHead,
   TableRow,
   IconButton,
+  TablePagination,
+  Tooltip,
+  Chip,
 } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { billingApi, customerApi, handleApiError } from '../../utils/apiClient';
@@ -132,7 +135,7 @@ const BillingForm = () => {
     e.preventDefault();
     
     if (!validateForm()) {
-      return;
+        return;
     }
 
     setLoading(true);
@@ -140,30 +143,54 @@ const BillingForm = () => {
     setSuccess(false);
 
     try {
-      // Format dates to YYYY-MM-DD
-      const formatDate = (date) => {
-        if (!date) return null;
-        const d = new Date(date);
-        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-      };
+        // Format dates to YYYY-MM-DD
+        const formatDate = (date) => {
+            if (!date) return null;
+            const d = new Date(date);
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        };
 
-      // First generate preview
-      const previewResponse = await billingApi.generateReport({
-        customer: formData.customer,
-        start_date: formatDate(formData.start_date),
-        end_date: formatDate(formData.end_date),
-        output_format: 'preview'
-      });
+        const requestData = {
+            customer: formData.customer,
+            start_date: formatDate(formData.start_date),
+            end_date: formatDate(formData.end_date),
+            output_format: formData.output_format || 'preview'
+        };
 
-      if (previewResponse.success) {
-        setPreviewData(previewResponse.data);
-        setShowPreview(true);
-        setSuccess(true);
-      }
+        const response = await billingApi.generateReport(requestData);
+
+        if (response.success) {
+            if (formData.output_format === 'preview') {
+                setPreviewData(response.data);
+                setShowPreview(true);
+            } else {
+                // Handle file download
+                const blob = new Blob(
+                    [response.data],
+                    { 
+                        type: formData.output_format === 'excel' 
+                            ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                            : 'application/pdf'
+                    }
+                );
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `billing_report.${formData.output_format === 'excel' ? 'xlsx' : 'pdf'}`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            }
+            setSuccess(true);
+        } else {
+            throw new Error(response.error || 'Failed to generate report');
+        }
     } catch (error) {
-      setError(handleApiError(error));
+        console.error('Report generation error:', error);
+        setError(handleApiError(error));
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
   };
 
@@ -406,22 +433,37 @@ const BillingForm = () => {
         <DialogContent>
           {previewData && (
             <>
-              <Typography variant="h6" gutterBottom>
-                {previewData.customer_name || 'Customer Report'}
-              </Typography>
-              <Typography variant="subtitle1" gutterBottom>
-                Period: {new Date(previewData.start_date).toLocaleDateString()} to{' '}
-                {new Date(previewData.end_date).toLocaleDateString()}
-              </Typography>
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="h6" gutterBottom>
+                  {previewData.customer_name || 'Customer Report'}
+                </Typography>
+                <Grid container spacing={2} sx={{ mb: 2 }}>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle1">
+                      Period: {new Date(previewData.start_date).toLocaleDateString()} to{' '}
+                      {new Date(previewData.end_date).toLocaleDateString()}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle1" align="right">
+                      Total Amount: ${previewData.total_amount || '0.00'}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Box>
               
-              <TableContainer component={Paper} sx={{ mt: 2 }}>
-                <Table>
+              <TableContainer component={Paper}>
+                <Table size="small">
                   <TableHead>
                     <TableRow>
                       <TableCell>Order ID</TableCell>
+                      <TableCell>Transaction Date</TableCell>
+                      <TableCell>Status</TableCell>
+                      <TableCell>Ship To</TableCell>
+                      <TableCell>Items</TableCell>
+                      <TableCell>Weight</TableCell>
                       <TableCell>Services</TableCell>
                       <TableCell align="right">Amount</TableCell>
-                      <TableCell>Date</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -429,30 +471,83 @@ const BillingForm = () => {
                       <TableRow key={order.order_id}>
                         <TableCell>{order.order_id}</TableCell>
                         <TableCell>
-                          {(order.services || []).map((service, index) => (
-                            <div key={service.service_id || index}>
-                              {service.service_name}: ${service.amount || '0.00'}
-                            </div>
-                          ))}
+                          {new Date(order.transaction_date).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell>
+                          <Chip 
+                            size="small"
+                            label={order.status}
+                            color={order.status === 'Completed' ? 'success' : 'default'}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Tooltip title={`${order.ship_to_address || ''}`}>
+                            <span>{order.ship_to_name}</span>
+                          </Tooltip>
+                        </TableCell>
+                        <TableCell>
+                          {order.total_items} items / {order.line_items} SKUs
+                        </TableCell>
+                        <TableCell>{order.weight_lb} lbs</TableCell>
+                        <TableCell>
+                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                            {(order.services || []).map((service, index) => (
+                              <Tooltip 
+                                key={service.service_id || index}
+                                title={`${service.service_name}: $${service.amount}`}
+                              >
+                                <Chip
+                                  size="small"
+                                  label={`${service.service_name}: $${service.amount}`}
+                                  sx={{ maxWidth: 200 }}
+                                />
+                              </Tooltip>
+                            ))}
+                          </Box>
                         </TableCell>
                         <TableCell align="right">
-                          ${order.total_amount || '0.00'}
+                          <strong>${order.total_amount || '0.00'}</strong>
                         </TableCell>
-                        <TableCell>{order.date || ''}</TableCell>
                       </TableRow>
                     ))}
                     <TableRow>
-                      <TableCell colSpan={2} align="right">
+                      <TableCell colSpan={7} align="right">
                         <strong>Total Amount:</strong>
                       </TableCell>
                       <TableCell align="right">
                         <strong>${previewData.total_amount || '0.00'}</strong>
                       </TableCell>
-                      <TableCell />
                     </TableRow>
                   </TableBody>
                 </Table>
               </TableContainer>
+
+              {/* Service Summary Section */}
+              <Box sx={{ mt: 3 }}>
+                <Typography variant="h6" gutterBottom>
+                  Service Summary
+                </Typography>
+                <TableContainer component={Paper}>
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Service</TableCell>
+                        <TableCell align="right">Total Amount</TableCell>
+                        <TableCell align="right">Order Count</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {Object.entries(previewData.service_totals || {}).map(([serviceId, details]) => (
+                        <TableRow key={serviceId}>
+                          <TableCell>{details.name}</TableCell>
+                          <TableCell align="right">${details.amount}</TableCell>
+                          <TableCell align="right">{details.order_count || 0}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Box>
             </>
           )}
         </DialogContent>
