@@ -27,12 +27,68 @@ const fs = require('fs');
 const path = require('path');
 const ignore = require('ignore');
 const chokidar = require('chokidar');
+const os = require('os');
+const isWindows = os.platform() === 'win32';
+
+// Function to get git executable path
+function getGitExecutable() {
+  // Check environment variable first
+  if (process.env.GIT_EXECUTABLE_PATH) {
+    return process.env.GIT_EXECUTABLE_PATH;
+  }
+  
+  // Try to load from config if it exists
+  let configGitPath = null;
+  try {
+    if (fs.existsSync('./linter-config.json')) {
+      const config = JSON.parse(fs.readFileSync('./linter-config.json', 'utf8'));
+      configGitPath = config.gitPath;
+    }
+  } catch (e) {
+    // Ignore config errors
+  }
+  
+  if (configGitPath) {
+    return configGitPath;
+  }
+  
+  // Default paths based on OS
+  if (isWindows) {
+    // Common Windows git paths
+    const windowsPaths = [
+      '/mnt/c/Users/Hassan/Desktop/Git/cmd/git.exe', // Found in your system
+      'C:\\Users\\Hassan\\Desktop\\Git\\cmd\\git.exe', // Windows path format
+      'C:\\Program Files\\Git\\bin\\git.exe',
+      'C:\\Program Files (x86)\\Git\\bin\\git.exe',
+      'C:\\Program Files\\GitHub CLI\\git.exe'
+    ];
+    
+    for (const gitPath of windowsPaths) {
+      try {
+        if (fs.existsSync(gitPath)) {
+          console.log(`Found Git at: ${gitPath}`);
+          return gitPath;
+        }
+      } catch (e) {
+        // Continue to next path
+      }
+    }
+  }
+  
+  // Default to 'git' command and let the system resolve it
+  return 'git';
+}
+
+// Use the function to get the git executable
+const GIT_EXECUTABLE = getGitExecutable();
 
 // Get project root directory (try git first, fall back to current directory)
-const GIT_PATH = '"C:\\Program Files\\GitHub CLI\\gh.exe"';
 let gitRoot;
 try {
-  gitRoot = execSync(`${GIT_PATH} rev-parse --show-toplevel`).toString().trim();
+  // Quote path if it contains spaces and on Windows
+  const gitCmd = isWindows && GIT_EXECUTABLE.includes(' ') ? 
+                `"${GIT_EXECUTABLE}"` : GIT_EXECUTABLE;
+  gitRoot = execSync(`${gitCmd} rev-parse --show-toplevel`).toString().trim();
   process.chdir(gitRoot);
 } catch (error) {
   console.log("Git not detected, using current directory as project root");
@@ -104,22 +160,28 @@ Sort issues by severity, then by filename and line number. Only report actual is
 // Get git diffs
 function getGitDiffs() {
   try {
+    // Get properly quoted git command
+    const gitCmd = isWindows && GIT_EXECUTABLE.includes(' ') ? 
+                 `"${GIT_EXECUTABLE}"` : GIT_EXECUTABLE;
+    
     // Check if git is available
     try {
-      execSync(`${GIT_PATH} --version`, { stdio: 'ignore' });
+      execSync(`${gitCmd} --version`, { stdio: 'ignore' });
     } catch (error) {
       return "Git not available. Skipping diff analysis.";
     }
     
     // Get list of changed files
-    const changedFiles = execSync(`${GIT_PATH} diff --name-only origin/main`).toString().trim().split('\n');
+    const changedFiles = execSync(`${gitCmd} diff --name-only origin/main`).toString().trim().split('\n');
     if (!changedFiles[0]) return "No changed files detected.";
 
     let diffs = "";
     for (const file of changedFiles) {
       if (!file || !fs.existsSync(file)) continue;
       diffs += `--- ${file} ---\n`;
-      diffs += execSync(`${GIT_PATH} diff origin/main -- "${file}"`).toString().trim() + "\n\n";
+      // Quote the file path for Windows
+      const quotedFile = isWindows ? `"${file}"` : `"${file}"`;
+      diffs += execSync(`${gitCmd} diff origin/main -- ${quotedFile}`).toString().trim() + "\n\n";
     }
     return diffs || "No meaningful diffs detected.";
   } catch (error) {
@@ -142,18 +204,24 @@ function getModifiedFilesContent(modifiedFiles) {
   }
 }
 
+// Cross-platform file finder using glob
+function findFiles(pattern, excludePattern = []) {
+  const glob = require('glob');
+  try {
+    return glob.sync(pattern, { ignore: excludePattern });
+  } catch (error) {
+    console.error(`Error finding files with pattern ${pattern}:`, error.message);
+    return [];
+  }
+}
+
 // Extract Django models structure
 function extractDjangoModels() {
   try {
-    // Find all Django models.py files
-    let modelFiles = [];
-    try {
-      modelFiles = execSync('find . -type f -name "models.py" | grep -v "migrations"').toString().trim().split('\n');
-    } catch (findError) {
-      return "Error finding Django model files. Make sure 'find' command is available.";
-    }
+    // Find all Django models.py files using glob
+    let modelFiles = findFiles('**/models.py', ['**/node_modules/**', '**/migrations/**', '**/venv/**']);
     
-    if (!modelFiles[0]) return "No Django model files found.";
+    if (!modelFiles.length) return "No Django model files found.";
     
     let modelsStructure = "DJANGO MODELS STRUCTURE:\n\n";
     
@@ -225,18 +293,10 @@ function extractDjangoModels() {
 // Extract React component structure
 function extractReactComponents() {
   try {
-    // Find all React component files (JSX)
-    let jsxFiles = [];
-    try {
-      jsxFiles = execSync('find ./frontend -type f -name "*.jsx" | grep -v "node_modules"').toString().trim().split('\n');
-    } catch (findError) {
-      return { 
-        componentsStructure: "Error finding React component files. Make sure 'find' command is available or frontend directory exists.",
-        allComponents: {}
-      };
-    }
+    // Find all React component files (JSX) using our cross-platform function
+    let jsxFiles = findFiles('./frontend/**/*.jsx', ['**/node_modules/**']);
     
-    if (!jsxFiles[0]) return { 
+    if (!jsxFiles.length) return { 
       componentsStructure: "No React component files found.",
       allComponents: {}
     };
@@ -441,18 +501,10 @@ function extractReactComponents() {
 // Extract DRF serializers
 function extractDjangoSerializers() {
   try {
-    // Find all Django serializers.py files
-    let serializerFiles = [];
-    try {
-      serializerFiles = execSync('find . -type f -name "serializers.py" | grep -v "migrations"').toString().trim().split('\n');
-    } catch (findError) {
-      return { 
-        serializersStructure: "Error finding Django serializer files. Make sure 'find' command is available.",
-        allSerializers: {}
-      };
-    }
+    // Find all Django serializers.py files using our cross-platform function
+    let serializerFiles = findFiles('**/serializers.py', ['**/node_modules/**', '**/migrations/**', '**/venv/**']);
     
-    if (!serializerFiles[0]) return { 
+    if (!serializerFiles.length) return { 
       serializersStructure: "No Django REST Framework serializer files found.",
       allSerializers: {}
     };
@@ -558,15 +610,10 @@ function extractDjangoSerializers() {
 // Extract Django API endpoints
 function extractDjangoApiEndpoints() {
   try {
-    // Find all Django urls.py files
-    let urlsFiles = [];
-    try {
-      urlsFiles = execSync('find . -type f -name "urls.py" | grep -v "migrations"').toString().trim().split('\n');
-    } catch (findError) {
-      return "Error finding Django URL files. Make sure 'find' command is available.";
-    }
+    // Find all Django urls.py files using our cross-platform function
+    let urlsFiles = findFiles('**/urls.py', ['**/node_modules/**', '**/migrations/**', '**/venv/**']);
     
-    if (!urlsFiles[0]) return "No Django URL configuration files found.";
+    if (!urlsFiles.length) return "No Django URL configuration files found.";
     
     let endpointsStructure = "DJANGO API ENDPOINTS:\n\n";
     
@@ -686,15 +733,10 @@ function correlateSerializersWithComponents(allSerializers, allComponents) {
 // Extract React API usage
 function extractReactApiUsage() {
   try {
-    // Find all JS/JSX files that might contain API calls
-    let jsFiles = [];
-    try {
-      jsFiles = execSync('find ./frontend -type f \\( -name "*.js" -o -name "*.jsx" \\) | grep -v "node_modules"').toString().trim().split('\n');
-    } catch (findError) {
-      return "Error finding React JS/JSX files. Make sure 'find' command is available or frontend directory exists.";
-    }
+    // Find all JS/JSX files that might contain API calls using our cross-platform function
+    let jsFiles = findFiles('./frontend/**/*.{js,jsx}', ['**/node_modules/**']);
     
-    if (!jsFiles[0]) return "No React JavaScript files found.";
+    if (!jsFiles.length) return "No React JavaScript files found.";
     
     let apiUsageStructure = "REACT API USAGE:\n\n";
     
@@ -789,9 +831,9 @@ function extractReactApiUsage() {
 // Build dependency graph (enhanced for Python & JavaScript)
 function analyzeDependencies(modifiedFiles = []) {
   try {
-    // Include both JS/TS and Python files
-    const allJsFiles = execSync('find . -type f \\( -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" \\) | grep -v "node_modules"').toString().trim().split('\n');
-    const allPyFiles = execSync('find . -type f -name "*.py" | grep -v "__pycache__" | grep -v "migrations"').toString().trim().split('\n');
+    // Include both JS/TS and Python files using our cross-platform function
+    const allJsFiles = findFiles('**/*.{js,jsx,ts,tsx}', ['**/node_modules/**']);
+    const allPyFiles = findFiles('**/*.py', ['**/__pycache__/**', '**/migrations/**', '**/venv/**']);
     
     const allFiles = [...allJsFiles, ...allPyFiles].filter(Boolean);
     
@@ -1019,15 +1061,78 @@ function getIgnorer() {
   return ig;
 }
 
+// Check if git is available
+function isGitAvailable() {
+  try {
+    // Get properly quoted git command
+    const gitCmd = isWindows && GIT_EXECUTABLE.includes(' ') ? 
+                 `"${GIT_EXECUTABLE}"` : GIT_EXECUTABLE;
+    
+    // Add more debug information
+    try {
+      const gitVersion = execSync(`${gitCmd} --version`, { stdio: ['ignore', 'pipe', 'pipe'] }).toString().trim();
+      console.log(`Git detected: ${gitVersion}`);
+      return true;
+    } catch (versionError) {
+      console.log(`Git command error: ${versionError.message}`);
+      // For Windows in WSL, try using `cmd.exe /c` prefix
+      if (isWindows) {
+        try {
+          // Try with direct Windows cmd.exe call
+          const cmdGitPath = GIT_EXECUTABLE.replace(/^\/mnt\/c\//, 'C:\\').replace(/\//g, '\\');
+          console.log(`Trying Windows cmd with: ${cmdGitPath}`);
+          const winVersion = execSync(`cmd.exe /c "${cmdGitPath}" --version`, { stdio: ['ignore', 'pipe', 'pipe'] }).toString().trim();
+          console.log(`Windows Git detected: ${winVersion}`);
+          return true;
+        } catch (winError) {
+          console.log(`Windows Git error: ${winError.message}`);
+        }
+      }
+      return false;
+    }
+  } catch (error) {
+    console.log(`Git availability check error: ${error.message}`);
+    return false;
+  }
+}
+
+// Check if Claude CLI is available and where (Windows or WSL)
+function checkClaudeCli() {
+  try {
+    // Try native Windows first
+    execSync('claude --version', { stdio: 'ignore' });
+    return { available: true, inWSL: false };
+  } catch (winError) {
+    // Try WSL next
+    try {
+      execSync('wsl claude --version', { stdio: 'ignore' });
+      console.log('Claude CLI detected in WSL environment');
+      return { available: true, inWSL: true };
+    } catch (wslError) {
+      return { available: false, inWSL: false };
+    }
+  }
+}
+
 // Run Claude analysis
 async function runAnalysis(modifiedFiles = []) {
   console.log("Analyzing code with Claude...");
   console.log("Extracting code structure and dependencies. This may take a moment...");
   
+  // Check if git is available
+  const gitAvailable = isGitAvailable();
+  
   // Get all required information
-  const diffs = getGitDiffs();
+  const diffs = gitAvailable ? getGitDiffs() : "Git not available. Skipping diff analysis.";
+  
+  console.log("Analyzing dependencies...");
   const { analysis: dependencies, affectedFiles } = analyzeDependencies(modifiedFiles);
-  const modifiedFilesContent = getModifiedFilesContent(affectedFiles);
+  
+  // If no specific files are provided, analyze the entire codebase
+  const filesToAnalyze = modifiedFiles.length > 0 ? affectedFiles : [];
+  const modifiedFilesContent = filesToAnalyze.length > 0 ? 
+                               getModifiedFilesContent(filesToAnalyze) : 
+                               "Analyzing full codebase.";
   
   console.log("Extracting Django models...");
   const backendStructure = extractDjangoModels();
@@ -1085,33 +1190,69 @@ async function runAnalysis(modifiedFiles = []) {
   
   // Run Claude CLI with the prompt
   try {
-    console.log(`Running analysis on ${modifiedFiles.length} modified files and ${affectedFiles.length - modifiedFiles.length} related files...`);
-    console.log("Sending code to Claude for analysis...");
+    console.log(`Running analysis on ${modifiedFiles.length} modified files and ${filesToAnalyze.length - modifiedFiles.length} related files...`);
+    console.log("Preparing data for Claude analysis...");
     
-    // Check if Claude CLI is available
-    try {
-      execSync('claude --version', { stdio: 'ignore' });
-      const result = execSync('claude -p "$(cat .claude-temp-prompt.txt)"').toString();
-      
-      // Display results with timestamp
-      const timestamp = new Date().toLocaleTimeString();
-      console.log(`\n=== CLAUDE ANALYSIS RESULTS (${timestamp}) ===\n`);
-      console.log(result);
-      console.log('\n=== END OF ANALYSIS ===\n');
-    } catch (cliError) {
+    // Check if Claude CLI is available and where
+    const claudeCliInfo = checkClaudeCli();
+    
+    if (claudeCliInfo.available) {
+      console.log("Sending code to Claude for analysis...");
+      try {
+        // Create a command based on where Claude CLI is available
+        let claudeCmd;
+        if (claudeCliInfo.inWSL) {
+          // Fix path for WSL by replacing backslashes and escaping properly
+          const wslPath = process.cwd().replace(/\\/g, '/').replace(/^([A-Z]):/i, '/mnt/$1').toLowerCase();
+          console.log(`Converting Windows path to WSL path: ${wslPath}`);
+          claudeCmd = `wsl bash -c "cd \\"${wslPath}\\" && claude -p \\".claude-temp-prompt.txt\\""`;
+        } else {
+          claudeCmd = 'claude -p ".claude-temp-prompt.txt"';
+        }
+        
+        console.log(`Executing Claude with command: ${claudeCmd}`);
+        
+        // Set a timeout for the claude command to avoid hanging
+        const result = execSync(claudeCmd, { 
+          timeout: 120000, // 2 minutes timeout
+          stdio: ['ignore', 'pipe', 'pipe'],
+          windowsHide: true // Hide command window on Windows
+        }).toString();
+        
+        // Display results with timestamp
+        const timestamp = new Date().toLocaleTimeString();
+        console.log(`\n=== CLAUDE ANALYSIS RESULTS (${timestamp}) ===\n`);
+        console.log(result);
+        console.log('\n=== END OF ANALYSIS ===\n');
+      } catch (cliRunError) {
+        console.log("Error running Claude analysis: " + cliRunError.message);
+        console.log("Analysis may have timed out or encountered an error.");
+        console.log("You can try running 'claude -p \".claude-temp-prompt.txt\"' manually.");
+      }
+    } else {
       console.log("Claude CLI not found or not properly configured.");
       console.log("To install Claude CLI, visit: https://github.com/anthropics/claude-cli");
       console.log("\nPrompt has been saved to .claude-temp-prompt.txt for manual analysis.");
       console.log("You can view this file and send its contents to Claude API directly.");
     }
   } catch (error) {
-    console.error("Error during analysis:", error.message);
+    console.error("Error during analysis preparation:", error.message);
   } finally {
-    // We'll keep the temp file for manual inspection if claude CLI isn't available
+    // We'll keep the temp file for manual inspection
     if (fs.existsSync('.claude-temp-prompt.txt')) {
-      console.log("Prompt file saved at .claude-temp-prompt.txt");
+      console.log("Analysis prompt saved at .claude-temp-prompt.txt");
+      console.log("Code structure has been extracted successfully.");
     }
   }
+  
+  // Provide a summary of what the linter found
+  console.log("\n=== LINTER SUMMARY ===");
+  console.log(`Models found: ${backendStructure.includes("MODEL: ") ? "Yes" : "No"}`);
+  console.log(`Serializers found: ${Object.keys(allSerializers).length} serializer(s)`);
+  console.log(`Components found: ${Object.keys(allComponents).length} component(s)`);
+  console.log(`API endpoints found: ${apiEndpoints.includes("ENDPOINT: ") ? "Yes" : "No"}`);
+  console.log(`Potential serializer-component correlations: ${correlations.length}`);
+  console.log("=== END OF SUMMARY ===")
 }
 
 // Main function for manual execution
