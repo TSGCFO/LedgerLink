@@ -121,7 +121,14 @@ API documentation is available at:
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
 - `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
+- `npm run lint` - Run ESLint (in frontend directory)
+
+### Project-level Scripts
+- `npm run lint` - Run fullstack AI-powered linter (analyzes backend and frontend)
+- `npm run lint:watch` - Run fullstack linter in watch mode
+- `npm run lint:claude` - Run raw Claude AI analysis
+
+See [LINTING.md](LINTING.md) for more details on our advanced linting capabilities.
 
 ## Best Practices
 
@@ -129,11 +136,13 @@ API documentation is available at:
    - Follow PEP 8 for Python code
    - Use ESLint for JavaScript/React code
    - Maintain consistent naming conventions
+   - Use our AI-powered linter for cross-stack issues
 
 2. Git Workflow:
    - Create feature branches
    - Write meaningful commit messages
    - Review code before merging
+   - Pre-commit hooks will run linting automatically
 
 3. Testing:
    - Write unit tests for new features

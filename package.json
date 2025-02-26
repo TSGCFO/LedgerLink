@@ -1,0 +1,15 @@
+{
+  "name": "ledgerlink",
+  "version": "1.0.0",
+  "description": "A modern web application built with Django REST Framework and React with Material UI",
+  "scripts": {
+    "lint": "node ./claude-lint-fullstack.js",
+    "lint:watch": "node ./claude-lint-fullstack.js --watch",
+    "lint:claude": "node ./claude-lint-fullstack.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "chokidar": "^3.6.0",
+    "ignore": "^5.3.1"
+  }
+}
