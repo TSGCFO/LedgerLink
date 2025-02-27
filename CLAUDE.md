@@ -87,6 +87,50 @@ npm run lint  # Run ESLint
 - PostgreSQL database hosted on Supabase
 - Contains views for specialized data access like OrderSKUView
 
+### Data Import Scripts
+The following scripts are available for importing data:
+
+```bash
+# Import orders from CSV file
+python import_orders.py orders_order_rows.csv
+
+# Import shipping data (CAD or US)
+python import_shipping.py shipping_cadshipping_rows.csv
+python import_shipping.py shipping_usshipping_rows.csv us
+
+# Import products
+python import_products.py products_product.csv
+
+# Check imported data
+python check_order_data.py
+python check_shipping_data.py
+python check_product_data.py
+```
+
+### Materialized View Maintenance
+
+Materialized views (`orders_sku_view` and `customer_services_customerserviceview`) should be refreshed regularly:
+
+```bash
+# Refresh all materialized views (standard mode)
+python manage.py refresh_all_views
+
+# Refresh with concurrent mode (for minimal locking when views are already populated)
+python manage.py refresh_all_views --concurrent
+```
+
+### Database Alignment
+
+The database schema should be aligned with Django models. If you find issues, use:
+
+```bash
+# Check for schema issues
+python manage.py check
+
+# Fix database alignment issues (if needed)
+python fix_db_alignment.py
+```
+
 ## API Structure
 - RESTful API endpoints for CRUD operations
 - JWT authentication

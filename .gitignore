@@ -97,3 +97,21 @@ postcss.config.js
 PGSQL_commands.md
 package-lock.json
 node_modules
+
+# Temporary data import and database alignment scripts
+import_orders.py
+import_shipping.py
+import_products.py
+check_order_data.py
+check_shipping_data.py
+check_product_data.py
+fix_db_alignment.py
+fix_url_namespaces.py
+refresh_view.py
+database_schema.txt
+order_sku_view_inspectdb.txt
+db_alignment_results.md
+data_import_summary.md
+shipping_import_errors.log
+product_import_errors.log
+order_import_errors.log
