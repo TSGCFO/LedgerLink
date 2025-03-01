@@ -26,28 +26,49 @@ const OrderList = () => {
   const [statusCounts, setStatusCounts] = useState({});
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+    totalCount: 0,
+  });
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchOrders();
+    fetchOrders({}, { pageIndex: 0, pageSize: pagination.pageSize });
   }, []);
 
   useEffect(() => {
     updateStatusCounts();
   }, [orders]);
 
-  const fetchOrders = async (filters = {}) => {
+  const fetchOrders = async (filters = {}, pageParams = {}) => {
     try {
-      const params = {};
+      setIsLoading(true);
+      const params = {
+        page: pageParams.pageIndex !== undefined ? pageParams.pageIndex + 1 : pagination.pageIndex + 1,
+        page_size: pageParams.pageSize !== undefined ? pageParams.pageSize : pagination.pageSize
+      };
+      
       if (filters.search) params.search = filters.search;
+      if (filters.status) params.status = filters.status;
+      if (filters.priority) params.priority = filters.priority;
       
       const response = await orderApi.list(params);
+      
       if (response.success) {
         setOrders(response.data);
+        setPagination({
+          pageIndex: params.page - 1,
+          pageSize: params.page_size,
+          totalCount: response.count || 0,
+        });
         updateStatusCounts();
       }
     } catch (error) {
       setError(handleApiError(error));
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -394,10 +415,28 @@ const OrderList = () => {
           data={orders}
           enableColumnFiltering
           enableGlobalFilter
-          enablePagination
           enableSorting
           enableColumnResizing
           columnResizeMode="onChange"
+          manualPagination
+          rowCount={pagination.totalCount}
+          state={{
+            pagination: {
+              pageIndex: pagination.pageIndex,
+              pageSize: pagination.pageSize,
+            },
+            isLoading,
+          }}
+          onPaginationChange={(updater) => {
+            const newPagination = typeof updater === 'function'
+              ? updater(pagination)
+              : updater;
+            
+            fetchOrders({}, {
+              pageIndex: newPagination.pageIndex,
+              pageSize: newPagination.pageSize,
+            });
+          }}
           muiToolbarAlertBannerProps={
             error
               ? {
@@ -422,7 +461,6 @@ const OrderList = () => {
           }}
           initialState={{
             density: 'compact',
-            pagination: { pageSize: 10 },
           }}
         />
       </Paper>

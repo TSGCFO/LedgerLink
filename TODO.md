@@ -115,6 +115,12 @@
    - Test rule groups
    - Test performance
 
+4. [x] Test case-based tier handling
+   - Verify tier_config structure
+   - Test tier calculation logic 
+   - Validate min/max field behavior
+   - Test tier range overlaps
+
 ### Frontend Testing
 1. [ ] Test advanced rule creation
    - Test form validation
@@ -134,6 +140,12 @@
    - Test error handling
    - Test performance
 
+4. [x] Test case-based tier UI
+   - Verify tier_config field appears correctly
+   - Test tier addition/removal
+   - Test validation messages
+   - Verify form submission format
+
 ### Integration Testing
 1. [ ] End-to-end tests
    - Test complete rule lifecycle
@@ -146,6 +158,12 @@
    - Test concurrent operations
    - Test system stability
    - Monitor performance
+
+3. [x] Validation consistency testing
+   - Verify client-side validation matches server-side
+   - Test error message consistency
+   - Validate field requirements match
+   - Test edge cases on both sides
 
 ## Documentation
 1. [ ] Update API documentation

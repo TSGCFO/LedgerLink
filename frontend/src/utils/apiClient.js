@@ -366,6 +366,8 @@ export const orderApi = {
     if (params.search) queryParams.append('search', params.search);
     if (params.status) queryParams.append('status', params.status);
     if (params.priority) queryParams.append('priority', params.priority);
+    if (params.page) queryParams.append('page', params.page);
+    if (params.page_size) queryParams.append('page_size', params.page_size);
     const query = queryParams.toString() ? `?${queryParams.toString()}` : '';
     return request(`/orders/${query}`);
   },

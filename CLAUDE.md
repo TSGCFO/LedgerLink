@@ -90,6 +90,9 @@ npm run lint:claude  # Claude-only analysis without additional processing
 - **Customer**: Basic customer information (company_name, contact details, etc.)
 - **Order**: Transaction details with shipping information and SKU quantities
 - **Rule/RuleGroup**: Business logic for determining service pricing
+  - **BasicRule**: Simple condition-based rules (field, operator, value)
+  - **AdvancedRule**: Complex rules with JSON-based conditions and calculations
+    - Supports case-based tiers with min/max ranges and values in tier_config
 - **BillingReport**: Generated billing reports for customers
 
 ## Database
@@ -233,6 +236,20 @@ def create_order(self):
 - Use server-side validation for all form inputs
 - Follow existing rules pattern for new business logic
 - Remember to update both frontend and backend components when changing models
+
+## Rules System Testing
+- **Case-Based Tiers**: Test with various min/max ranges to ensure proper calculation
+  - Use `case_based_tier` field type in the frontend
+  - Ensure `tier_config` is included at the root level of the rule JSON
+  - Validate proper tier progression (min/max shouldn't overlap)
+  - Test edge cases at tier boundaries
+- **Server-Side Validation**: Always matches client-side validation constraints
+  - Validate both in frontend (AdvancedRuleBuilder.jsx) and backend (validators.py)
+  - Check for proper error messages and validation logic consistency
+- **Rule Execution**: Test rule evaluation with real SKU and order data
+  - Create comprehensive test cases for each rule type
+  - Verify calculation accuracy especially with decimal values
+  - Validate complex nested conditions and rule groups
 
 ## Project Architecture Summary
 - Django REST Framework backend with PostgreSQL database
