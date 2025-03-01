@@ -24,9 +24,10 @@ npm run dev  # Frontend server (http://localhost:5175)
 npm run build  # Build for production
 npm run lint  # Run ESLint
 
-# Fullstack Linting
-npm run lint  # Complete fullstack analysis
-npm run lint:watch  # Linter in watch mode
+# AI-Powered Fullstack Linting
+npm run lint  # Complete fullstack analysis with Claude AI
+npm run lint:watch  # Claude linter in watch mode
+npm run lint:claude  # Claude-only analysis without additional processing
 ```
 
 ## Code Style Guidelines
@@ -44,6 +45,13 @@ npm run lint:watch  # Linter in watch mode
   - Props destructuring and PropTypes validation
   - Clear error boundaries and fallbacks
   - Prefer named exports over default exports
+
+## Linting Framework
+- **AI-Powered Analysis**: Uses Claude AI for intelligent code scanning
+- **Cross-stack Validation**: Checks consistency between Django and React
+- **API Endpoint Validation**: Ensures backend endpoints match frontend calls
+- **Pre-commit Hook**: Runs automatically before each commit
+- **Custom Linting Scripts**: Located in project root (`claude-lint-*.js`)
 
 ## Project Structure
 ### Backend (Django)
@@ -133,11 +141,12 @@ python fix_db_alignment.py
 ```
 
 ## API Structure
-- RESTful API endpoints for CRUD operations
-- JWT authentication
-- Custom error handling and response formatting
-- API client with token refresh
-- Comprehensive error logging
+- RESTful API endpoints for CRUD operations following Django REST Framework conventions
+- JWT authentication with token refresh mechanism
+- Custom exception classes in api/exceptions.py
+- Consistent response format with error handling
+- API client with automatic token refresh in frontend/src/utils/apiClient.js
+- Comprehensive request/response logging
 
 ## Logging System
 
@@ -215,8 +224,20 @@ def create_order(self):
 - Use `test_logging.js` for scripted test cases
 - Use `test_server_logging.py` to test server-side API
 
-## Notes
-- The application appears to be a fulfillment/logistics management system
-- Billing uses a complex rule system to calculate charges based on order attributes
-- Rules can be simple or advanced with different calculation methods (flat fee, percentage, tiered, etc.)
-- The frontend uses a proxy setup to forward API requests to the backend during development
+## Development Best Practices
+- Run linting in watch mode during active development
+- Always run tests before committing changes
+- Follow existing code patterns for consistency
+- Use the logging system for debugging
+- Refresh materialized views after data changes
+- Use server-side validation for all form inputs
+- Follow existing rules pattern for new business logic
+- Remember to update both frontend and backend components when changing models
+
+## Project Architecture Summary
+- Django REST Framework backend with PostgreSQL database
+- React frontend with Material UI components
+- JWT authentication for API security
+- Complex rule system for business logic and pricing
+- Comprehensive logging at all levels
+- Bulk operations for data import/export

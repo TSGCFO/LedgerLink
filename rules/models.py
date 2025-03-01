@@ -42,6 +42,17 @@ def normalize_sku(sku):
 
 
 class RuleGroup(models.Model):
+    """
+    A group of rules with a logical operator that determines how the rules are combined.
+    
+    Rules within a group are combined using the logic_operator, which can be one of:
+    AND: All rules must evaluate to True
+    OR: At least one rule must evaluate to True
+    NOT: No rules should evaluate to True
+    XOR: Exactly one rule must evaluate to True
+    NAND: At least one rule must evaluate to False
+    NOR: All rules must evaluate to False
+    """
     LOGIC_CHOICES = [
         ('AND', 'All conditions must be true (AND)'),
         ('OR', 'Any condition can be true (OR)'),
@@ -51,8 +62,18 @@ class RuleGroup(models.Model):
         ('NOR', 'None of the conditions must be true (NOR)'),
     ]
 
-    customer_service = models.ForeignKey(CustomerService, on_delete=models.CASCADE)
-    logic_operator = models.CharField(max_length=5, choices=LOGIC_CHOICES, default='AND')
+    customer_service = models.ForeignKey(
+        CustomerService, 
+        on_delete=models.CASCADE,
+        db_index=True,  # Add index for improved query performance
+        help_text="The customer service this rule group applies to"
+    )
+    logic_operator = models.CharField(
+        max_length=5, 
+        choices=LOGIC_CHOICES, 
+        default='AND',
+        help_text="Logic operator to apply when evaluating rules in this group"
+    )
 
     def __str__(self):
         return f"Rule Group for {self.customer_service} ({self.get_logic_operator_display()})"
@@ -82,6 +103,13 @@ class RuleGroup(models.Model):
 
 
 class Rule(models.Model):
+    """
+    Basic rule that evaluates a condition on an order field and applies a price adjustment.
+    
+    A rule consists of a field, operator, and value that are evaluated against
+    an order to determine if the rule applies. If the rule applies, the adjustment_amount
+    can be applied to modify pricing.
+    """
     FIELD_CHOICES = [
         ('reference_number', 'Reference Number'),
         ('ship_to_name', 'Ship To Name'),
@@ -117,16 +145,34 @@ class Rule(models.Model):
         ('endswith', 'Ends with'),
     ]
 
-    rule_group = models.ForeignKey(RuleGroup, on_delete=models.CASCADE, related_name='rules')
-    field = models.CharField(max_length=50, choices=FIELD_CHOICES)
-    operator = models.CharField(max_length=15, choices=OPERATOR_CHOICES)
-    value = models.CharField(max_length=255, help_text="For multiple values, separate them with a semicolon (;)")
+    rule_group = models.ForeignKey(
+        RuleGroup, 
+        on_delete=models.CASCADE, 
+        related_name='rules',
+        db_index=True,  # Add index for improved query performance
+        help_text="The rule group this rule belongs to"
+    )
+    field = models.CharField(
+        max_length=50, 
+        choices=FIELD_CHOICES,
+        db_index=True,  # Add index for improved filtering
+        help_text="Order field to evaluate"
+    )
+    operator = models.CharField(
+        max_length=15, 
+        choices=OPERATOR_CHOICES,
+        help_text="Comparison operator"
+    )
+    value = models.CharField(
+        max_length=255, 
+        help_text="For multiple values, separate them with a semicolon (;)"
+    )
     adjustment_amount = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         null=True,
         blank=True,
-        help_text="Amount to adjust the price"
+        help_text="Amount to adjust the price when this rule applies"
     )
 
     def __str__(self):
@@ -177,16 +223,26 @@ class Rule(models.Model):
 
 
 class AdvancedRule(Rule):
-    """Extended Rule model with complex conditions and calculations"""
+    """
+    Extended Rule model with complex conditions and calculations.
+    
+    AdvancedRule extends the basic Rule model with:
+    1. Additional conditions as a JSON structure
+    2. Complex calculation methods that go beyond simple adjustment amounts
+    3. Tiered pricing configurations for case-based pricing
+    
+    This model supports various pricing strategies including flat fees, percentages,
+    per-unit pricing, weight/volume-based pricing, tiered pricing, and product-specific rates.
+    """
 
     CALCULATION_TYPES = [
-        'flat_fee',  # Add fixed amount
-        'percentage',  # Add percentage of base price
-        'per_unit',  # Multiply by quantity
-        'weight_based',  # Multiply by weight
-        'volume_based',  # Multiply by volume
-        'tiered_percentage',  # Apply percentage based on value tiers
-        'product_specific',  # Apply specific rates per product
+        'flat_fee',        # Add fixed amount
+        'percentage',      # Add percentage of base price
+        'per_unit',        # Multiply by quantity
+        'weight_based',    # Multiply by weight
+        'volume_based',    # Multiply by volume
+        'tiered_percentage', # Apply percentage based on value tiers
+        'product_specific', # Apply specific rates per product
         'case_based_tier'  # New type for case-based calculations
     ]
 
