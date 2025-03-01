@@ -16,6 +16,7 @@ urlpatterns = [
     path('fields/', views.get_available_fields, name='get_available_fields'),
     path('calculation-types/', views.get_calculation_types, name='get_calculation_types'),
     path('validate-rule-value/', views.validate_rule_value, name='validate_rule_value'),
+    path('test-rule/', views.test_rule, name='test_rule'),
     path('group/<int:group_id>/rules/', views.get_rules, name='get_rules'),
     path('group/<int:group_id>/rule/create/api/', views.create_or_update_rule, name='api_create_rule'),
     path('rule/<int:pk>/edit/api/', views.create_or_update_rule, name='api_update_rule'),
@@ -55,6 +56,7 @@ urlpatterns = [
          name='delete_rule'),
 
     # Advanced Rule URLs
+    # Frontend views - HTML Templates
     path('group/<int:group_id>/advanced-rule/create/',
          views.AdvancedRuleCreateView.as_view(),
          name='create_advanced_rule'),
@@ -64,5 +66,16 @@ urlpatterns = [
     path('advanced-rule/<int:pk>/delete/',
          views.AdvancedRuleDeleteView.as_view(),
          name='delete_advanced_rule'),
+         
+    # API endpoints - JSON only
+    path('group/<int:group_id>/advanced-rule/create/api/',
+         views.create_or_update_rule,
+         name='api_create_advanced_rule'),
+    path('advanced-rule/<int:pk>/edit/api/',
+         views.create_or_update_rule,
+         name='api_update_advanced_rule'),
+    path('advanced-rule/<int:pk>/delete/api/',
+         views.delete_rule,
+         name='api_delete_advanced_rule'),
     path('group/<int:group_id>/skus/', views.get_customer_skus, name='get_customer_skus'),
 ]

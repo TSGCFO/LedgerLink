@@ -115,3 +115,18 @@ data_import_summary.md
 shipping_import_errors.log
 product_import_errors.log
 order_import_errors.log
+
+# Added files to ignore
+.claude-temp-prompt.txt
+customer_services.csv
+inserts.csv
+import_customer_services.py
+import_inserts.py
+whatsapp_transaction_bot.json
+frontend/src/components/rules/BasicRuleForm.jsx
+frontend/src/components/rules/CalculationBuilder.jsx
+frontend/src/components/rules/ConditionBuilder.jsx
+frontend/src/components/rules/RuleTester.jsx
+frontend/src/utils/validationUtils.js
+rules/migrations/0012_alter_rule_adjustment_amount_alter_rule_field_and_more.py
+rules/utils/

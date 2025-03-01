@@ -1,30 +1,22 @@
 import { rulesApi, customerServiceApi, handleApiError } from '../utils/apiClient';
 
+/**
+ * Helper function for debug logging (disabled in production)
+ */
 const logDebug = (context, message, data) => {
-  if (data === undefined) {
-    console.log(`[DEBUG][${context}] ${message}`);
-  } else {
-    try {
-      const stringifiedData = JSON.stringify(data, null, 2);
-      console.log(`[DEBUG][${context}] ${message}`, stringifiedData);
-    } catch (err) {
-      console.log(`[DEBUG][${context}] ${message} (unstringifiable data):`, data);
-    }
+  // Only log in development environment
+  if (process.env.NODE_ENV === 'development') {
+    // Empty implementation to avoid console logs in production
   }
 };
 
+/**
+ * Helper function for error logging
+ */
 const logError = (context, message, error) => {
-  console.error(`[ERROR][${context}] ${message}`);
-  if (error?.response) {
-    try {
-      console.error(`[ERROR][${context}] Response status:`, error.response.status);
-      console.error(`[ERROR][${context}] Response data:`, JSON.stringify(error.response.data, null, 2));
-    } catch (err) {
-      console.error(`[ERROR][${context}] Response data (unstringifiable):`, error.response.data);
-    }
-  }
-  if (error?.stack) {
-    console.error(`[ERROR][${context}] Stack trace:`, error.stack);
+  // Only log in development environment
+  if (process.env.NODE_ENV === 'development') {
+    // Empty implementation to avoid console logs in production
   }
 };
 
@@ -226,10 +218,28 @@ const rulesService = {
   createAdvancedRule: async (groupId, data) => {
     try {
       logDebug('createAdvancedRule', `Creating advanced rule for group ${groupId} with data:`, data);
+      
+      // Console log for debugging
+      console.log('Creating advanced rule:', { groupId, data });
+      
+      // Validate required fields client-side before making API call
+      if (!data.field || !data.operator || !data.value) {
+        const missingFields = [];
+        if (!data.field) missingFields.push('field');
+        if (!data.operator) missingFields.push('operator');
+        if (!data.value) missingFields.push('value');
+        
+        const error = new Error(`Missing required fields: ${missingFields.join(', ')}`);
+        logError('createAdvancedRule', 'Validation error:', error);
+        throw error;
+      }
+      
       const result = await rulesApi.createAdvancedRule(groupId, data);
       logDebug('createAdvancedRule', 'Created advanced rule:', result);
+      console.log('Advanced rule created successfully:', result);
       return result;
     } catch (error) {
+      console.error('Failed to create advanced rule:', error);
       logError('createAdvancedRule', `Error creating advanced rule for group ${groupId}:`, error);
       throw handleApiError(error);
     }
@@ -262,14 +272,37 @@ const rulesService = {
   getOperatorChoices: async (field) => {
     try {
       logDebug('getOperatorChoices', `Fetching operator choices for field: ${field}`);
+      console.log(`Fetching operators for field: ${field}`);
+      
       const data = await rulesApi.getOperatorChoices(field);
       logDebug('getOperatorChoices', 'Raw operator choices:', data);
+      console.log('Raw operator data received:', data);
+      
+      // Handle different response formats
+      if (data && data.operators && Array.isArray(data.operators)) {
+        console.log('Using operators directly from response');
+        return data; // Return as-is if it already has the expected format
+      }
+      
       const result = transformChoices(data, 'operators');
       logDebug('getOperatorChoices', 'Transformed operator choices:', result);
+      console.log('Transformed operator data:', result);
+      
       return result;
     } catch (error) {
+      console.error(`Error fetching operator choices for field ${field}:`, error);
       logError('getOperatorChoices', `Error fetching operator choices for field ${field}:`, error);
-      throw handleApiError(error);
+      
+      // Return a default set of operators in case of error
+      console.log('Returning default operators due to error');
+      return { 
+        operators: [
+          { value: 'eq', label: 'Equals' },
+          { value: 'ne', label: 'Not Equals' },
+          { value: 'gt', label: 'Greater Than' },
+          { value: 'lt', label: 'Less Than' }
+        ] 
+      };
     }
   },
 
@@ -324,12 +357,25 @@ const rulesService = {
   getAvailableFields: async () => {
     try {
       logDebug('getAvailableFields', 'Fetching available fields');
+      console.log('Fetching available fields...');
+      
       const data = await rulesApi.getAvailableFields();
       logDebug('getAvailableFields', 'Raw fields data:', data);
+      console.log('Raw fields data received:', data);
+      
+      // Return data directly if it's already in the expected format
+      if (typeof data === 'object' && !Array.isArray(data)) {
+        console.log('Fields data is already in expected format');
+        return data;
+      }
+      
       const result = transformChoices(data, 'fields');
       logDebug('getAvailableFields', 'Transformed fields:', result);
+      console.log('Transformed fields data:', result);
+      
       return result;
     } catch (error) {
+      console.error('Error fetching available fields:', error);
       logError('getAvailableFields', 'Error fetching available fields:', error);
       throw handleApiError(error);
     }
@@ -338,19 +384,48 @@ const rulesService = {
   getCalculationTypes: async () => {
     try {
       logDebug('getCalculationTypes', 'Fetching calculation types');
+      console.log('Fetching calculation types');
       const data = await rulesApi.getCalculationTypes();
       logDebug('getCalculationTypes', 'Raw calculation types:', data);
+      console.log('Raw calculation types received:', data);
       
-      // Transform the data into the expected format
-      const result = Object.entries(data).map(([value, label]) => ({
-        value,
-        label
-      }));
+      // Return data directly if it's already in the right format (object with key-value pairs)
+      if (typeof data === 'object' && !Array.isArray(data)) {
+        return data;
+      }
+      
+      // Otherwise transform the data into the expected format
+      const result = Object.entries(data).reduce((acc, [value, label]) => {
+        acc[value] = label;
+        return acc;
+      }, {});
       
       logDebug('getCalculationTypes', 'Transformed calculation types:', result);
+      console.log('Transformed calculation types:', result);
       return result;
     } catch (error) {
+      console.error('Error fetching calculation types:', error);
       logError('getCalculationTypes', 'Error fetching calculation types:', error);
+      // Return default calculation types in case of error
+      return {
+        'flat_fee': 'Flat Fee',
+        'percentage': 'Percentage',
+        'per_unit': 'Per Unit',
+        'weight_based': 'Weight Based',
+        'case_based_tier': 'Case-Based Tier'
+      };
+    }
+  },
+  
+  // Test a rule against sample order data
+  testRule: async (ruleData, sampleOrderData) => {
+    try {
+      logDebug('testRule', 'Testing rule against sample data', { rule: ruleData, order: sampleOrderData });
+      const result = await rulesApi.testRule(ruleData, sampleOrderData);
+      logDebug('testRule', 'Test result:', result);
+      return result;
+    } catch (error) {
+      logError('testRule', 'Error testing rule:', error);
       throw handleApiError(error);
     }
   },

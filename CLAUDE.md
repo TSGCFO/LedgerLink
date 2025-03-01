@@ -3,30 +3,19 @@
 ## Project Overview
 LedgerLink is a web application built with Django REST Framework and React with Material UI. It provides a system for managing customers, orders, products, and billing for a fulfillment or logistics business.
 
-## Linting and Code Quality
-The project uses an AI-powered fullstack linting system based on Claude. These scripts analyze code across the Django backend and React frontend to catch issues that traditional linters miss:
-
-- `npm run lint` - Run a complete fullstack analysis
-- `npm run lint:watch` - Run the linter in watch mode
-- `npm run lint:claude` - Run raw Claude analysis
-
-The lint scripts detect critical issues like:
-- API endpoint mismatches between backend and frontend
-- Data structure inconsistencies between Django models and React components
-- Security vulnerabilities and performance issues
-- Other common bugs and logic errors
-
-For more details, see LINTING.md.
-
-## Important Commands
+## Build, Lint, and Test Commands
 ```bash
 # Backend (Django)
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 python manage.py migrate
-python manage.py createsuperuser
 python manage.py runserver  # Backend server (http://localhost:8000)
+
+# Testing
+python manage.py test  # Run all tests
+python manage.py test <app_name>  # Test specific app
+python manage.py test <app_name>.tests.<TestClass>.<test_method>  # Run single test
 
 # Frontend (React)
 cd frontend
@@ -34,15 +23,35 @@ npm install
 npm run dev  # Frontend server (http://localhost:5175)
 npm run build  # Build for production
 npm run lint  # Run ESLint
+
+# AI-Powered Fullstack Linting
+npm run lint  # Complete fullstack analysis with Claude AI
+npm run lint:watch  # Claude linter in watch mode
+npm run lint:claude  # Claude-only analysis without additional processing
 ```
 
-## Code Style and Conventions
-- Django apps follow standard Django structure
-- PEP 8 standards for Python code
-- React components use functional components with hooks
-- React Router for navigation
-- Material UI for component library
-- API endpoints are RESTful
+## Code Style Guidelines
+- **Python**: Follow PEP 8 standards with 4-space indentation
+  - Use absolute imports with Django app structure
+  - Type hints encouraged for function parameters and returns
+  - Follow Django's model->serializer->view pattern
+  - Error handling with custom exceptions defined in api/exceptions.py
+  - Naming: snake_case for variables/functions, PascalCase for classes
+  
+- **JavaScript/React**: 
+  - Use ESLint with configured rules (strictNullChecks: true)
+  - Functional components with hooks, avoid class components
+  - Material UI for component library (v5)
+  - Props destructuring and PropTypes validation
+  - Clear error boundaries and fallbacks
+  - Prefer named exports over default exports
+
+## Linting Framework
+- **AI-Powered Analysis**: Uses Claude AI for intelligent code scanning
+- **Cross-stack Validation**: Checks consistency between Django and React
+- **API Endpoint Validation**: Ensures backend endpoints match frontend calls
+- **Pre-commit Hook**: Runs automatically before each commit
+- **Custom Linting Scripts**: Located in project root (`claude-lint-*.js`)
 
 ## Project Structure
 ### Backend (Django)
@@ -132,14 +141,103 @@ python fix_db_alignment.py
 ```
 
 ## API Structure
-- RESTful API endpoints for CRUD operations
-- JWT authentication
-- Custom error handling and response formatting
-- API client with token refresh
-- Comprehensive error logging
+- RESTful API endpoints for CRUD operations following Django REST Framework conventions
+- JWT authentication with token refresh mechanism
+- Custom exception classes in api/exceptions.py
+- Consistent response format with error handling
+- API client with automatic token refresh in frontend/src/utils/apiClient.js
+- Comprehensive request/response logging
 
-## Notes
-- The application appears to be a fulfillment/logistics management system
-- Billing uses a complex rule system to calculate charges based on order attributes
-- Rules can be simple or advanced with different calculation methods (flat fee, percentage, tiered, etc.)
-- The frontend uses a proxy setup to forward API requests to the backend during development
+## Logging System
+
+### Client-Side Logging
+- Implemented in `frontend/src/utils/logger.js`
+- Captures all console logs (debug, info, warn, error) automatically
+- Stores logs in localStorage with timestamp and contextual data
+- Maximum storage of 10,000 logs with automatic rotation
+
+#### Usage
+```javascript
+// Import in components
+import logger from '../utils/logger';
+
+// Log at different levels
+logger.debug('Debug message', { optional: 'data' });
+logger.info('Info message');
+logger.warn('Warning message');
+logger.error('Error message', error); // Optional error object
+
+// API logging (used by apiClient.js)
+logger.logApiRequest(method, url, options);
+logger.logApiResponse(method, url, response, data);
+logger.logApiError(method, url, error);
+
+// Log management
+const logs = logger.getLogs();  // Get all stored logs
+logger.clearLogs();             // Clear all logs
+logger.exportLogs();            // Download logs as JSON file
+await logger.saveLogsToServer(); // Save logs to server
+```
+
+#### Log Viewer
+- Access the log viewer by clicking the bug icon in the app header
+- View, filter, search and export logs
+- Save logs to server for admin access
+
+### Server-Side Logging
+- Django logging configured in `LedgerLink/logging_settings.py`
+- Client logs saved in `logs/client/` directory
+- System logs in `logs/` directory:
+  - `debug_YYYYMMDD.log` - All levels
+  - `error_YYYYMMDD.log` - Error level only
+  - `api_YYYYMMDD.log` - API requests and responses
+
+#### API Endpoints
+```
+# Save client logs
+POST /api/v1/logs/client/
+
+# List client log files (admin only)
+GET /api/v1/logs/client/list/ 
+
+# Get client log file content (admin only)
+GET /api/v1/logs/client/<filename>/
+```
+
+#### Decorator Usage
+```python
+from api.utils.logging_utils import log_view_access, log_model_access
+
+# Log view access with timing info
+@log_view_access(logger=customers_logger)
+def my_view(request):
+    # View code here
+
+# Log model operations
+@log_model_access(logger=orders_logger)
+def create_order(self):
+    # Model method code here
+```
+
+## Testing the Logging System
+- Use `logging_test.html` to test client-side logging
+- Use `test_logging.js` for scripted test cases
+- Use `test_server_logging.py` to test server-side API
+
+## Development Best Practices
+- Run linting in watch mode during active development
+- Always run tests before committing changes
+- Follow existing code patterns for consistency
+- Use the logging system for debugging
+- Refresh materialized views after data changes
+- Use server-side validation for all form inputs
+- Follow existing rules pattern for new business logic
+- Remember to update both frontend and backend components when changing models
+
+## Project Architecture Summary
+- Django REST Framework backend with PostgreSQL database
+- React frontend with Material UI components
+- JWT authentication for API security
+- Complex rule system for business logic and pricing
+- Comprehensive logging at all levels
+- Bulk operations for data import/export
