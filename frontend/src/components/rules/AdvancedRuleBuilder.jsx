@@ -304,12 +304,14 @@ const AdvancedRuleBuilder = ({ groupId, initialData, onSubmit, onCancel }) => {
       // Format the data for submission
       const submissionData = {
         ...formData,
+        // Ensure tier_config is provided at the root level for the backend model validation
+        tier_config: formData.tier_config,
         calculations: formData.calculations.map(calc => {
+          // We'll keep a reference to tier_config here as well for completeness
           if (calc.type === 'case_based_tier') {
             return {
               type: calc.type,
-              value: calc.value,
-              tier_config: formData.tier_config
+              value: calc.value
             };
           }
           return calc;

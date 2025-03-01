@@ -661,6 +661,45 @@ def validate_calculations(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        # Check if any calculation is of type 'case_based_tier'
+        has_case_based_tier = any(
+            isinstance(calc, dict) and 
+            calc.get('type') == 'case_based_tier' 
+            for calc in calculations
+        )
+
+        # If case_based_tier is used, validate tier_config at the root level
+        if has_case_based_tier:
+            tier_config = request.data.get('tier_config')
+            if not tier_config:
+                raise ValidationError('tier_config is required for case_based_tier calculations')
+                
+            if not isinstance(tier_config, dict):
+                raise ValidationError('tier_config must be a dictionary')
+                
+            if 'ranges' not in tier_config:
+                raise ValidationError('ranges are required in tier_config')
+                
+            ranges = tier_config['ranges']
+            if not isinstance(ranges, list):
+                raise ValidationError('ranges must be a list')
+                
+            for tier in ranges:
+                if not all(k in tier for k in ('min', 'max', 'multiplier')):
+                    raise ValidationError('Each tier must have min, max, and multiplier')
+                    
+                if float(tier['min']) > float(tier['max']):
+                    raise ValidationError(f'Min value ({tier["min"]}) cannot be greater than max value ({tier["max"]})')
+                    
+                if float(tier['multiplier']) <= 0:
+                    raise ValidationError('Multiplier must be greater than 0')
+            
+            # Validate excluded_skus if present
+            excluded_skus = tier_config.get('excluded_skus', [])
+            if excluded_skus and not isinstance(excluded_skus, list):
+                raise ValidationError('excluded_skus must be a list of SKU strings')
+
+        # Validate each calculation individually
         for calc in calculations:
             if not isinstance(calc, dict):
                 raise ValidationError('Each calculation must be a dictionary')
@@ -671,39 +710,13 @@ def validate_calculations(request):
             if calc['type'] not in AdvancedRule.CALCULATION_TYPES:
                 raise ValidationError(f'Invalid calculation type: {calc["type"]}')
             
-            # Special handling for case_based_tier
-            if calc['type'] == 'case_based_tier':
-                if 'tier_config' not in calc:
-                    raise ValidationError('tier_config is required for case_based_tier')
-                    
-                tier_config = calc['tier_config']
-                if not isinstance(tier_config, dict):
-                    raise ValidationError('tier_config must be a dictionary')
-                    
-                if 'ranges' not in tier_config:
-                    raise ValidationError('ranges are required in tier_config')
-                    
-                ranges = tier_config['ranges']
-                if not isinstance(ranges, list):
-                    raise ValidationError('ranges must be a list')
-                    
-                for tier in ranges:
-                    if not all(k in tier for k in ('min', 'max', 'multiplier')):
-                        raise ValidationError('Each tier must have min, max, and multiplier')
-                        
-                    if tier['min'] > tier['max']:
-                        raise ValidationError(f'Min value ({tier["min"]}) cannot be greater than max value ({tier["max"]})')
-                        
-                    if tier['multiplier'] <= 0:
-                        raise ValidationError('Multiplier must be greater than 0')
-            else:
-                # For other calculation types
-                if 'value' not in calc:
-                    raise ValidationError('value is required for calculation')
-                try:
-                    float(calc['value'])
-                except (ValueError, TypeError):
-                    raise ValidationError('value must be a number')
+            # For all calculation types (even case_based_tier), value is required
+            if 'value' not in calc:
+                raise ValidationError('value is required for calculation')
+            try:
+                float(calc['value'])
+            except (ValueError, TypeError):
+                raise ValidationError('value must be a number')
 
         return Response({'valid': True})
     except ValidationError as e:

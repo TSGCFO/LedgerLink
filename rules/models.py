@@ -80,7 +80,8 @@ class RuleGroup(models.Model):
 
     def evaluate(self, order):
         """Evaluate all rules in the group according to the logic operator"""
-        rules = list(self.rules.all())
+        # Use select_related to avoid N+1 queries
+        rules = list(self.rules.all().select_related())
         if not rules:
             return True
 
