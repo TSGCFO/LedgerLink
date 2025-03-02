@@ -3,46 +3,46 @@
 ## Project Overview
 LedgerLink is a web application built with Django REST Framework and React with Material UI. It provides a system for managing customers, orders, products, and billing for a fulfillment or logistics business.
 
-## Linting and Code Quality
-The project uses an AI-powered fullstack linting system based on Claude. These scripts analyze code across the Django backend and React frontend to catch issues that traditional linters miss:
-
-- `npm run lint` - Run a complete fullstack analysis
-- `npm run lint:watch` - Run the linter in watch mode
-- `npm run lint:claude` - Run raw Claude analysis
-
-The lint scripts detect critical issues like:
-- API endpoint mismatches between backend and frontend
-- Data structure inconsistencies between Django models and React components
-- Security vulnerabilities and performance issues
-- Other common bugs and logic errors
-
-For more details, see LINTING.md.
-
-## Important Commands
+## Development Commands
 ```bash
 # Backend (Django)
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-python manage.py migrate
-python manage.py createsuperuser
 python manage.py runserver  # Backend server (http://localhost:8000)
+python manage.py migrate    # Apply migrations
+python manage.py test       # Run all tests
+python manage.py test app_name.tests.TestClass.test_method  # Run a single test
+python manage.py check      # Check for project issues
 
 # Frontend (React)
-cd frontend
-npm install
-npm run dev  # Frontend server (http://localhost:5175)
-npm run build  # Build for production
-npm run lint  # Run ESLint
+cd frontend && npm run dev  # Frontend server (http://localhost:5175)
+npm run build               # Build for production
+
+# Linting
+npm run lint                # Run fullstack linting
+npm run lint:watch          # Run linter in watch mode
+npm run lint:claude         # Run raw Claude analysis
+
+# Database
+python manage.py refresh_all_views         # Refresh materialized views
+python manage.py refresh_all_views --concurrent  # Non-blocking refresh
+python fix_db_alignment.py                 # Fix schema issues
 ```
 
-## Code Style and Conventions
-- Django apps follow standard Django structure
-- PEP 8 standards for Python code
-- React components use functional components with hooks
-- React Router for navigation
-- Material UI for component library
-- API endpoints are RESTful
+## Code Style Guidelines
+### Backend (Django)
+- Follow PEP 8 standards for Python code
+- **IMPORTANT:** Do not modify existing Django models or settings without approval
+- Document new settings with clear comments
+- Virtual tables/views can be added as needed
+- Use Django's class-based views for API endpoints
+- RESTful API endpoint design
+
+### Frontend (React)
+- Functional components with hooks (no class components)
+- One component per file with meaningful names
+- Group related components in subdirectories
+- Use Material UI as the primary component library
+- Material React Table for all list views
+- Handle loading, error, and empty states appropriately
 
 ## Project Structure
 ### Backend (Django)
