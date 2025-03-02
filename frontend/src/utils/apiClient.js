@@ -26,6 +26,8 @@ async function request(endpoint, options = {}, useBaseUrl = true) {
   const token = getAccessToken();
   const csrfToken = getCookie('csrftoken');
 
+  console.log(`Requesting ${options.method || 'GET'} ${url}`);
+  
   const headers = {
     'Content-Type': 'application/json',
     'X-CSRFToken': csrfToken,
@@ -138,6 +140,7 @@ async function request(endpoint, options = {}, useBaseUrl = true) {
       throw error;
     }
   } catch (error) {
+    console.error(`API Error ${options.method || 'GET'} ${url}:`, error);
     logger.logApiError(options.method || 'GET', url, error);
     throw error;
   }
@@ -178,36 +181,67 @@ export const rulesApi = {
 
   // Advanced Rules
   listAdvancedRules: (groupId) => request(`/rules/group/${groupId}/advanced-rules/`),
-  createAdvancedRule: (groupId, data) => request(`/rules/group/${groupId}/advanced-rule/create/`, {
+  createAdvancedRule: (groupId, data) => request(`/rules/group/${groupId}/advanced-rule/create/api/`, {
     method: 'POST',
     body: JSON.stringify(data),
   }),
-  updateAdvancedRule: (id, data) => request(`/rules/advanced-rule/${id}/edit/`, {
+  updateAdvancedRule: (id, data) => request(`/rules/advanced-rule/${id}/edit/api/`, {
     method: 'PUT',
     body: JSON.stringify(data),
   }),
-  deleteAdvancedRule: (id) => request(`/rules/advanced-rule/${id}/delete/`, {
+  deleteAdvancedRule: (id) => request(`/rules/advanced-rule/${id}/delete/api/`, {
     method: 'DELETE',
   }),
 
   // Utility Endpoints
-  getOperatorChoices: (field) => request(`/rules/operators/?field=${field}`),
-  validateConditions: (conditions) => request('/rules/validate-conditions/', {
-    method: 'POST',
-    body: JSON.stringify({ conditions }),
-  }),
-  validateCalculations: (calculations) => request('/rules/validate-calculations/', {
-    method: 'POST',
-    body: JSON.stringify({ calculations }),
-  }),
-  getConditionsSchema: () => request('/rules/conditions-schema/'),
-  getCalculationsSchema: () => request('/rules/calculations-schema/'),
-  getAvailableFields: () => request('/rules/fields/'),
-  getCalculationTypes: () => request('/rules/calculation-types/'),
-  validateRuleValue: (data) => request('/rules/validate-rule-value/', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  }),
+  getOperatorChoices: (field) => {
+    console.log('Getting operator choices for field:', field);
+    return request(`/rules/operators/?field=${field}`);
+  },
+  validateConditions: (conditions) => {
+    console.log('Validating conditions:', conditions);
+    return request('/rules/validate-conditions/', {
+      method: 'POST',
+      body: JSON.stringify({ conditions }),
+    });
+  },
+  validateCalculations: (calculations) => {
+    console.log('Validating calculations:', calculations);
+    return request('/rules/validate-calculations/', {
+      method: 'POST',
+      body: JSON.stringify({ calculations }),
+    });
+  },
+  getConditionsSchema: () => {
+    console.log('Fetching conditions schema');
+    return request('/rules/conditions-schema/');
+  },
+  getCalculationsSchema: () => {
+    console.log('Fetching calculations schema');
+    return request('/rules/calculations-schema/');
+  },
+  getAvailableFields: () => {
+    console.log('Fetching available fields');
+    return request('/rules/fields/');
+  },
+  getCalculationTypes: () => {
+    console.log('Fetching calculation types');
+    return request('/rules/calculation-types/');
+  },
+  validateRuleValue: (data) => {
+    console.log('Validating rule value:', data);
+    return request('/rules/validate-rule-value/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+  testRule: (ruleData, sampleOrderData) => {
+    console.log('Testing rule:', ruleData, 'with order data:', sampleOrderData);
+    return request('/rules/test-rule/', {
+      method: 'POST',
+      body: JSON.stringify({ rule: ruleData, order: sampleOrderData }),
+    });
+  },
   getCustomerSkus: (groupId) => request(`/rules/group/${groupId}/skus/`),
 };
 
@@ -332,6 +366,8 @@ export const orderApi = {
     if (params.search) queryParams.append('search', params.search);
     if (params.status) queryParams.append('status', params.status);
     if (params.priority) queryParams.append('priority', params.priority);
+    if (params.page) queryParams.append('page', params.page);
+    if (params.page_size) queryParams.append('page_size', params.page_size);
     const query = queryParams.toString() ? `?${queryParams.toString()}` : '';
     return request(`/orders/${query}`);
   },

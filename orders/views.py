@@ -54,9 +54,23 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         """
-        List orders with optional filtering.
+        List orders with optional filtering and pagination.
         """
         queryset = self.get_queryset()
+        
+        # Handle pagination
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            result = self.get_paginated_response(serializer.data)
+            return Response({
+                'success': True,
+                'data': serializer.data,
+                'count': result.data['count'],
+                'next': result.data['next'],
+                'previous': result.data['previous']
+            })
+            
         serializer = self.get_serializer(queryset, many=True)
         return Response({
             'success': True,
