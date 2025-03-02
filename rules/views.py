@@ -891,7 +891,7 @@ def evaluate_condition(order, field, operator, value):
         # Evaluate based on operator
         if operator == 'eq':
             return str(order_value) == str(value)
-        elif operator == 'neq':
+        elif operator == 'ne' or operator == 'neq':  # Support both 'ne' and 'neq' for backward compatibility
             return str(order_value) != str(value)
         elif operator == 'gt':
             return float(order_value) > float(value)
