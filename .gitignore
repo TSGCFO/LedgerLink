@@ -115,3 +115,11 @@ data_import_summary.md
 shipping_import_errors.log
 product_import_errors.log
 order_import_errors.log
+
+# Stand Alone Scripts
+import_orders_from_csv.py
+apply_migration.py
+checkserver.py
+desktop.ini
+check_db_alignment.py
+check_db_alignment_v2.py
