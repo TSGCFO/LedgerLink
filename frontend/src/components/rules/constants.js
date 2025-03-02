@@ -46,7 +46,8 @@ export const CALCULATION_TYPES = {
   WEIGHT_BASED: 'weight_based',
   VOLUME_BASED: 'volume_based',
   TIERED_PERCENTAGE: 'tiered_percentage',
-  PRODUCT_SPECIFIC: 'product_specific'
+  PRODUCT_SPECIFIC: 'product_specific',
+  CASE_BASED_TIER: 'case_based_tier'
 };
 
 // Field Options
@@ -60,6 +61,7 @@ export const FIELD_OPTIONS = [
   { value: 'weight_lb', label: 'Weight (lb)', type: FIELD_TYPES.NUMBER },
   { value: 'line_items', label: 'Line Items', type: FIELD_TYPES.NUMBER },
   { value: 'sku_quantity', label: 'SKU Quantity', type: FIELD_TYPES.SKU },
+  { value: 'sku_name', label: 'SKU Name', type: FIELD_TYPES.STRING },
   { value: 'total_item_qty', label: 'Total Item Quantity', type: FIELD_TYPES.NUMBER },
   { value: 'packages', label: 'Packages', type: FIELD_TYPES.NUMBER },
   { value: 'notes', label: 'Notes', type: FIELD_TYPES.STRING },
@@ -112,5 +114,6 @@ export const CALCULATION_TYPE_OPTIONS = [
   { value: CALCULATION_TYPES.WEIGHT_BASED, label: 'Weight Based', description: 'Multiply by weight' },
   { value: CALCULATION_TYPES.VOLUME_BASED, label: 'Volume Based', description: 'Multiply by volume' },
   { value: CALCULATION_TYPES.TIERED_PERCENTAGE, label: 'Tiered Percentage', description: 'Apply percentage based on value tiers' },
-  { value: CALCULATION_TYPES.PRODUCT_SPECIFIC, label: 'Product Specific', description: 'Apply specific rates per product' }
+  { value: CALCULATION_TYPES.PRODUCT_SPECIFIC, label: 'Product Specific', description: 'Apply specific rates per product' },
+  { value: CALCULATION_TYPES.CASE_BASED_TIER, label: 'Case Based Tier', description: 'Apply pricing based on case quantity tiers' }
 ];

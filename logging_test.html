@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LedgerLink Logging System Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #1976d2;
+        }
+        
+        button {
+            background-color: #1976d2;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background-color: #1565c0;
+        }
+        
+        .log-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .log-viewer {
+            margin-top: 20px;
+            border-top: 1px solid #ccc;
+            padding-top: 20px;
+        }
+        
+        #test-results {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        
+        .level-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .level-debug { background-color: #4caf50; }
+        .level-info { background-color: #2196f3; }
+        .level-warn { background-color: #ff9800; }
+        .level-error { background-color: #f44336; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>LedgerLink Logging Test</h1>
+        <p>This page tests the logging system by generating various log events.</p>
+        
+        <div class="log-actions">
+            <div class="level-buttons">
+                <button class="level-debug" onclick="console.debug('Manual debug log', {timestamp: new Date()})">Generate Debug Log</button>
+                <button class="level-info" onclick="console.info('Manual info log', {timestamp: new Date()})">Generate Info Log</button>
+                <button class="level-warn" onclick="console.warn('Manual warning log', {timestamp: new Date()})">Generate Warning Log</button>
+                <button class="level-error" onclick="console.error('Manual error log', {timestamp: new Date()})">Generate Error Log</button>
+            </div>
+            
+            <button onclick="runAllTests()">Run Complete Test Suite</button>
+            <button onclick="simulateApiRequests()">Simulate API Requests</button>
+            <button onclick="generateError()">Generate Error</button>
+            <button onclick="testLocalStorage()">Test Local Storage</button>
+            <button id="viewLogsBtn">View Logs</button>
+        </div>
+        
+        <div id="test-results">Test results will appear here...</div>
+    </div>
+    
+    <!-- Include logger script first so it can capture logs -->
+    <script src="/frontend/src/utils/logger.js"></script>
+    
+    <!-- Log viewer dialog -->
+    <div id="logViewerContainer" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000;">
+        <div style="background: white; margin: 50px auto; width: 90%; max-width: 1000px; height: 80%; overflow: auto; padding: 20px; border-radius: 4px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2 style="margin: 0;">Logs Viewer</h2>
+                <button onclick="document.getElementById('logViewerContainer').style.display = 'none'">Close</button>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <button onclick="refreshLogView()">Refresh</button>
+                <button onclick="clearLogs()">Clear Logs</button>
+                <button onclick="exportLogs()">Export Logs</button>
+                <button onclick="saveLogsToServer()">Save To Server</button>
+            </div>
+            
+            <div id="logsContent" style="font-family: monospace; white-space: pre-wrap; font-size: 12px; border: 1px solid #ccc; padding: 10px; height: calc(100% - 120px); overflow: auto;"></div>
+        </div>
+    </div>
+    
+    <!-- Test script -->
+    <script>
+        document.getElementById('viewLogsBtn').addEventListener('click', function() {
+            document.getElementById('logViewerContainer').style.display = 'block';
+            refreshLogView();
+        });
+        
+        function refreshLogView() {
+            try {
+                const logs = logger.getLogs();
+                let logContent = logs.length > 0 
+                    ? logs.map(formatLogEntry).join('\n\n')
+                    : 'No logs found';
+                document.getElementById('logsContent').textContent = logContent;
+            } catch (e) {
+                document.getElementById('logsContent').textContent = 'Error loading logs: ' + e.message;
+            }
+        }
+        
+        function formatLogEntry(log) {
+            const time = new Date(log.timestamp).toLocaleTimeString();
+            let formatted = `[${time}] [${log.level}] ${log.message}`;
+            if (log.data) {
+                try {
+                    const data = typeof log.data === 'string' ? log.data : JSON.stringify(JSON.parse(log.data), null, 2);
+                    formatted += '\nData: ' + data;
+                } catch (e) {
+                    formatted += '\nData: ' + log.data;
+                }
+            }
+            return formatted;
+        }
+        
+        function clearLogs() {
+            if (confirm('Are you sure you want to clear all logs?')) {
+                logger.clearLogs();
+                refreshLogView();
+                updateResults('All logs cleared');
+            }
+        }
+        
+        function exportLogs() {
+            try {
+                logger.exportLogs();
+                updateResults('Logs exported to file');
+            } catch (e) {
+                updateResults('Error exporting logs: ' + e.message);
+            }
+        }
+        
+        async function saveLogsToServer() {
+            try {
+                updateResults('Saving logs to server...');
+                const result = await logger.saveLogsToServer();
+                if (result.success) {
+                    updateResults(`Successfully saved ${result.log_count} logs to server (${result.filename})`);
+                } else {
+                    updateResults('Error saving logs: ' + result.error);
+                }
+            } catch (e) {
+                updateResults('Error saving logs: ' + e.message);
+            }
+        }
+        
+        function updateResults(message) {
+            const results = document.getElementById('test-results');
+            results.textContent = message + '\n' + results.textContent;
+        }
+        
+        function runAllTests() {
+            updateResults('Running all tests...');
+            
+            // Include the test script
+            const script = document.createElement('script');
+            script.src = '/test_logging.js';
+            script.onload = () => updateResults('Test script executed');
+            script.onerror = (e) => updateResults('Error loading test script: ' + e.message);
+            document.body.appendChild(script);
+        }
+        
+        function simulateApiRequests() {
+            updateResults('Simulating API requests...');
+            
+            // Simulate API request with logger
+            logger.logApiRequest('GET', '/api/v1/customers/', { 
+                headers: { 'Authorization': 'Bearer token123' } 
+            });
+            
+            // Simulate successful response
+            logger.logApiResponse('GET', '/api/v1/customers/', 
+                { ok: true, status: 200, statusText: 'OK', headers: new Headers() },
+                { count: 5, results: [{ id: 1, name: 'Test Customer' }] }
+            );
+            
+            // Simulate error response
+            logger.logApiResponse('POST', '/api/v1/orders/', 
+                { ok: false, status: 400, statusText: 'Bad Request', headers: new Headers() },
+                { error: 'Invalid order data' }
+            );
+            
+            // Simulate network error
+            logger.logApiError('DELETE', '/api/v1/products/123', 
+                new Error('Network error')
+            );
+            
+            updateResults('API requests simulated');
+        }
+        
+        function generateError() {
+            updateResults('Generating error...');
+            try {
+                const obj = null;
+                obj.nonExistentMethod();
+            } catch (error) {
+                console.error('Caught test error', error);
+                logger.error('Test error', error);
+                updateResults('Error generated and logged');
+            }
+            
+            // Also try to trigger an uncaught error
+            setTimeout(() => {
+                try {
+                    throw new Error('Async error for testing');
+                } catch (e) {
+                    console.error('Async error:', e);
+                }
+            }, 100);
+        }
+        
+        function testLocalStorage() {
+            updateResults('Testing localStorage...');
+            
+            // Generate a lot of logs to test pagination/limits
+            for (let i = 1; i <= 100; i++) {
+                console.log(`Test log entry ${i} of 100`);
+            }
+            
+            // Check the current log count
+            const logs = logger.getLogs();
+            updateResults(`Generated 100 log entries. Total logs: ${logs.length}`);
+        }
+        
+        console.log('Logging test page loaded');
+    </script>
+</body>
+</html>

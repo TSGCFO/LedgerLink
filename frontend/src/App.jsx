@@ -14,6 +14,8 @@ import {
   ListItemText,
   ThemeProvider,
   createTheme,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
 import {
   People as PeopleIcon,
@@ -28,12 +30,14 @@ import {
   Category as CategoryIcon,
   Inventory2 as Inventory2Icon,
   CloudUpload as CloudUploadIcon,
+  BugReport as BugReportIcon,
 } from '@mui/icons-material';
 
 // Import our components
 import Login from './components/auth/Login';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import { isAuthenticated } from './utils/auth';
+import LogViewer from './components/common/LogViewer';
 import CustomerList from './components/customers/CustomerList';
 import CustomerForm from './components/customers/CustomerForm';
 import CustomerServiceList from './components/customer-services/CustomerServiceList';
@@ -56,6 +60,8 @@ import MaterialForm from './components/materials/MaterialForm';
 import BoxPriceList from './components/materials/BoxPriceList';
 import BoxPriceForm from './components/materials/BoxPriceForm';
 import BulkOperations from './components/bulk-operations/BulkOperations';
+import BillingList from './components/billing/BillingList';
+import BillingForm from './components/billing/BillingForm';
 
 // Create theme
 const theme = createTheme({
@@ -74,6 +80,7 @@ const drawerWidth = 240;
 
 function App() {
   const [authenticated, setAuthenticated] = useState(isAuthenticated());
+  const [logViewerOpen, setLogViewerOpen] = useState(false);
 
   useEffect(() => {
     const handleAuthChange = (event) => {
@@ -96,9 +103,22 @@ function App() {
           {/* App Bar */}
           <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
             <Toolbar>
-              <Typography variant="h6" noWrap component="div">
+              <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
                 LedgerLink
               </Typography>
+              
+              {/* Console Logs Button */}
+              {authenticated && (
+                <Tooltip title="View Console Logs">
+                  <IconButton 
+                    color="inherit" 
+                    onClick={() => setLogViewerOpen(true)}
+                    edge="end"
+                  >
+                    <BugReportIcon />
+                  </IconButton>
+                </Tooltip>
+              )}
             </Toolbar>
           </AppBar>
 
@@ -196,6 +216,12 @@ function App() {
                     </ListItemIcon>
                     <ListItemText primary="Bulk Operations" />
                   </ListItem>
+                  <ListItem button component={Link} to="/billing">
+                    <ListItemIcon>
+                      <DescriptionIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Billing" />
+                  </ListItem>
                 </List>
               </Box>
             </Drawer>
@@ -259,11 +285,20 @@ function App() {
                 <Route path="/shipping/us/new" element={<ProtectedRoute><USShippingForm /></ProtectedRoute>} />
                 <Route path="/shipping/us/:id/edit" element={<ProtectedRoute><USShippingForm /></ProtectedRoute>} />
                 <Route path="/bulk-operations" element={<ProtectedRoute><BulkOperations /></ProtectedRoute>} />
+                <Route path="/billing" element={<ProtectedRoute><BillingList /></ProtectedRoute>} />
+                <Route path="/billing/new" element={<ProtectedRoute><BillingForm /></ProtectedRoute>} />
+                <Route path="/billing/:id/edit" element={<ProtectedRoute><BillingForm /></ProtectedRoute>} />
               </Routes>
             </Container>
           </Box>
         </Box>
       </Router>
+      
+      {/* Log Viewer Component */}
+      <LogViewer 
+        open={logViewerOpen} 
+        onClose={() => setLogViewerOpen(false)} 
+      />
     </ThemeProvider>
   );
 }

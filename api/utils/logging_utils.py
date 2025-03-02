@@ -1,12 +1,16 @@
 """
-Logging utilities for backend components
+Logging utilities for backend components and client-side log handling
 """
 
 import logging
 import functools
 import time
 import traceback
-from typing import Any, Callable, Dict, Optional, Type
+import os
+import json
+import datetime
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 # Get loggers for different components
 api_logger = logging.getLogger('api')
@@ -178,3 +182,123 @@ def get_component_logger(component_name: str) -> logging.Logger:
         logger = get_component_logger('orders')
     """
     return logging.getLogger(component_name)
+
+
+# Client-Side Log Handling
+
+# Directory to store client-side logs
+CLIENT_LOGS_DIR = Path('logs/client')
+
+def ensure_logs_directory():
+    """Ensure the logs directory exists"""
+    os.makedirs(CLIENT_LOGS_DIR, exist_ok=True)
+
+def save_client_logs(logs: List[Dict], user_info: Optional[Dict] = None) -> Dict:
+    """
+    Save client logs to a file in the logs directory
+    
+    Args:
+        logs: List of log entries from the client
+        user_info: Information about the user (email, id, etc.)
+    
+    Returns:
+        Dict: Status and filename of the saved log file
+    """
+    ensure_logs_directory()
+    
+    # Create a timestamp for the filename
+    timestamp = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
+    
+    # Create a unique filename
+    user_id = user_info.get('id', 'anonymous') if user_info else 'anonymous'
+    filename = f"client-logs-{user_id}-{timestamp}.json"
+    filepath = CLIENT_LOGS_DIR / filename
+    
+    # Add metadata to the logs
+    metadata = {
+        "timestamp": datetime.datetime.now().isoformat(),
+        "user": user_info,
+        "log_count": len(logs)
+    }
+    
+    # Save the logs with metadata
+    try:
+        with open(filepath, 'w') as f:
+            json.dump({
+                "metadata": metadata,
+                "logs": logs
+            }, f, indent=2)
+        
+        api_logger.info(f"Saved {len(logs)} client logs to {filename}")
+        return {
+            "success": True,
+            "filename": filename,
+            "log_count": len(logs)
+        }
+    except Exception as e:
+        api_logger.error(f"Error saving client logs: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+def list_client_log_files() -> List[Dict]:
+    """
+    List all client log files
+    
+    Returns:
+        List[Dict]: List of log filenames with metadata
+    """
+    ensure_logs_directory()
+    
+    try:
+        files = []
+        for filepath in CLIENT_LOGS_DIR.glob('*.json'):
+            try:
+                stat = filepath.stat()
+                files.append({
+                    "filename": filepath.name,
+                    "size": stat.st_size,
+                    "created": datetime.datetime.fromtimestamp(stat.st_ctime).isoformat(),
+                    "path": str(filepath)
+                })
+            except Exception as e:
+                api_logger.error(f"Error reading file {filepath}: {str(e)}")
+        
+        return sorted(files, key=lambda x: x["created"], reverse=True)
+    except Exception as e:
+        api_logger.error(f"Error listing log files: {str(e)}")
+        return []
+
+def get_client_log_file_content(filename: str) -> Dict:
+    """
+    Read the content of a client log file
+    
+    Args:
+        filename: Name of the log file
+    
+    Returns:
+        Dict: Content of the log file
+    """
+    filepath = CLIENT_LOGS_DIR / filename
+    
+    if not filepath.exists():
+        return {
+            "success": False,
+            "error": "File not found"
+        }
+    
+    try:
+        with open(filepath, 'r') as f:
+            content = json.load(f)
+        
+        return {
+            "success": True,
+            "content": content
+        }
+    except Exception as e:
+        api_logger.error(f"Error reading log file {filename}: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e)
+        }

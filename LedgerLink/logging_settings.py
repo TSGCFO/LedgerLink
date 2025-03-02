@@ -4,6 +4,8 @@ Logging configuration for LedgerLink
 
 import os
 from datetime import datetime
+from logging.handlers import WatchedFileHandler
+import threading
 
 # Create logs directory if it doesn't exist
 LOGS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'logs')
@@ -15,6 +17,25 @@ timestamp = datetime.now().strftime('%Y%m%d')
 DEBUG_LOG = os.path.join(LOGS_DIR, f'debug_{timestamp}.log')
 ERROR_LOG = os.path.join(LOGS_DIR, f'error_{timestamp}.log')
 API_LOG = os.path.join(LOGS_DIR, f'api_{timestamp}.log')
+
+# Custom RotatingFileHandler with file locking
+class SafeRotatingFileHandler(RotatingFileHandler):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.lock = threading.Lock()
+
+    def emit(self, record):
+        if self.lock:  # Check if lock exists
+            try:
+                with self.lock:
+                    super().emit(record)
+            except Exception:
+                self.handleError(record)
+        else:
+            try:
+                super().emit(record)
+            except Exception:
+                self.handleError(record)
 
 # Logging Configuration
 LOGGING = {
@@ -44,21 +65,24 @@ LOGGING = {
         },
         'file_debug': {
             'level': 'DEBUG',
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.WatchedFileHandler',
             'filename': DEBUG_LOG,
             'formatter': 'verbose',
+            'encoding': 'utf-8',
         },
         'file_error': {
             'level': 'ERROR',
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.WatchedFileHandler',
             'filename': ERROR_LOG,
             'formatter': 'verbose',
+            'encoding': 'utf-8',
         },
         'file_api': {
             'level': 'DEBUG',
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.WatchedFileHandler',
             'filename': API_LOG,
             'formatter': 'api',
+            'encoding': 'utf-8',
         },
     },
     'loggers': {

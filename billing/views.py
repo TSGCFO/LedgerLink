@@ -1,21 +1,23 @@
 from django.views.generic import TemplateView
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse, HttpResponse
 from django.core.exceptions import ValidationError
-from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 from django.utils.decorators import method_decorator
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 from .forms import BillingReportForm
-from .billing_calculator import generate_billing_report
+from .models import BillingReport, Customer
+from .serializers import BillingReportSerializer, ReportRequestSerializer
+from .services import BillingReportService
+from .utils import ReportFileHandler
 import logging
+from django.utils import timezone
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('billing')
 
-@method_decorator(ensure_csrf_cookie, name='dispatch')
-class BillingReportView(LoginRequiredMixin, TemplateView):
+@method_decorator([ensure_csrf_cookie, csrf_exempt], name='dispatch')
+class BillingReportView(TemplateView):
     template_name = 'billing/billing_report.html'
 
     def get_context_data(self, **kwargs):
@@ -23,73 +25,110 @@ class BillingReportView(LoginRequiredMixin, TemplateView):
         context['form'] = BillingReportForm()
         return context
 
+@method_decorator(csrf_exempt, name='dispatch')
+class BillingReportListView(APIView):
+    serializer_class = BillingReportSerializer
+
+    def get(self, request):
+        try:
+            # Get query parameters
+            customer_id = request.query_params.get('customer')
+            start_date = request.query_params.get('start_date')
+            end_date = request.query_params.get('end_date')
+
+            # Build the queryset with filters
+            queryset = BillingReport.objects.select_related('customer')
+
+            if customer_id:
+                queryset = queryset.filter(customer_id=customer_id)
+            if start_date:
+                queryset = queryset.filter(start_date__gte=start_date)
+            if end_date:
+                queryset = queryset.filter(end_date__lte=end_date)
+
+            serializer = self.serializer_class(queryset, many=True)
+            
+            return Response({
+                'success': True,
+                'data': serializer.data,
+                'count': len(serializer.data)
+            })
+        except Exception as e:
+            logger.error(f"Error fetching billing reports: {str(e)}")
+            return Response({
+                'success': False,
+                'error': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@method_decorator(csrf_exempt, name='dispatch')
 class GenerateReportAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    serializer_class = ReportRequestSerializer
 
     def post(self, request):
         try:
-            logger.info(f"Received data: {request.data}")
+            serializer = self.serializer_class(data=request.data)
+            if not serializer.is_valid():
+                return Response({
+                    'success': False,
+                    'error': serializer.errors
+                }, status=status.HTTP_400_BAD_REQUEST)
 
-            customer_id = request.data.get('customer_id')
-            start_date = request.data.get('start_date')
-            end_date = request.data.get('end_date')
-            output_format = request.data.get('output_format', 'json')
-
-            if not all([customer_id, start_date, end_date]):
-                missing_params = []
-                if not customer_id: missing_params.append('customer_id')
-                if not start_date: missing_params.append('start_date')
-                if not end_date: missing_params.append('end_date')
-                error_msg = f"Missing required parameters: {', '.join(missing_params)}"
-                logger.error(error_msg)
-                return Response(
-                    {"error": error_msg},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-            try:
-                customer_id = int(customer_id)
-            except (TypeError, ValueError):
-                error_msg = f"Invalid customer_id format: {customer_id}"
-                logger.error(error_msg)
-                return Response(
-                    {"error": error_msg},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-            try:
-                report = generate_billing_report(
-                    customer_id=customer_id,
-                    start_date=start_date,
-                    end_date=end_date,
-                    output_format=output_format
-                )
-                logger.info("Report generated successfully")
-
-                # Handle different output formats
-                if output_format == 'csv':
-                    response = HttpResponse(report, content_type='text/csv')
-                    response['Content-Disposition'] = 'attachment; filename="billing_report.csv"'
-                    return response
-                elif output_format == 'pdf':
-                    response = HttpResponse(report, content_type='application/pdf')
-                    response['Content-Disposition'] = 'attachment; filename="billing_report.pdf"'
-                    return response
-                else:
-                    return Response({'report': report})
-
-            except Exception as e:
-                error_msg = f"Error generating report: {str(e)}"
-                logger.error(error_msg)
-                return Response(
-                    {"error": error_msg},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
-
-        except Exception as e:
-            error_msg = f"Unexpected error: {str(e)}"
-            logger.error(error_msg)
-            return Response(
-                {"error": error_msg},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            service = BillingReportService()  # Removed user parameter for development
+            
+            result = service.generate_report(
+                customer_id=serializer.validated_data['customer'],
+                start_date=serializer.validated_data['start_date'],
+                end_date=serializer.validated_data['end_date'],
+                output_format=serializer.validated_data.get('output_format', 'preview')
             )
+
+            output_format = serializer.validated_data.get('output_format', 'preview')
+            
+            if output_format == 'preview':
+                customer = Customer.objects.get(id=serializer.validated_data['customer'])
+                
+                preview_data = {
+                    'success': True,
+                    'data': {
+                        'customer_name': customer.company_name,
+                        'start_date': serializer.validated_data['start_date'].isoformat(),
+                        'end_date': serializer.validated_data['end_date'].isoformat(),
+                        'preview_data': result,
+                        'total_amount': str(result.get('total_amount', '0.00')),
+                        'service_totals': result.get('service_totals', {}),
+                        'generated_at': timezone.now().isoformat()
+                    }
+                }
+                
+                return Response(preview_data)
+            else:
+                content_type = ReportFileHandler.get_content_type(output_format)
+                file_extension = ReportFileHandler.get_file_extension(output_format)
+                
+                response = HttpResponse(
+                    result.getvalue(),
+                    content_type=content_type
+                )
+                response['Content-Disposition'] = f'attachment; filename="billing_report.{file_extension}"'
+                return response
+
+        except ValidationError as e:
+            logger.warning(f"Validation error: {str(e)}")
+            return Response({
+                'success': False,
+                'error': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
+        except Customer.DoesNotExist:
+            logger.error(f"Customer not found: {serializer.validated_data.get('customer')}")
+            return Response({
+                'success': False,
+                'error': 'Customer not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+            
+        except Exception as e:
+            logger.error(f"Error generating report: {str(e)}")
+            return Response({
+                'success': False,
+                'error': 'Failed to generate report'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

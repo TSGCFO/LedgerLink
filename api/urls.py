@@ -4,6 +4,7 @@ from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django.conf import settings
 from rest_framework import permissions
+from api import views
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -58,6 +59,13 @@ urlpatterns = [
 
         # Add bulk operations URLs
         path('bulk-operations/', include('bulk_operations.urls')),
+
+        # Client logging endpoints
+        path('logs/client/', include([
+            path('', views.logging_views.save_client_logs, name='save_client_logs'),
+            path('list/', views.logging_views.list_client_logs, name='list_client_logs'), 
+            path('<str:filename>/', views.logging_views.get_client_log_file, name='get_client_log_file'),
+        ])),
     ])),
 ]
 

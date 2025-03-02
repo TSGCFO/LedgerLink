@@ -27,6 +27,7 @@ const OrderForm = () => {
 
   const [formData, setFormData] = useState({
     customer: '',
+    transaction_id: '',  // Add transaction_id field
     reference_number: '',
     status: 'draft',
     priority: 'medium',
@@ -49,6 +50,7 @@ const OrderForm = () => {
   const [priorityChoices, setPriorityChoices] = useState([]);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [validatingId, setValidatingId] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
 
@@ -101,7 +103,38 @@ const OrderForm = () => {
     }
   };
 
-  const validateForm = () => {
+  // Add a function to validate transaction ID uniqueness
+  const validateTransactionId = async (transactionId) => {
+    if (!transactionId || isEditMode) return true;
+    
+    try {
+      setValidatingId(true);
+      // Check if an order with this transaction ID already exists
+      const response = await orderApi.list({ search: transactionId });
+      
+      if (response.success && response.data && response.data.length > 0) {
+        const exists = response.data.some(order => 
+          order.transaction_id.toLowerCase() === transactionId.toLowerCase()
+        );
+        
+        if (exists) {
+          setErrors(prev => ({
+            ...prev,
+            transaction_id: 'This transaction ID is already in use'
+          }));
+          return false;
+        }
+      }
+      return true;
+    } catch (error) {
+      console.error('Error validating transaction ID:', error);
+      return false;
+    } finally {
+      setValidatingId(false);
+    }
+  };
+
+  const validateForm = async () => {
     const newErrors = {};
     
     if (!formData.customer) {
@@ -110,6 +143,11 @@ const OrderForm = () => {
     
     if (!formData.reference_number) {
       newErrors.reference_number = 'Reference number is required';
+    }
+    
+    // Validate transaction ID
+    if (!isEditMode && !formData.transaction_id) {
+      newErrors.transaction_id = 'Transaction ID is required';
     }
 
     // Validate shipping fields if any are filled
@@ -144,7 +182,19 @@ const OrderForm = () => {
     }
     
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    
+    // If there are already validation errors, return false immediately
+    if (Object.keys(newErrors).length > 0) {
+      return false;
+    }
+    
+    // If no other errors, check transaction ID uniqueness
+    if (!isEditMode && formData.transaction_id) {
+      const isValid = await validateTransactionId(formData.transaction_id);
+      return isValid && Object.keys(errors).length === 0;
+    }
+    
+    return true;
   };
 
   const handleChange = (e) => {
@@ -216,7 +266,8 @@ const OrderForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!validateForm()) {
+    const isValid = await validateForm();
+    if (!isValid) {
       return;
     }
 
@@ -323,6 +374,22 @@ const OrderForm = () => {
                 )}
               </FormControl>
             </Grid>
+
+            {!isEditMode && (
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  required
+                  fullWidth
+                  label="Transaction ID"
+                  name="transaction_id"
+                  value={formData.transaction_id}
+                  onChange={handleChange}
+                  error={Boolean(errors.transaction_id)}
+                  helperText={errors.transaction_id || "Must be unique"}
+                  disabled={validatingId}
+                />
+              </Grid>
+            )}
 
             <Grid item xs={12} sm={6}>
               <TextField
