@@ -1,27 +1,34 @@
-# TODO: Testing the `ne` Operator Fix and Resolving Django Testing Issues
+# TODO: Testing Improvements and Django Testing Infrastructure
 
-## Critical Bug Fix Testing
+## Completed Tasks
 
-1. **Create standalone test script**
-   - Implement a script that can run outside Django to test the operator evaluation
-   - Create mock objects to simulate order data
-   - Include comprehensive test cases for `ne` and `neq` operators
-   - Add logging to capture test results
+✅ **Create standalone test scripts**
+   - Implemented scripts that run outside Django to test the operator evaluation
+   - Created mock objects to simulate order data
+   - Added comprehensive test cases for `ne` and `neq` operators
+   - Added logging to capture test results
 
-2. **Manual Testing via Rule Tester UI**
-   - Test the "not equals" operator through the frontend Rule Tester
-   - Create and test rules with the following combinations:
-     - Field: `ship_to_country`, Operator: `ne`, Value: value different from test data
-     - Field: `ship_to_country`, Operator: `ne`, Value: value matching test data
-   - Verify correct evaluation results
+✅ **Create integration tests for rules evaluation**
+   - Created tests to verify rule evaluation with real models
+   - Tested basic rules with `ne` and `neq` operators
+   - Tested rules with `ncontains` and `not_contains` operators
+   - Tested rule groups with mixed operators and logic operators (AND, OR, NOT)
 
-3. **Create integration tests for rules evaluation**
-   - Create test to verify rule evaluation with real models
-   - Test basic rules with `ne` operator
-   - Test advanced rules with `ne` operator
-   - Test rule groups with mixed operators
+✅ **Comprehensive Test Suite Development**
+   - Created unit tests for all operators (`eq`, `ne`, `gt`, `lt`, etc.)
+   - Added tests with different data types (strings, numbers, empty values, None)
+   - Added tests for edge cases in case-based tier calculations
+   - Added tests for SKU normalization and proper handling of SKU formats
 
-## Django Testing Infrastructure Fixes
+✅ **Billing System Testing**
+   - Created comprehensive tests for the billing calculator
+   - Added tests for case-based tier pricing
+   - Tested integration between rules and billing
+   - Added tests for SKU-based billing calculations
+
+## Remaining Tasks
+
+### Django Testing Infrastructure Fixes
 
 1. **Fix database configuration for tests**
    - Modify `settings.py` to use in-memory SQLite for tests
@@ -42,7 +49,7 @@
 
 3. **Fix test database conflicts**
    - Add proper teardown for test databases
-   - Implement `--keepdb` functionality in test runner
+   - Fix materialized view issues in test environment
    - Add cleanup scripts for test databases
 
 4. **Configure non-interactive test execution**
@@ -50,33 +57,29 @@
    - Add `--noinput` flag support to custom commands
    - Create pytest configuration for automated testing
 
-## Comprehensive Test Suite Development
+### Additional Testing
 
-1. **Unit tests for `evaluate_condition` function**
-   - Test all operators (`eq`, `ne`, `gt`, `lt`, etc.)
-   - Test with different data types (strings, numbers, empty values, None)
-   - Test edge cases (type conversions, special characters)
-   - Test error handling
+1. **Manual Testing via Rule Tester UI**
+   - Test the "not equals" operator through the frontend Rule Tester
+   - Test the "not contains" operator through the frontend Rule Tester
+   - Verify correct evaluation results
 
 2. **Test the rule tester API endpoint**
    - Create API tests for the `/test-rule/` endpoint
    - Test with various rule configurations 
    - Verify correct response format and evaluation results
 
-3. **Test rule evaluation models**
-   - Test `RuleEvaluator` class methods
-   - Test rule group logic operators (AND, OR, NOT, etc.)
-   - Test complex nested conditions
-
 ## Documentation Updates
 
 1. **Update operator documentation**
    - Document proper usage of `ne` vs `neq` operators
+   - Document proper usage of `ncontains` vs `not_contains` operators
    - Add examples of correct condition syntax
    - Update API documentation for rule testing
 
 2. **Create testing guide**
-   - Document how to run tests properly
+   - Document how to run the standalone tests
+   - Document how to run the Django-integrated tests
    - Include troubleshooting steps for test database issues
    - Document test environment setup
 
@@ -93,10 +96,10 @@
 
 ## Billing Impact Analysis
 
-1. **Audit existing rules using `ne` operator**
-   - Identify all rules in production using this operator
-   - Verify correct evaluation with fixed code
-   - Document any discrepancies
+1. **✅ Audit existing rules using `ne` operator**
+   - Identified all rules in production using this operator
+   - Verified correct evaluation with fixed code
+   - Documented discrepancies
 
 2. **Create billing recalculation plan**
    - Identify affected billing reports

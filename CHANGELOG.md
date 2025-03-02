@@ -8,13 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Comprehensive Billing Tests**: Added extensive test suite with 28+ test cases for the billing system
+- **Standalone Tests**: Created standalone test files for billing system that don't require Django environment
+- **Case-Based Tier Tests**: Added specialized tests for case-based tier calculations and boundary conditions
+- **Rule Integration Tests**: Added tests for the integration between rule system and billing calculator
 
 ### Changed
+- **Testing Infrastructure**: Enhanced the testing framework with standalone and integrated test components
+- **Test Coverage**: Expanded test coverage to include all rule operators and edge cases
 
 ### Fixed
 - **Critical Bug Fix**: Fixed the "not equals" (`ne`) operator in rule evaluation. The `evaluate_condition` function was previously looking for `neq` instead of `ne`, causing incorrect evaluation of rules using this operator. This could have affected billing calculations and business logic decisions. The fix supports both `ne` and `neq` for backward compatibility.
 - **Critical Bug Fix**: Fixed the "not contains" (`ncontains`) operator in rule evaluation. The `evaluate_condition` function was previously looking for `not_contains` instead of `ncontains`, causing incorrect evaluation of rules using this operator. This affected string field and JSON field evaluations. The fix supports both `ncontains` and `not_contains` for backward compatibility.
 - **Billing System Fix**: Updated the billing calculator's RuleEvaluator class to handle both `ne`/`neq` and `ncontains`/`not_contains` operator variants consistently with the main rule system. This ensures correct service application and cost calculation in billing reports.
+- **SKU Normalization**: Fixed inconsistencies in SKU normalization across different parts of the system
+- **Rule Group Logic**: Enhanced testing of different rule group logic operators (AND, OR, NOT)
 
 ### Security
 
