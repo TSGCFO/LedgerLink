@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - **Critical Bug Fix**: Fixed the "not equals" (`ne`) operator in rule evaluation. The `evaluate_condition` function was previously looking for `neq` instead of `ne`, causing incorrect evaluation of rules using this operator. This could have affected billing calculations and business logic decisions. The fix supports both `ne` and `neq` for backward compatibility.
+- **Critical Bug Fix**: Fixed the "not contains" (`ncontains`) operator in rule evaluation. The `evaluate_condition` function was previously looking for `not_contains` instead of `ncontains`, causing incorrect evaluation of rules using this operator. This affected string field and JSON field evaluations. The fix supports both `ncontains` and `not_contains` for backward compatibility.
 
 ### Security
 

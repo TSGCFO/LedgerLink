@@ -104,6 +104,20 @@ class ConditionEvaluatorTests(TestCase):
 
         # Case insensitivity
         self.assertFalse(evaluate_condition(order, 'notes', 'not_contains', 'TEST'))
+        
+    def test_ncontains_operator(self):
+        """Test the 'ncontains' operator (alias for 'not_contains')."""
+        order = MockOrder(notes="This is a test note")
+        # Basic tests
+        self.assertTrue(evaluate_condition(order, 'notes', 'ncontains', 'missing'))
+        self.assertFalse(evaluate_condition(order, 'notes', 'ncontains', 'test'))
+        
+        # Case insensitivity
+        self.assertFalse(evaluate_condition(order, 'notes', 'ncontains', 'TEST'))
+        
+        # Test with the example that was failing
+        order = MockOrder(ship_to_country="US")
+        self.assertTrue(evaluate_condition(order, 'ship_to_country', 'ncontains', 'tom'))
 
     def test_edge_cases(self):
         """Test various edge cases."""
