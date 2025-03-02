@@ -256,7 +256,7 @@ class RuleEvaluator:
                         return field_value < value
                     elif rule.operator == 'eq':
                         return field_value == value
-                    elif rule.operator == 'ne':
+                    elif rule.operator == 'ne' or rule.operator == 'neq':  # Support both 'ne' and 'neq' for backward compatibility
                         return field_value != value
                     elif rule.operator == 'ge':
                         return field_value >= value
@@ -275,7 +275,7 @@ class RuleEvaluator:
 
                 if rule.operator == 'eq':
                     return field_value == values[0]
-                elif rule.operator == 'ne':
+                elif rule.operator == 'ne' or rule.operator == 'neq':  # Support both 'ne' and 'neq' for backward compatibility
                     return field_value != values[0]
                 elif rule.operator == 'in':
                     return field_value in values
@@ -283,7 +283,7 @@ class RuleEvaluator:
                     return field_value not in values
                 elif rule.operator == 'contains':
                     return any(v in field_value for v in values)
-                elif rule.operator == 'ncontains':
+                elif rule.operator == 'ncontains' or rule.operator == 'not_contains':  # Support both variants for consistency
                     return not any(v in field_value for v in values)
                 elif rule.operator == 'startswith':
                     return any(field_value.startswith(v) for v in values)
@@ -309,7 +309,7 @@ class RuleEvaluator:
 
                     if rule.operator == 'contains':
                         return any(normalize_sku(v) in skus for v in values)
-                    elif rule.operator == 'ncontains':
+                    elif rule.operator == 'ncontains' or rule.operator == 'not_contains':  # Support both variants for consistency
                         return not any(normalize_sku(v) in skus for v in values)
                     elif rule.operator == 'in':
                         return any(normalize_sku(v) in str(sku_dict) for v in values)
