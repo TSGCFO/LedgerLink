@@ -1,0 +1,26 @@
+[run]
+source = .
+omit =
+    */migrations/*
+    */tests/*
+    */venv/*
+    */settings/*
+    manage.py
+    wsgi.py
+    asgi.py
+    */node_modules/*
+    frontend/*
+    */admin.py
+    */__init__.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    def __str__
+    raise NotImplementedError
+    if settings.DEBUG
+    pass
+    raise ImportError
+    if 0:
+    if __name__ == .__main__.:

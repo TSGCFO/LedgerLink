@@ -502,6 +502,8 @@ COMPONENT: App (frontend\src\App.jsx)
   STATE: authenticated (unknown, isAuthenticated()
   STATE: logViewerOpen (boolean, false)
 
+COMPONENT: useCustomerData.test (frontend\src\hooks\__tests__\useCustomerData.test.jsx)
+
 COMPONENT: USShippingList (frontend\src\components\shipping\USShippingList.jsx)
   STATE: shipments (array, [])
   STATE: customers (array, [])
@@ -970,6 +972,8 @@ COMPONENT: CustomerForm (frontend\src\components\customers\CustomerForm.jsx)
   FORM FIELD: country
   FORM FIELD: business_type
 
+COMPONENT: CustomerForm.test (frontend\src\components\customers\__tests__\CustomerForm.test.jsx)
+
 COMPONENT: CustomerServiceList (frontend\src\components\customer-services\CustomerServiceList.jsx)
   STATE: customerServices (array, [])
   STATE: customers (array, [])
@@ -1007,6 +1011,10 @@ COMPONENT: LogViewer (frontend\src\components\common\LogViewer.jsx)
   STATE: saveResult (unknown, null)
 
 COMPONENT: ErrorBoundary (frontend\src\components\common\ErrorBoundary.jsx)
+
+COMPONENT: ErrorBoundary.test (frontend\src\components\common\__tests__\ErrorBoundary.test.jsx)
+
+COMPONENT: DataTable.test (frontend\src\components\common\__tests__\DataTable.test.jsx)
 
 COMPONENT: ValidationProgress (frontend\src\components\bulk-operations\ValidationProgress.jsx)
   PROPS: progress, errors, isProcessing
@@ -1289,6 +1297,9 @@ frontend\src\utils\apiClient.js depends on:
 frontend\src\services\rulesService.js depends on:
   - frontend\src\utils\apiClient.js
 
+frontend\src\hooks\__tests__\useCustomerData.test.jsx depends on:
+  - frontend\src\utils\apiClient.js
+
 frontend\src\components\shipping\USShippingList.jsx depends on:
   - frontend\src\utils\apiClient.js
 
@@ -1331,11 +1342,17 @@ frontend\src\components\customers\CustomerList.jsx depends on:
 frontend\src\components\customers\CustomerForm.jsx depends on:
   - frontend\src\utils\apiClient.js
 
+frontend\src\components\customers\__tests__\CustomerForm.test.jsx depends on:
+  - frontend\src\utils\apiClient.js
+
 frontend\src\components\customer-services\CustomerServiceList.jsx depends on:
   - frontend\src\utils\apiClient.js
 
 frontend\src\components\customer-services\CustomerServiceForm.jsx depends on:
   - frontend\src\utils\apiClient.js
+
+frontend\src\components\common\__tests__\ErrorBoundary.test.jsx depends on:
+  - frontend\src\components\common\ErrorBoundary.jsx
 
 frontend\src\components\billing\BillingList.jsx depends on:
   - frontend\src\utils\apiClient.js
@@ -1345,6 +1362,9 @@ frontend\src\components\billing\BillingForm.jsx depends on:
 
 frontend\src\components\auth\Login.jsx depends on:
   - frontend\src\utils\auth.js
+
+cypress\support\e2e.js depends on:
+  - cypress\support\commands.js
 
 PYTHON DEPENDENCIES:
 shipping\views.py depends on:
@@ -1517,6 +1537,10 @@ materials\admin.py depends on:
 LedgerLink\urls.py depends on:
   - LedgerLink\settings.py
 
+LedgerLink\test_settings.py depends on:
+  - LedgerLink\settings.py
+  - LedgerLink
+
 LedgerLink\routing.py depends on:
   - LedgerLink\routing.py
 
@@ -1584,6 +1608,14 @@ customers\views.py depends on:
 
 customers\urls.py depends on:
   - customers\views.py
+  - customers
+
+customers\test_models.py depends on:
+  - customers\models.py
+  - customers
+
+customers\test_apis.py depends on:
+  - customers\models.py
   - customers
 
 customers\tests.py depends on:

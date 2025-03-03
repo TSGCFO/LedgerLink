@@ -1,0 +1,4 @@
+transaction,customer,service_code_description,ship_to_name,ship_to_address_1,ship_to_address_2,shiptoaddress3,ship_to_city,ship_to_state,ship_to_country,ship_to_postal_code,tracking_number,pre_tax_shipping_charge,tax1type,tax1amount,tax2type,tax2amount,tax3type,tax3amount,fuel_surcharge,reference,weight,gross_weight,box_length,box_width,box_height,box_name,carrier
+1,1,Regular Delivery,John Smith,123 Maple St,,,"Toronto",ON,CA,M5V 2H1,CAD12345678901,24.99,GST,1.25,PST,2.00,,,3.50,Order #12345,5.2,5.5,12,10,8,Small Box,Canada Post
+2,1,Express Delivery,Jane Doe,456 Oak Ave,Suite 200,,"Montreal",QC,CA,H2Y 1C6,CAD98765432109,32.50,GST,1.63,QST,3.25,,,4.75,Order #67890,8.3,8.7,15,12,10,Medium Box,Purolator
+3,2,Standard Shipping,Michael Johnson,789 Pine St,,,"Vancouver",BC,CA,V6B 5A8,CAD45678901234,18.75,GST,0.94,PST,1.50,,,2.25,Order #54321,3.7,4.0,10,8,6,Small Box,FedEx

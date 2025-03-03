@@ -1,0 +1,137 @@
+name: End-to-End Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:  # Allow manual trigger
+  schedule:
+    - cron: '0 2 * * 1-5'  # Run at 2 AM Monday-Friday
+
+jobs:
+  cypress-tests:
+    name: Cypress E2E Tests
+    runs-on: ubuntu-latest
+    
+    # Use a custom service container for PostgreSQL
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ledgerlink_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          npm ci
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Run migrations
+        run: python manage.py migrate --settings=LedgerLink.test_settings
+      
+      - name: Load test data
+        run: python manage.py loaddata test_data --settings=LedgerLink.test_settings
+      
+      # Cache Cypress binary to speed up builds
+      - name: Cache Cypress binary
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-${{ runner.os }}-${{ hashFiles('**/package.json') }}
+          restore-keys: |
+            cypress-${{ runner.os }}-
+      
+      # Verify Cypress installation
+      - name: Verify Cypress
+        run: npx cypress verify
+      
+      # Start the Django and frontend servers
+      - name: Start backend
+        run: |
+          python manage.py runserver --settings=LedgerLink.test_settings 8000 &
+          echo "BACKEND_PID=$!" >> $GITHUB_ENV
+      
+      - name: Build and start frontend
+        run: |
+          cd frontend
+          npm run build
+          npm run preview &
+          echo "FRONTEND_PID=$!" >> $GITHUB_ENV
+          # Give servers time to start
+          sleep 10
+      
+      # Run Cypress tests
+      - name: Run Cypress tests
+        uses: cypress-io/github-action@v5
+        with:
+          browser: chrome
+          headless: true
+          wait-on: 'http://localhost:5173'
+          wait-on-timeout: 120
+          record: ${{ secrets.CYPRESS_RECORD_KEY != '' }}
+          # Only record on main branch if record key is set
+          record-key: ${{ secrets.CYPRESS_RECORD_KEY }}
+        env:
+          CYPRESS_BASE_URL: http://localhost:5173
+      
+      # Run accessibility tests
+      - name: Run accessibility tests
+        uses: cypress-io/github-action@v5
+        with:
+          browser: chrome
+          headless: true
+          spec: "cypress/e2e/a11y.cy.js"
+          wait-on: 'http://localhost:5173'
+          wait-on-timeout: 60
+        env:
+          CYPRESS_BASE_URL: http://localhost:5173
+      
+      # Clean up processes to ensure proper workflow completion
+      - name: Clean up
+        if: always()
+        run: |
+          if [ -n "$BACKEND_PID" ]; then kill -9 $BACKEND_PID || true; fi
+          if [ -n "$FRONTEND_PID" ]; then kill -9 $FRONTEND_PID || true; fi
+      
+      # Upload screenshots and videos on failure
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+          if-no-files-found: ignore
+      
+      - name: Upload videos
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: cypress-videos
+          path: cypress/videos
+          if-no-files-found: ignore

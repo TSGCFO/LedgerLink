@@ -1,0 +1,44 @@
+[
+  {
+    "id": 1,
+    "company_name": "ACME Corporation",
+    "contact_name": "John Smith",
+    "contact_email": "john@acme.com",
+    "contact_phone": "555-123-4567",
+    "address": "123 Main St",
+    "city": "New York",
+    "state": "NY",
+    "postal_code": "10001",
+    "country": "US",
+    "created_at": "2023-01-01T00:00:00Z",
+    "updated_at": "2023-01-01T00:00:00Z"
+  },
+  {
+    "id": 2,
+    "company_name": "Globex Industries",
+    "contact_name": "Jane Doe",
+    "contact_email": "jane@globex.com",
+    "contact_phone": "555-987-6543",
+    "address": "456 Park Ave",
+    "city": "Chicago",
+    "state": "IL",
+    "postal_code": "60601",
+    "country": "US",
+    "created_at": "2023-01-02T00:00:00Z",
+    "updated_at": "2023-01-02T00:00:00Z"
+  },
+  {
+    "id": 3,
+    "company_name": "Wayne Enterprises",
+    "contact_name": "Bruce Wayne",
+    "contact_email": "bruce@wayne.com",
+    "contact_phone": "555-555-5555",
+    "address": "1 Wayne Manor",
+    "city": "Gotham",
+    "state": "NJ",
+    "postal_code": "08701",
+    "country": "US",
+    "created_at": "2023-01-03T00:00:00Z",
+    "updated_at": "2023-01-03T00:00:00Z"
+  }
+]

@@ -1,0 +1,4 @@
+transaction,customer,ship_date,ship_to_name,ship_to_address_1,ship_to_address_2,ship_to_city,ship_to_state,ship_to_zip,ship_to_country_code,tracking_number,service_name,weight_lbs,length_in,width_in,height_in,base_chg,carrier_peak_charge,wizmo_peak_charge,accessorial_charges,rate,hst,gst,current_status,delivery_status
+4,2,2025-02-28,Robert Williams,123 Main St,,New York,NY,10001,US,US12345678901,Express,4.8,12,10,8,19.99,1.50,0.75,2.25,1.0,,,in_transit,pending
+5,3,2025-02-27,Emily Davis,456 Elm St,Apt 301,Chicago,IL,60601,US,US98765432109,2-Day,7.2,15,12,10,24.50,2.25,1.25,3.00,1.0,,,delivered,delivered
+6,1,2025-02-26,Thomas Brown,789 Oak St,,Los Angeles,CA,90001,US,US45678901234,Ground,3.5,10,8,6,12.75,1.00,0.50,0.0,1.0,,,delivered,delivered
