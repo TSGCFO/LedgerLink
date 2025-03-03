@@ -84,7 +84,7 @@ etc/
 images/
 Main/
 ai_core/
-tests/
+
 templates/
 Writerside/
 *.pgerd
