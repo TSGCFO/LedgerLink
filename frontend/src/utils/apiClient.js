@@ -152,16 +152,16 @@ async function request(endpoint, options = {}, useBaseUrl = true) {
 export const rulesApi = {
   // Rule Groups
   listGroups: () => request('/rules/api/groups/'),
-  getGroup: (id) => request(`/rules/group/${id}/`),
+  getGroup: (id) => request(`/rules/api/groups/${id}/`),
   createGroup: (data) => request('/rules/api/groups/', {
     method: 'POST',
     body: JSON.stringify(data),
   }),
-  updateGroup: (id, data) => request(`/rules/group/${id}/edit/`, {
+  updateGroup: (id, data) => request(`/rules/api/groups/${id}/`, {
     method: 'PUT',
     body: JSON.stringify(data),
   }),
-  deleteGroup: (id) => request(`/rules/group/${id}/delete/api/`, {
+  deleteGroup: (id) => request(`/rules/api/groups/${id}/`, {
     method: 'DELETE',
   }),
 
@@ -242,7 +242,7 @@ export const rulesApi = {
       body: JSON.stringify({ rule: ruleData, order: sampleOrderData }),
     });
   },
-  getCustomerSkus: (groupId) => request(`/rules/group/${groupId}/skus/`),
+  getCustomerSkus: (groupId) => request(`/rules/groups/${groupId}/skus/`),
 };
 
 /**

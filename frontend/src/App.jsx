@@ -111,9 +111,16 @@ function App() {
               {authenticated && (
                 <Tooltip title="View Console Logs">
                   <IconButton 
-                    color="inherit" 
+                    color="secondary" 
                     onClick={() => setLogViewerOpen(true)}
                     edge="end"
+                    sx={{ 
+                      backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 0.25)',
+                      },
+                      ml: 1,
+                    }}
                   >
                     <BugReportIcon />
                   </IconButton>

@@ -205,6 +205,50 @@ cd frontend
 npm test -- --coverage
 ```
 
+## API Contract Testing
+
+We use Pact for contract testing between our frontend (consumer) and backend (provider). This ensures that API contracts are maintained.
+
+### Consumer Tests (Frontend)
+
+Consumer tests define the expectations that the frontend has for the backend API:
+
+```bash
+# Run all consumer tests
+cd frontend
+npm run test:pact
+
+# Run a specific contract test
+npm test -- src/utils/__tests__/products.pact.test.js
+```
+
+Consumer tests are located in:
+- `frontend/src/utils/__tests__/*.pact.test.js`
+
+### Provider Tests (Backend)
+
+These tests verify the backend implements the API according to the consumer's expectations:
+
+```bash
+# Run provider tests for an app
+python manage.py test customers.tests.pact_provider
+```
+
+### Contract Testing Workflow
+
+1. Frontend developers write consumer tests defining API expectations
+2. Tests generate Pact files in `frontend/pacts/`
+3. Backend developers run provider tests against these Pact files
+4. CI pipeline verifies both sides of the contract
+
+### Best Practices
+
+1. **Always update contracts first**: When changing an API, update the contract test before changing the implementation
+2. **Version your contracts**: Use semantic versioning for your Pact contracts
+3. **Use provider states**: Define clear provider states for different testing scenarios
+4. **Test all response fields**: Ensure your contracts test all relevant fields in responses
+5. **Include error cases**: Test both successful and error responses
+
 ## Continuous Integration
 
 The test suite runs automatically in the CI pipeline for:

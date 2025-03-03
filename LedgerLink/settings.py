@@ -80,16 +80,31 @@ WSGI_APPLICATION = 'LedgerLink.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'Hassan8488$',
-        'HOST': 'db.dorunzumqoeiozqiyiux.supabase.co',
-        'PORT': '5432',
+import sys
+
+# Use dedicated PostgreSQL database for testing
+if 'test' in sys.argv:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'postgres',
+            'USER': 'postgres',
+            'PASSWORD': 'Hassan8488$',
+            'HOST': 'db.aqlxkyvyprmmufpejzlf.supabase.co',
+            'PORT': '5432',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'postgres',
+            'USER': 'postgres',
+            'PASSWORD': 'Hassan8488$',
+            'HOST': 'db.aqlxkyvyprmmufpejzlf.supabase.co',
+            'PORT': '5432',
+        }
+    }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [

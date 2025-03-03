@@ -1,0 +1,32 @@
+# These packages typically require compilation or development headers
+# Install these one by one to identify specific issues
+
+# Database
+psycopg2-binary==2.8.6
+
+# System utilities
+psutil-wheels
+tornado
+
+# Data processing
+numpy
+pandas
+pyarrow
+
+# Image processing
+Pillow
+
+# Excel support
+XlsxWriter
+openpyxl
+
+# AI/ML
+openai
+
+# PDF generation
+reportlab
+
+# Other packages that might need compilation
+celery
+streamlit
+pydeck

@@ -1,0 +1,272 @@
+[
+  {
+    "timestamp": "2025-03-01T22:28:19.888Z",
+    "level": "ERROR",
+    "message": "Error saving logs to server: {}",
+    "data": null
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.959Z",
+    "level": "ERROR",
+    "message": "Error fetching rules: Server error. Please try again later.",
+    "data": null
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.958Z",
+    "level": "ERROR",
+    "message": "Server Error",
+    "data": "{\"message\":\"Invalid response from server\",\"stack\":null,\"status\":500,\"originalError\":{},\"data\":null}"
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.958Z",
+    "level": "ERROR",
+    "message": "[2025-03-01T22:28:05.958Z] [ERROR] Server Error\nData: {\n  \"message\": \"Invalid response from server\",\n  \"stack\": null,\n  \"status\": 500,\n  \"originalError\": {},\n  \"data\": null\n}",
+    "data": null
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.958Z",
+    "level": "ERROR",
+    "message": "API Error: GET /api/v1/rules/api/groups/2/rules/",
+    "data": "{\"message\":\"Invalid response from server\",\"status\":500,\"originalError\":{}}"
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.958Z",
+    "level": "ERROR",
+    "message": "[2025-03-01T22:28:05.958Z] [ERROR] API Error: GET /api/v1/rules/api/groups/2/rules/\nData: {\n  \"message\": \"Invalid response from server\",\n  \"status\": 500,\n  \"originalError\": {}\n}",
+    "data": null
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.958Z",
+    "level": "ERROR",
+    "message": "API Error GET /api/v1/rules/api/groups/2/rules/: {\"status\":500,\"message\":\"Invalid response from server\",\"originalError\":{}}",
+    "data": null
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.958Z",
+    "level": "ERROR",
+    "message": "JSON Parsing Error",
+    "data": "{\"message\":\"Invalid response from server\",\"status\":500,\"originalError\":{}}"
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.958Z",
+    "level": "ERROR",
+    "message": "[2025-03-01T22:28:05.957Z] [ERROR] JSON Parsing Error\nData: {\n  \"message\": \"Invalid response from server\",\n  \"status\": 500,\n  \"originalError\": {}\n}",
+    "data": null
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.957Z",
+    "level": "ERROR",
+    "message": "Error fetching advanced rules: Server error. Please try again later.",
+    "data": null
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.957Z",
+    "level": "ERROR",
+    "message": "Server Error",
+    "data": "{\"message\":\"Invalid response from server\",\"stack\":null,\"status\":500,\"originalError\":{},\"data\":null}"
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.956Z",
+    "level": "ERROR",
+    "message": "[2025-03-01T22:28:05.956Z] [ERROR] Server Error\nData: {\n  \"message\": \"Invalid response from server\",\n  \"stack\": null,\n  \"status\": 500,\n  \"originalError\": {},\n  \"data\": null\n}",
+    "data": null
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.956Z",
+    "level": "ERROR",
+    "message": "API Error: GET /api/v1/rules/api/groups/2/advanced-rules/",
+    "data": "{\"message\":\"Invalid response from server\",\"status\":500,\"originalError\":{}}"
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.956Z",
+    "level": "ERROR",
+    "message": "[2025-03-01T22:28:05.956Z] [ERROR] API Error: GET /api/v1/rules/api/groups/2/advanced-rules/\nData: {\n  \"message\": \"Invalid response from server\",\n  \"status\": 500,\n  \"originalError\": {}\n}",
+    "data": null
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.956Z",
+    "level": "ERROR",
+    "message": "API Error GET /api/v1/rules/api/groups/2/advanced-rules/: {\"status\":500,\"message\":\"Invalid response from server\",\"originalError\":{}}",
+    "data": null
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.956Z",
+    "level": "ERROR",
+    "message": "JSON Parsing Error",
+    "data": "{\"message\":\"Invalid response from server\",\"status\":500,\"originalError\":{}}"
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.956Z",
+    "level": "ERROR",
+    "message": "[2025-03-01T22:28:05.955Z] [ERROR] JSON Parsing Error\nData: {\n  \"message\": \"Invalid response from server\",\n  \"status\": 500,\n  \"originalError\": {}\n}",
+    "data": null
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.908Z",
+    "level": "ERROR",
+    "message": "Error fetching advanced rules: Server error. Please try again later.",
+    "data": null
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.908Z",
+    "level": "ERROR",
+    "message": "Server Error",
+    "data": "{\"message\":\"Invalid response from server\",\"stack\":null,\"status\":500,\"originalError\":{},\"data\":null}"
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.908Z",
+    "level": "ERROR",
+    "message": "[2025-03-01T22:28:05.908Z] [ERROR] Server Error\nData: {\n  \"message\": \"Invalid response from server\",\n  \"stack\": null,\n  \"status\": 500,\n  \"originalError\": {},\n  \"data\": null\n}",
+    "data": null
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.908Z",
+    "level": "ERROR",
+    "message": "API Error: GET /api/v1/rules/api/groups/2/advanced-rules/",
+    "data": "{\"message\":\"Invalid response from server\",\"status\":500,\"originalError\":{}}"
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.908Z",
+    "level": "ERROR",
+    "message": "[2025-03-01T22:28:05.907Z] [ERROR] API Error: GET /api/v1/rules/api/groups/2/advanced-rules/\nData: {\n  \"message\": \"Invalid response from server\",\n  \"status\": 500,\n  \"originalError\": {}\n}",
+    "data": null
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.907Z",
+    "level": "ERROR",
+    "message": "API Error GET /api/v1/rules/api/groups/2/advanced-rules/: {\"status\":500,\"message\":\"Invalid response from server\",\"originalError\":{}}",
+    "data": null
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.907Z",
+    "level": "ERROR",
+    "message": "JSON Parsing Error",
+    "data": "{\"message\":\"Invalid response from server\",\"status\":500,\"originalError\":{}}"
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.907Z",
+    "level": "ERROR",
+    "message": "[2025-03-01T22:28:05.907Z] [ERROR] JSON Parsing Error\nData: {\n  \"message\": \"Invalid response from server\",\n  \"status\": 500,\n  \"originalError\": {}\n}",
+    "data": null
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.865Z",
+    "level": "ERROR",
+    "message": "Error fetching rules: Server error. Please try again later.",
+    "data": null
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.865Z",
+    "level": "ERROR",
+    "message": "Server Error",
+    "data": "{\"message\":\"Invalid response from server\",\"stack\":null,\"status\":500,\"originalError\":{},\"data\":null}"
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.865Z",
+    "level": "ERROR",
+    "message": "[2025-03-01T22:28:05.865Z] [ERROR] Server Error\nData: {\n  \"message\": \"Invalid response from server\",\n  \"stack\": null,\n  \"status\": 500,\n  \"originalError\": {},\n  \"data\": null\n}",
+    "data": null
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.865Z",
+    "level": "ERROR",
+    "message": "API Error: GET /api/v1/rules/api/groups/2/rules/",
+    "data": "{\"message\":\"Invalid response from server\",\"status\":500,\"originalError\":{}}"
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.865Z",
+    "level": "ERROR",
+    "message": "[2025-03-01T22:28:05.864Z] [ERROR] API Error: GET /api/v1/rules/api/groups/2/rules/\nData: {\n  \"message\": \"Invalid response from server\",\n  \"status\": 500,\n  \"originalError\": {}\n}",
+    "data": null
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.864Z",
+    "level": "ERROR",
+    "message": "API Error GET /api/v1/rules/api/groups/2/rules/: {\"status\":500,\"message\":\"Invalid response from server\",\"originalError\":{}}",
+    "data": null
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.864Z",
+    "level": "ERROR",
+    "message": "JSON Parsing Error",
+    "data": "{\"message\":\"Invalid response from server\",\"status\":500,\"originalError\":{}}"
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.864Z",
+    "level": "ERROR",
+    "message": "[2025-03-01T22:28:05.863Z] [ERROR] JSON Parsing Error\nData: {\n  \"message\": \"Invalid response from server\",\n  \"status\": 500,\n  \"originalError\": {}\n}",
+    "data": null
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.536Z",
+    "level": "DEBUG",
+    "message": "API Request: GET /api/v1/rules/api/groups/2/advanced-rules/",
+    "data": "{\"method\":\"GET\",\"url\":\"/api/v1/rules/api/groups/2/advanced-rules/\",\"headers\":{\"Content-Type\":\"application/json\",\"X-CSRFToken\":\"e1QTBk87m1OzwRVl2FB1ZiltrlhDwFSZ\",\"Authorization\":\"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM3NzgxOTE4LCJpYXQiOjE3Mzc3NzgzMTgsImp0aSI6IjU3MWQ1N2Q4ZjVkNjQ3ZTg5NjQzY2QwY2RhN2UwOGQ3IiwidXNlcl9pZCI6MX0.W-aTrQV9NbIlz3Tp2enDL79N83REo295YucqanBq-as\"}}"
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.536Z",
+    "level": "DEBUG",
+    "message": "[2025-03-01T22:28:05.536Z] [DEBUG] API Request: GET /api/v1/rules/api/groups/2/advanced-rules/\nData: {\n  \"method\": \"GET\",\n  \"url\": \"/api/v1/rules/api/groups/2/advanced-rules/\",\n  \"headers\": {\n    \"Content-Type\": \"application/json\",\n    \"X-CSRFToken\": \"e1QTBk87m1OzwRVl2FB1ZiltrlhDwFSZ\",\n    \"Authorization\": \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM3NzgxOTE4LCJpYXQiOjE3Mzc3NzgzMTgsImp0aSI6IjU3MWQ1N2Q4ZjVkNjQ3ZTg5NjQzY2QwY2RhN2UwOGQ3IiwidXNlcl9pZCI6MX0.W-aTrQV9NbIlz3Tp2enDL79N83REo295YucqanBq-as\"\n  }\n}",
+    "data": null
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.536Z",
+    "level": "LOG",
+    "message": "Requesting GET /api/v1/rules/api/groups/2/advanced-rules/",
+    "data": null
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.530Z",
+    "level": "DEBUG",
+    "message": "API Request: GET /api/v1/rules/api/groups/2/rules/",
+    "data": "{\"method\":\"GET\",\"url\":\"/api/v1/rules/api/groups/2/rules/\",\"headers\":{\"Content-Type\":\"application/json\",\"X-CSRFToken\":\"e1QTBk87m1OzwRVl2FB1ZiltrlhDwFSZ\",\"Authorization\":\"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM3NzgxOTE4LCJpYXQiOjE3Mzc3NzgzMTgsImp0aSI6IjU3MWQ1N2Q4ZjVkNjQ3ZTg5NjQzY2QwY2RhN2UwOGQ3IiwidXNlcl9pZCI6MX0.W-aTrQV9NbIlz3Tp2enDL79N83REo295YucqanBq-as\"}}"
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.530Z",
+    "level": "DEBUG",
+    "message": "[2025-03-01T22:28:05.530Z] [DEBUG] API Request: GET /api/v1/rules/api/groups/2/rules/\nData: {\n  \"method\": \"GET\",\n  \"url\": \"/api/v1/rules/api/groups/2/rules/\",\n  \"headers\": {\n    \"Content-Type\": \"application/json\",\n    \"X-CSRFToken\": \"e1QTBk87m1OzwRVl2FB1ZiltrlhDwFSZ\",\n    \"Authorization\": \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM3NzgxOTE4LCJpYXQiOjE3Mzc3NzgzMTgsImp0aSI6IjU3MWQ1N2Q4ZjVkNjQ3ZTg5NjQzY2QwY2RhN2UwOGQ3IiwidXNlcl9pZCI6MX0.W-aTrQV9NbIlz3Tp2enDL79N83REo295YucqanBq-as\"\n  }\n}",
+    "data": null
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.530Z",
+    "level": "LOG",
+    "message": "Requesting GET /api/v1/rules/api/groups/2/rules/",
+    "data": null
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.516Z",
+    "level": "DEBUG",
+    "message": "API Request: GET /api/v1/rules/api/groups/2/advanced-rules/",
+    "data": "{\"method\":\"GET\",\"url\":\"/api/v1/rules/api/groups/2/advanced-rules/\",\"headers\":{\"Content-Type\":\"application/json\",\"X-CSRFToken\":\"e1QTBk87m1OzwRVl2FB1ZiltrlhDwFSZ\",\"Authorization\":\"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM3NzgxOTE4LCJpYXQiOjE3Mzc3NzgzMTgsImp0aSI6IjU3MWQ1N2Q4ZjVkNjQ3ZTg5NjQzY2QwY2RhN2UwOGQ3IiwidXNlcl9pZCI6MX0.W-aTrQV9NbIlz3Tp2enDL79N83REo295YucqanBq-as\"}}"
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.516Z",
+    "level": "DEBUG",
+    "message": "[2025-03-01T22:28:05.516Z] [DEBUG] API Request: GET /api/v1/rules/api/groups/2/advanced-rules/\nData: {\n  \"method\": \"GET\",\n  \"url\": \"/api/v1/rules/api/groups/2/advanced-rules/\",\n  \"headers\": {\n    \"Content-Type\": \"application/json\",\n    \"X-CSRFToken\": \"e1QTBk87m1OzwRVl2FB1ZiltrlhDwFSZ\",\n    \"Authorization\": \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM3NzgxOTE4LCJpYXQiOjE3Mzc3NzgzMTgsImp0aSI6IjU3MWQ1N2Q4ZjVkNjQ3ZTg5NjQzY2QwY2RhN2UwOGQ3IiwidXNlcl9pZCI6MX0.W-aTrQV9NbIlz3Tp2enDL79N83REo295YucqanBq-as\"\n  }\n}",
+    "data": null
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.516Z",
+    "level": "LOG",
+    "message": "Requesting GET /api/v1/rules/api/groups/2/advanced-rules/",
+    "data": null
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.510Z",
+    "level": "DEBUG",
+    "message": "API Request: GET /api/v1/rules/api/groups/2/rules/",
+    "data": "{\"method\":\"GET\",\"url\":\"/api/v1/rules/api/groups/2/rules/\",\"headers\":{\"Content-Type\":\"application/json\",\"X-CSRFToken\":\"e1QTBk87m1OzwRVl2FB1ZiltrlhDwFSZ\",\"Authorization\":\"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM3NzgxOTE4LCJpYXQiOjE3Mzc3NzgzMTgsImp0aSI6IjU3MWQ1N2Q4ZjVkNjQ3ZTg5NjQzY2QwY2RhN2UwOGQ3IiwidXNlcl9pZCI6MX0.W-aTrQV9NbIlz3Tp2enDL79N83REo295YucqanBq-as\"}}"
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.510Z",
+    "level": "DEBUG",
+    "message": "[2025-03-01T22:28:05.510Z] [DEBUG] API Request: GET /api/v1/rules/api/groups/2/rules/\nData: {\n  \"method\": \"GET\",\n  \"url\": \"/api/v1/rules/api/groups/2/rules/\",\n  \"headers\": {\n    \"Content-Type\": \"application/json\",\n    \"X-CSRFToken\": \"e1QTBk87m1OzwRVl2FB1ZiltrlhDwFSZ\",\n    \"Authorization\": \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM3NzgxOTE4LCJpYXQiOjE3Mzc3NzgzMTgsImp0aSI6IjU3MWQ1N2Q4ZjVkNjQ3ZTg5NjQzY2QwY2RhN2UwOGQ3IiwidXNlcl9pZCI6MX0.W-aTrQV9NbIlz3Tp2enDL79N83REo295YucqanBq-as\"\n  }\n}",
+    "data": null
+  },
+  {
+    "timestamp": "2025-03-01T22:28:05.510Z",
+    "level": "LOG",
+    "message": "Requesting GET /api/v1/rules/api/groups/2/rules/",
+    "data": null
+  }
+]

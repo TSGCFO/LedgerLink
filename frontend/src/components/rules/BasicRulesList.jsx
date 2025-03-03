@@ -117,8 +117,21 @@ const BasicRulesList = ({ groupId }) => {
       setRules(fetchedRules);
       setError(null);
     } catch (err) {
-      setError('Failed to fetch rules. Please try again.');
-      console.error('Error fetching rules:', err);
+      console.error('Error fetching basic rules:', err);
+      // Check if it's a connection error
+      if (err.message && (
+          err.message.includes('connect to the server') ||
+          err.message.includes('Network error') ||
+          err.message.includes('Failed to fetch')
+      )) {
+        setError('Cannot connect to the server. Please make sure the backend is running.');
+      } else if (err.status === 404) {
+        setError(`Basic rules endpoint not found. There may be an API path mismatch. Check the /api/v1/rules/group/${groupId}/rules/ endpoint.`);
+      } else if (err.status === 500) {
+        setError('Server error processing this request. This might be due to incorrect API paths or route configuration.');
+      } else {
+        setError(`Failed to fetch basic rules: ${err.message || 'Unknown error'}. Please try again.`);
+      }
     } finally {
       setLoading(false);
     }
@@ -168,13 +181,26 @@ const BasicRulesList = ({ groupId }) => {
 
   return (
     <Box>
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
-
-      <Box mb={2} display="flex" justifyContent="flex-end">
+      <Box mb={2} display="flex" justifyContent="space-between" alignItems="center">
+        <Box>
+          {error && (
+            <Alert 
+              severity="error" 
+              sx={{ mb: 2, maxWidth: '600px' }}
+              action={
+                <Button 
+                  color="inherit" 
+                  size="small" 
+                  onClick={() => fetchRules()}
+                >
+                  Retry
+                </Button>
+              }
+            >
+              {error}
+            </Alert>
+          )}
+        </Box>
         <Button
           variant="contained"
           color="primary"
@@ -185,7 +211,18 @@ const BasicRulesList = ({ groupId }) => {
         </Button>
       </Box>
 
-      <MaterialReactTable table={table} />
+      {!loading && rules.length === 0 && !error ? (
+        <Box sx={{ p: 4, textAlign: 'center', border: '1px dashed', borderColor: 'grey.300', borderRadius: 1 }}>
+          <Typography variant="body1" color="text.secondary" gutterBottom>
+            No basic rules found for this group.
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Click the "Create Rule" button to add a new rule.
+          </Typography>
+        </Box>
+      ) : (
+        <MaterialReactTable table={table} />
+      )}
 
       {showRuleBuilder && (
         <RuleBuilder

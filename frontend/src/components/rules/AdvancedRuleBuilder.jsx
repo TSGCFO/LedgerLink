@@ -358,48 +358,130 @@ const AdvancedRuleBuilder = ({ groupId, initialData, onSubmit, onCancel }) => {
           if (!formData.field) errors.field = 'Field is required';
           if (!formData.operator) errors.operator = 'Operator is required';
           if (!formData.value) errors.value = 'Value is required';
+          
+          // Validate the value format based on field type
+          if (formData.field && formData.operator && formData.value) {
+            const { isValid, message } = validateRuleValue(formData.field, formData.operator, formData.value);
+            if (!isValid) {
+              errors.value = message;
+            }
+          }
           break;
+          
         case 1: // Conditions
           // Validate each condition has all required fields
           if (formData.conditions && typeof formData.conditions === 'object') {
-            Object.entries(formData.conditions).forEach(([field, criteria], index) => {
-              if (!field) errors[`condition_${index}_field`] = 'Field is required';
-              
-              // Safely handle criteria that might be undefined or not an object
-              if (criteria && typeof criteria === 'object') {
-                const entries = Object.entries(criteria);
-                const [operator, value] = entries.length > 0 ? entries[0] : ['', ''];
-                if (!operator) errors[`condition_${index}_operator`] = 'Operator is required';
-                if (!value) errors[`condition_${index}_value`] = 'Value is required';
-              } else {
-                errors[`condition_${index}_operator`] = 'Operator is required';
-                errors[`condition_${index}_value`] = 'Value is required';
-              }
-            });
+            // Check if there are any conditions at all
+            const hasConditions = Object.keys(formData.conditions).length > 0;
+            
+            // Warn about empty conditions, but don't block progression
+            if (!hasConditions) {
+              errors.conditions_warning = 'No additional conditions added. You can continue without conditions.';
+            } else {
+              // Validate existing conditions
+              Object.entries(formData.conditions).forEach(([field, criteria], index) => {
+                if (!field) errors[`condition_${index}_field`] = 'Field is required';
+                
+                // Safely handle criteria that might be undefined or not an object
+                if (criteria && typeof criteria === 'object') {
+                  const entries = Object.entries(criteria);
+                  const [operator, value] = entries.length > 0 ? entries[0] : ['', ''];
+                  if (!operator) errors[`condition_${index}_operator`] = 'Operator is required';
+                  if (!value) errors[`condition_${index}_value`] = 'Value is required';
+                  
+                  // Additional validation for condition values
+                  if (field && operator && value) {
+                    const { isValid, message } = validateRuleValue(field, operator, value);
+                    if (!isValid) {
+                      errors[`condition_${index}_value`] = message;
+                    }
+                  }
+                } else {
+                  errors[`condition_${index}_operator`] = 'Operator is required';
+                  errors[`condition_${index}_value`] = 'Value is required';
+                }
+              });
+            }
           }
           break;
+          
         case 2: // Calculations
-          if (Array.isArray(formData.calculations)) {
-            formData.calculations.forEach((calc, index) => {
-              if (!calc || typeof calc !== 'object') {
-                errors[`calculation_${index}`] = 'Invalid calculation format';
-                return;
+          // Check if there are any calculations
+          if (!Array.isArray(formData.calculations) || formData.calculations.length === 0) {
+            errors.calculations_required = 'At least one calculation is required to define how pricing works';
+            break;
+          }
+          
+          // Validate each calculation
+          formData.calculations.forEach((calc, index) => {
+            if (!calc || typeof calc !== 'object') {
+              errors[`calculation_${index}`] = 'Invalid calculation format';
+              return;
+            }
+            
+            if (!calc.type) {
+              errors[`calculation_${index}_type`] = 'Calculation type is required';
+            }
+            
+            if (calc.value === undefined || calc.value === null || calc.value === '') {
+              errors[`calculation_${index}_value`] = 'Value is required';
+            }
+            
+            // Special validation for case_based_tier
+            if (calc.type === 'case_based_tier') {
+              // Validate using our calculation validator
+              const { isValid, message } = validateCalculation(calc);
+              if (!isValid) {
+                errors[`calculation_${index}`] = message;
               }
               
-              if (!calc.type) errors[`calculation_${index}_type`] = 'Calculation type is required';
-              if (calc.value === undefined || calc.value === null || calc.value === '') {
-                errors[`calculation_${index}_value`] = 'Value is required';
+              // Check for tier ranges
+              if (!calc.tier_config || !calc.tier_config.ranges || calc.tier_config.ranges.length === 0) {
+                errors[`calculation_${index}_tiers`] = 'Case-based tier requires at least one tier range';
+              } else {
+                // Check that ranges are in ascending order
+                const sortedRanges = [...calc.tier_config.ranges].sort((a, b) => parseFloat(a.min) - parseFloat(b.min));
+                
+                // Check for tier issues
+                let previousTier = null;
+                sortedRanges.forEach((tier, tierIndex) => {
+                  // Min max relationship
+                  if (parseFloat(tier.min) > parseFloat(tier.max)) {
+                    errors[`tier_${tierIndex}_min_max`] = `Min (${tier.min}) cannot be greater than max (${tier.max})`;
+                  }
+                  
+                  // Check for gaps and overlaps
+                  if (previousTier) {
+                    const prevMax = parseFloat(previousTier.max);
+                    const currentMin = parseFloat(tier.min);
+                    
+                    if (prevMax >= currentMin) {
+                      errors[`tier_${tierIndex}_overlap`] = `Tier overlaps with previous tier (${prevMax} >= ${currentMin})`;
+                    } else if (prevMax + 1 < currentMin) {
+                      errors[`tier_${tierIndex}_gap`] = `Gap between tiers (${prevMax} to ${currentMin})`;
+                    }
+                  }
+                  
+                  previousTier = tier;
+                });
               }
-            });
-          }
+            }
+          });
           break;
+          
         default:
           console.warn(`Unknown step: ${step}`);
       }
 
       console.log('Validation errors:', errors);
       setValidationErrors(errors);
-      return Object.keys(errors).length === 0;
+      
+      // Allow continuing with warnings but not errors
+      const blockingErrors = Object.entries(errors).filter(([key]) => 
+        !key.includes('warning') && !key.includes('conditions_')
+      );
+      
+      return blockingErrors.length === 0;
     } catch (err) {
       console.error('Error in validateStep:', err);
       setError('Validation error occurred. Please check your inputs.');

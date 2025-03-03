@@ -1,113 +1,112 @@
-# Bulk Operations Module Testing Documentation
+# Bulk Operations Testing Documentation
 
-This document outlines the testing approach and coverage for the Bulk Operations module in the LedgerLink application.
+## Overview
 
-## Test Structure
+The Bulk Operations module facilitates data import functionality, allowing users to upload CSV or Excel files for bulk data import. This document outlines the testing approach and implementation for this module.
 
-The tests for the Bulk Operations module follow the testing pyramid approach:
+## Components Under Test
 
-1. **Unit Tests**: Testing individual components (template generator, validator, serializers)
-2. **Integration Tests**: Testing components working together
-3. **API Tests**: Testing API endpoints and authentication
+The Bulk Operations feature consists of the following components:
+
+1. **BulkOperations.jsx** - Main container component
+2. **TemplateSelector.jsx** - Template selection interface
+3. **FileUploader.jsx** - File upload functionality with validation
+4. **ValidationProgress.jsx** - Progress display during validation
+5. **ResultsSummary.jsx** - Results display after import
+6. **ErrorDisplay.jsx** - Error boundary for fault tolerance
+
+## Test Types Implemented
+
+### Unit Tests
+
+Unit tests have been created for all components to verify their individual functionality:
+
+- **BulkOperations.test.jsx** - Tests the workflow progression, state management, and integration with child components
+- **TemplateSelector.test.jsx** - Tests template loading, selection, and download functionality
+- **FileUploader.test.jsx** - Tests file selection, validation, and error handling
+- **ValidationProgress.test.jsx** - Tests progress display for different states
+- **ResultsSummary.test.jsx** - Tests different import result scenarios
+- **ErrorDisplay.test.jsx** - Tests error boundary functionality
+
+### Accessibility Tests
+
+Accessibility tests ensure the components meet WCAG guidelines:
+
+- **BulkOperations.a11y.test.jsx** - Tests the entire workflow for accessibility
+- **FileUploader.a11y.test.jsx** - Tests file upload interface for accessibility
 
 ## Test Coverage
 
-### Service Layer Tests
+The tests cover the following aspects:
 
-#### Template Generator
-- ✅ Test retrieving all available templates
-- ✅ Test getting specific template definitions
-- ✅ Test getting field types for templates
-- ✅ Test generating template headers
-- ✅ Test error handling for invalid templates
+1. **Component Rendering** - Verifies components render correctly
+2. **State Management** - Tests state changes during workflow
+3. **API Integration** - Mock API calls and response handling
+4. **Validation Logic** - Tests client-side validation rules
+5. **Error Handling** - Tests error display and recovery
+6. **Accessibility** - Tests ARIA compliance and keyboard navigation
 
-#### Validator
-- ✅ Test validation of required fields
-- ✅ Test validation of data types
-- ✅ Test error formatting and reporting
-- ✅ Test handling of various data formats
-
-### Serializer Tests
-
-#### Bulk Serializers
-- ✅ Test CustomerBulkSerializer validation
-- ✅ Test MaterialBulkSerializer validation
-- ✅ Test OrderBulkSerializer validation
-- ✅ Test handling of foreign key constraints
-- ✅ Test validation of required fields
-- ✅ Test data type validation
-- ✅ Test serializer factory functionality
-
-### API Tests
-
-#### Bulk Operations API
-- ✅ Test template listing endpoint
-- ✅ Test template info endpoint
-- ✅ Test template download endpoint
-- ✅ Test authentication requirements
-- ✅ Test error handling for invalid templates
-
-#### Bulk Import API
-- ✅ Test validation of imported data
-- ✅ Test successful import process
-- ✅ Test error handling for invalid files
-- ✅ Test file size limits
-- ✅ Test file format validation
-- ✅ Test transaction handling
-
-## Covered Functionality
-
-The tests cover all key functionality of the Bulk Operations module:
-- Template definitions and availability
-- Data validation and error reporting
-- File parsing and processing
-- Database record creation
-- Error handling
-- Authentication and permissions
-- Transaction management
-
-## Running the Tests
-
-To run the Bulk Operations module tests:
+## How to Run Tests
 
 ```bash
-# Run all Bulk Operations tests
-python manage.py test bulk_operations
+# Run all bulk operations tests
+npm test -- --testPathPattern=src/components/bulk-operations/__tests__
 
-# Run specific test class
-python manage.py test bulk_operations.tests.TemplateGeneratorTests
+# Run only unit tests (excluding a11y tests)
+npm test -- --testPathPattern=src/components/bulk-operations/__tests__/.*\.test\.jsx$ --testPathIgnorePatterns=a11y
 
-# Run specific test method
-python manage.py test bulk_operations.tests.TemplateGeneratorTests.test_get_available_templates
+# Run only accessibility tests
+npm test -- --testPathPattern=src/components/bulk-operations/__tests__/.*\.a11y\.test\.jsx$
 ```
 
-## Test Design Principles
+## Mock Strategy
 
-1. **Isolation**: Each test is isolated and doesn't depend on the state from previous tests
-2. **Completeness**: Tests cover both positive cases (expected behavior) and negative cases (error handling)
-3. **Clarity**: Test names and docstrings clearly describe what is being tested
-4. **Performance**: Tests are optimized to run quickly
+The tests use the following mock strategies:
+
+1. **Child Component Mocks** - Simplify testing of parent components
+2. **API Mocks** - Simulate server responses
+3. **File Mocks** - Simulate file uploads
+4. **Event Mocks** - Simulate user interactions
 
 ## Test Data
 
-The tests use minimal test data created directly in the tests, following the testing pyramid principles:
-- Pandas DataFrames for validator testing
-- CSV files for import testing
-- In-memory test data for serializer testing
+The tests use various test scenarios:
 
-## Mock Objects and Dependencies
+1. **Valid Template Data** - For happy path testing
+2. **Invalid File Formats** - For validation testing
+3. **Missing Required Fields** - For error handling
+4. **Server Errors** - For API error handling
 
-- SimpleUploadedFile for mocking file uploads
-- StringIO for in-memory CSV generation
-- API client for testing endpoints
-- Database isolation via Django's TestCase
+## E2E Tests
 
-## Future Improvements
+End-to-end tests have been implemented using Cypress to verify the complete Bulk Operations workflow:
 
-Potential areas for test enhancement:
+- `/frontend/cypress/e2e/bulk_operations.cy.js`
 
-1. Add tests for foreign key validation in BulkImportValidator
-2. Add performance tests for large file imports
-3. Test Excel file import format
-4. Add explicit tests for row limit enforcement
-5. Test concurrent imports and potential race conditions
+These tests cover the following scenarios:
+
+1. **Template Selection** - Verifies that templates load and can be selected
+2. **Template Download** - Tests template file download functionality
+3. **File Upload** - Tests file upload with validation
+4. **Validation Process** - Verifies the validation progress and error handling
+5. **Results Display** - Tests the results summary with success and error cases
+6. **Error Handling** - Tests various error conditions including server errors
+7. **Accessibility** - Verifies accessibility compliance at each step
+
+The tests use mock API responses to simulate different scenarios:
+- Successful imports
+- Partial success with validation errors
+- Complete validation failures
+- Server errors
+
+## Future Enhancements
+
+1. **Visual Regression Tests** - Add screenshot comparison tests
+2. **Performance Testing** - Test with large file imports
+3. **Integration with Real Backend** - Run E2E tests against real backend instead of mocks
+
+## Related Documentation
+
+- [Frontend Component Structure](../frontend/README.md)
+- [API Documentation](../api/README.md)
+- [Bulk Import API Specification](../api/README.md#bulk-import-api)

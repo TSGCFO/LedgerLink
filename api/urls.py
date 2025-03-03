@@ -66,6 +66,9 @@ urlpatterns = [
             path('list/', views.logging_views.list_client_logs, name='list_client_logs'), 
             path('<str:filename>/', views.logging_views.get_client_log_file, name='get_client_log_file'),
         ])),
+        
+        # Pact provider state endpoint for contract testing
+        path('pact/provider-states', views.pact_views.provider_states, name='pact_provider_states'),
     ])),
 ]
 
