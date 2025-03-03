@@ -1,0 +1,1355 @@
+You are an advanced code reviewer and linter specialized in Django/React full-stack applications. Analyze the following code and identify inconsistencies between frontend and backend:
+
+CHANGED FILES (Diffs vs. main branch):
+Skipping git diffs: Command failed: C:\Users\Hassan\Desktop\Git\cmd\git.exe diff --name-only origin/main
+fatal: ambiguous argument 'origin/main': unknown revision or path not in the working tree.
+Use '--' to separate paths from revisions, like this:
+'git <command> [<revision>...] -- [<file>...]'
+
+
+RECENTLY MODIFIED FILES:
+Analyzing full codebase.
+
+BACKEND STRUCTURE:
+DJANGO MODELS STRUCTURE:
+
+APP: shipping
+  MODEL: CADShipping
+    FIELD: transaction (OneToOneField, Order, on_delete=models.CASCADE, primary_key=True)
+    FIELD: customer (ForeignKey, Customer, on_delete=models.CASCADE)
+    FIELD: service_code_description (CharField, max_length=255, blank=True, null=True)
+    FIELD: ship_to_name (CharField, max_length=255, blank=True, null=True)
+    FIELD: ship_to_address_1 (CharField, max_length=255, blank=True, null=True)
+    FIELD: ship_to_address_2 (CharField, max_length=255, blank=True, null=True)
+    FIELD: shiptoaddress3 (CharField, max_length=255, blank=True, null=True)
+    FIELD: ship_to_city (CharField, max_length=255, blank=True, null=True)
+    FIELD: ship_to_state (CharField, max_length=255, blank=True, null=True)
+    FIELD: ship_to_country (CharField, max_length=255, blank=True, null=True)
+    FIELD: ship_to_postal_code (CharField, max_length=20, blank=True, null=True)
+    FIELD: tracking_number (CharField, max_length=50, blank=True, null=True)
+    FIELD: pre_tax_shipping_charge (DecimalField, max_digits=10, decimal_places=2, blank=True, null=True)
+    FIELD: tax1type (CharField, max_length=50, blank=True, null=True)
+    FIELD: tax1amount (DecimalField, max_digits=10, decimal_places=2, blank=True, null=True)
+    FIELD: tax2type (CharField, max_length=50, blank=True, null=True)
+    FIELD: tax2amount (DecimalField, max_digits=10, decimal_places=2, blank=True, null=True)
+    FIELD: tax3type (CharField, max_length=50, blank=True, null=True)
+    FIELD: tax3amount (DecimalField, max_digits=10, decimal_places=2, blank=True, null=True)
+    FIELD: fuel_surcharge (DecimalField, max_digits=10, decimal_places=2, blank=True, null=True)
+    FIELD: reference (CharField, max_length=255, blank=True, null=True)
+    FIELD: weight (DecimalField, max_digits=10, decimal_places=2, blank=True, null=True)
+    FIELD: gross_weight (DecimalField, max_digits=10, decimal_places=2, blank=True, null=True)
+    FIELD: box_length (DecimalField, max_digits=10, decimal_places=2, blank=True, null=True)
+    FIELD: box_width (DecimalField, max_digits=10, decimal_places=2, blank=True, null=True)
+    FIELD: box_height (DecimalField, max_digits=10, decimal_places=2, blank=True, null=True)
+    FIELD: box_name (CharField, max_length=255, blank=True, null=True)
+    FIELD: ship_date (DateTimeField, blank=True, null=True)
+    FIELD: carrier (CharField, max_length=50, blank=True, null=True)
+    FIELD: raw_ship_date (TextField, blank=True, null=True)
+    RELATION: transaction (OneToOneField to Order)
+    RELATION: customer (ForeignKey to Customer)
+  MODEL: USShipping
+    FIELD: transaction (OneToOneField, Order, on_delete=models.CASCADE, primary_key=True)
+    FIELD: customer (ForeignKey, Customer, on_delete=models.CASCADE)
+    FIELD: ship_date (DateField, blank=True, null=True)
+    FIELD: ship_to_name (CharField, max_length=255, blank=True, null=True)
+    FIELD: ship_to_address_1 (CharField, max_length=255, blank=True, null=True)
+    FIELD: ship_to_address_2 (CharField, max_length=255, blank=True, null=True)
+    FIELD: ship_to_city (CharField, max_length=255, blank=True, null=True)
+    FIELD: ship_to_state (CharField, max_length=255, blank=True, null=True)
+    FIELD: ship_to_zip (CharField, max_length=20, blank=True, null=True)
+    FIELD: ship_to_country_code (CharField, max_length=10, blank=True, null=True)
+    FIELD: tracking_number (CharField, max_length=50, blank=True, null=True)
+    FIELD: service_name (CharField, max_length=255, blank=True, null=True)
+    FIELD: weight_lbs (DecimalField, max_digits=10, decimal_places=2, blank=True, null=True)
+    FIELD: length_in (DecimalField, max_digits=10, decimal_places=2, blank=True, null=True)
+    FIELD: width_in (DecimalField, max_digits=10, decimal_places=2, blank=True, null=True)
+    FIELD: height_in (DecimalField, max_digits=10, decimal_places=2, blank=True, null=True)
+    FIELD: base_chg (DecimalField, max_digits=10, decimal_places=2, blank=True, null=True)
+    FIELD: carrier_peak_charge (DecimalField, max_digits=10, decimal_places=2, blank=True, null=True)
+    FIELD: wizmo_peak_charge (DecimalField, max_digits=10, decimal_places=2, blank=True, null=True)
+    FIELD: accessorial_charges (DecimalField, max_digits=10, decimal_places=2, blank=True, null=True)
+    FIELD: rate (DecimalField, max_digits=10, decimal_places=2, blank=True, null=True)
+    FIELD: hst (DecimalField, max_digits=10, decimal_places=2, blank=True, null=True)
+    FIELD: gst (DecimalField, max_digits=10, decimal_places=2, blank=True, null=True)
+    FIELD: current_status (CharField, max_length=255, blank=True, null=True)
+    FIELD: delivery_status (CharField, max_length=255, blank=True, null=True)
+    FIELD: first_attempt_date (DateField, blank=True, null=True)
+    FIELD: delivery_date (DateField, blank=True, null=True)
+    FIELD: days_to_first_deliver (IntegerField, blank=True, null=True)
+    RELATION: transaction (OneToOneField to Order)
+    RELATION: customer (ForeignKey to Customer)
+
+APP: services
+  MODEL: Service
+    FIELD: service_name (CharField, max_length=100, unique=True)
+    FIELD: description (TextField, blank=True, null=True)
+    FIELD: charge_type (CharField, max_length=10, choices=CHARGE_TYPES, default='quantity')
+    FIELD: created_at (DateTimeField, auto_now_add=True)
+    FIELD: updated_at (DateTimeField, auto_now=True)
+
+APP: rules
+  MODEL: RuleGroup
+    FIELD: customer_service (ForeignKey, CustomerService, 
+        on_delete=models.CASCADE,
+        db_index=True,  # Add index for improved query performance
+        help_text="The customer service this rule group applies to")
+    FIELD: logic_operator (CharField, max_length=5, 
+        choices=LOGIC_CHOICES, 
+        default='AND',
+        help_text="Logic operator to apply when evaluating rules in this group")
+  MODEL: Rule
+    FIELD: rule_group (ForeignKey, RuleGroup, 
+        on_delete=models.CASCADE, 
+        related_name='rules',
+        db_index=True,  # Add index for improved query performance
+        help_text="The rule group this rule belongs to")
+    FIELD: field (CharField, max_length=50, 
+        choices=FIELD_CHOICES,
+        db_index=True,  # Add index for improved filtering
+        help_text="Order field to evaluate")
+    FIELD: operator (CharField, max_length=15, 
+        choices=OPERATOR_CHOICES,
+        help_text="Comparison operator")
+    FIELD: value (CharField, max_length=255, 
+        help_text="For multiple values, separate them with a semicolon (;)
+    FIELD: adjustment_amount (DecimalField, max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Amount to adjust the price when this rule applies")
+  MODEL: AdvancedRule
+    FIELD: conditions (JSONField, default=dict,
+        blank=True,
+        help_text="Additional conditions as JSON: {'field': {'operator': 'value'}}")
+    FIELD: calculations (JSONField, default=list,
+        blank=True,
+        help_text="Calculation steps as JSON: [{'type': 'calculation_type', 'value': number}]")
+    FIELD: tier_config (JSONField, default=dict,
+        blank=True,
+        help_text="Configuration for tiered calculations: {'ranges': [{'min': x, 'max': y, 'multiplier': z}], 'excluded_skus': []}")
+
+APP: products
+  MODEL: Product
+    FIELD: id (BigAutoField, primary_key=True)
+    FIELD: sku (CharField, max_length=100)
+    FIELD: customer (ForeignKey, Customer, on_delete=models.CASCADE)
+    FIELD: labeling_unit_1 (CharField, max_length=50, null=True, blank=True)
+    FIELD: labeling_quantity_1 (PositiveIntegerField, null=True, blank=True)
+    FIELD: labeling_unit_2 (CharField, max_length=50, null=True, blank=True)
+    FIELD: labeling_quantity_2 (PositiveIntegerField, null=True, blank=True)
+    FIELD: labeling_unit_3 (CharField, max_length=50, null=True, blank=True)
+    FIELD: labeling_quantity_3 (PositiveIntegerField, null=True, blank=True)
+    FIELD: labeling_unit_4 (CharField, max_length=50, null=True, blank=True)
+    FIELD: labeling_quantity_4 (PositiveIntegerField, null=True, blank=True)
+    FIELD: labeling_unit_5 (CharField, max_length=50, null=True, blank=True)
+    FIELD: labeling_quantity_5 (PositiveIntegerField, null=True, blank=True)
+    FIELD: created_at (DateTimeField, default=timezone.now)
+    FIELD: updated_at (DateTimeField, auto_now=True)
+    FIELD: check (Q, labeling_quantity_1__gte=0)
+    FIELD: check (Q, labeling_quantity_2__gte=0)
+    FIELD: check (Q, labeling_quantity_3__gte=0)
+    FIELD: check (Q, labeling_quantity_4__gte=0)
+    FIELD: check (Q, labeling_quantity_5__gte=0)
+    RELATION: customer (ForeignKey to Customer)
+
+APP: orders
+  MODEL: Order
+    FIELD: transaction_id (IntegerField, primary_key=True)
+    FIELD: customer (ForeignKey, Customer, on_delete=models.CASCADE)
+    FIELD: close_date (DateTimeField, blank=True, null=True)
+    FIELD: reference_number (CharField, max_length=100)
+    FIELD: ship_to_name (CharField, max_length=100, blank=True, null=True)
+    FIELD: ship_to_company (CharField, max_length=100, blank=True, null=True)
+    FIELD: ship_to_address (CharField, max_length=200, blank=True, null=True)
+    FIELD: ship_to_address2 (CharField, max_length=200, blank=True, null=True)
+    FIELD: ship_to_city (CharField, max_length=100, blank=True, null=True)
+    FIELD: ship_to_state (CharField, max_length=50, blank=True, null=True)
+    FIELD: ship_to_zip (CharField, max_length=20, blank=True, null=True)
+    FIELD: ship_to_country (CharField, max_length=50, blank=True, null=True)
+    FIELD: weight_lb (DecimalField, max_digits=10, decimal_places=2, blank=True, null=True)
+    FIELD: line_items (IntegerField, blank=True, null=True)
+    FIELD: sku_quantity (JSONField, blank=True, null=True)
+    FIELD: total_item_qty (IntegerField, blank=True, null=True)
+    FIELD: volume_cuft (DecimalField, max_digits=10, decimal_places=2, blank=True, null=True)
+    FIELD: packages (IntegerField, blank=True, null=True)
+    FIELD: notes (TextField, blank=True, null=True)
+    FIELD: carrier (CharField, max_length=50, blank=True, null=True)
+    FIELD: status (CharField, max_length=20,
+        choices=STATUS_CHOICES,
+        default='draft')
+    FIELD: priority (CharField, max_length=20,
+        choices=PRIORITY_CHOICES,
+        default='medium')
+    FIELD: total_cases (Sum, 'cases')
+    FIELD: total_picks (Sum, 'picks')
+    RELATION: customer (ForeignKey to Customer)
+  MODEL: OrderSKUView
+    FIELD: transaction_id (IntegerField, primary_key=True)
+    FIELD: customer (ForeignKey, Customer, on_delete=models.CASCADE)
+    FIELD: close_date (DateTimeField, blank=True, null=True)
+    FIELD: reference_number (CharField, max_length=100)
+    FIELD: ship_to_name (CharField, max_length=100, blank=True, null=True)
+    FIELD: ship_to_company (CharField, max_length=100, blank=True, null=True)
+    FIELD: ship_to_address (CharField, max_length=200, blank=True, null=True)
+    FIELD: ship_to_address2 (CharField, max_length=200, blank=True, null=True)
+    FIELD: ship_to_city (CharField, max_length=100, blank=True, null=True)
+    FIELD: ship_to_state (CharField, max_length=50, blank=True, null=True)
+    FIELD: ship_to_zip (CharField, max_length=20, blank=True, null=True)
+    FIELD: ship_to_country (CharField, max_length=50, blank=True, null=True)
+    FIELD: weight_lb (DecimalField, max_digits=10, decimal_places=2, blank=True, null=True)
+    FIELD: line_items (IntegerField, blank=True, null=True)
+    FIELD: total_item_qty (IntegerField, blank=True, null=True)
+    FIELD: volume_cuft (DecimalField, max_digits=10, decimal_places=2, blank=True, null=True)
+    FIELD: packages (IntegerField, blank=True, null=True)
+    FIELD: notes (TextField, blank=True, null=True)
+    FIELD: carrier (CharField, max_length=50, blank=True, null=True)
+    FIELD: status (CharField, max_length=20)
+    FIELD: priority (CharField, max_length=20)
+    FIELD: sku_name (CharField, max_length=100)
+    FIELD: sku_count (IntegerField)
+    FIELD: cases (IntegerField)
+    FIELD: picks (IntegerField)
+    FIELD: case_size (IntegerField, null=True)
+    FIELD: case_unit (CharField, max_length=50, null=True)
+    RELATION: customer (ForeignKey to Customer)
+
+APP: materials
+  MODEL: Material
+    FIELD: name (CharField, max_length=100, unique=True)
+    FIELD: description (TextField, blank=True, null=True)
+    FIELD: unit_price (DecimalField, max_digits=10, decimal_places=2)
+  MODEL: BoxPrice
+    FIELD: box_type (CharField, max_length=50)
+    FIELD: price (DecimalField, max_digits=10, decimal_places=2)
+    FIELD: length (DecimalField, max_digits=5, decimal_places=2)
+    FIELD: width (DecimalField, max_digits=5, decimal_places=2)
+    FIELD: height (DecimalField, max_digits=5, decimal_places=2)
+
+APP: inserts
+  MODEL: Insert
+    FIELD: sku (CharField, max_length=100)
+    FIELD: insert_name (CharField, max_length=100)
+    FIELD: insert_quantity (PositiveIntegerField)
+    FIELD: created_at (DateTimeField, auto_now_add=True)
+    FIELD: updated_at (DateTimeField, auto_now=True)
+    FIELD: customer (ForeignKey, Customer, on_delete=models.CASCADE)
+    RELATION: customer (ForeignKey to Customer)
+
+APP: customer_services
+  MODEL: CustomerService
+    FIELD: unit_price (DecimalField, max_digits=10, decimal_places=2)
+    FIELD: created_at (DateTimeField, auto_now_add=True)
+    FIELD: updated_at (DateTimeField, auto_now=True)
+    FIELD: customer (ForeignKey, Customer, on_delete=models.CASCADE)
+    FIELD: service (ForeignKey, Service, on_delete=models.CASCADE)
+    FIELD: skus (ManyToManyField, Product, blank=True, related_name='customer_services')
+    RELATION: customer (ForeignKey to Customer)
+    RELATION: service (ForeignKey to Service)
+    RELATION: skus (ManyToManyField to Product)
+  MODEL: CustomerServiceView
+    FIELD: id (IntegerField, primary_key=True)
+    FIELD: customer_service (CharField, max_length=255)
+
+APP: customers
+  MODEL: Customer
+    FIELD: id (AutoField, primary_key=True)
+    FIELD: company_name (CharField, max_length=100)
+    FIELD: legal_business_name (CharField, max_length=100)
+    FIELD: email (EmailField, max_length=254, unique=True)
+    FIELD: phone (CharField, max_length=20, blank=True, null=True)
+    FIELD: address (CharField, max_length=200, blank=True, null=True)
+    FIELD: city (CharField, max_length=50, blank=True, null=True)
+    FIELD: state (CharField, max_length=50, blank=True, null=True)
+    FIELD: zip (CharField, max_length=20, blank=True, null=True)
+    FIELD: country (CharField, max_length=50, blank=True, null=True)
+    FIELD: business_type (CharField, max_length=50, blank=True, null=True)
+    FIELD: is_active (BooleanField, default=True)
+    FIELD: created_at (DateTimeField, auto_now_add=True)
+    FIELD: updated_at (DateTimeField, auto_now=True)
+
+APP: bulk_operations
+
+APP: billing
+  MODEL: BillingReport
+    FIELD: customer (ForeignKey, Customer, on_delete=models.CASCADE)
+    FIELD: start_date (DateField)
+    FIELD: end_date (DateField)
+    FIELD: generated_at (DateTimeField, auto_now_add=True)
+    FIELD: total_amount (DecimalField, max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(0)
+    FIELD: report_data (JSONField)
+    FIELD: created_by (ForeignKey, settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='created_reports')
+    FIELD: updated_by (ForeignKey, settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='updated_reports')
+    FIELD: created_at (DateTimeField, auto_now_add=True)
+    FIELD: updated_at (DateTimeField, auto_now=True)
+    RELATION: customer (ForeignKey to Customer)
+  MODEL: BillingReportDetail
+    FIELD: report (ForeignKey, BillingReport,
+        on_delete=models.CASCADE,
+        related_name='details')
+    FIELD: order (ForeignKey, Order, on_delete=models.CASCADE)
+    FIELD: service_breakdown (JSONField)
+    FIELD: total_amount (DecimalField, max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(0)
+    RELATION: order (ForeignKey to Order)
+
+
+DJANGO REST FRAMEWORK SERIALIZERS:
+
+APP: shipping
+  SERIALIZER: CADShippingSerializer
+    FIELD: total_tax (SerializerMethodField)
+    FIELD: total_charges (SerializerMethodField)
+    META: fields=['transaction']
+  SERIALIZER: USShippingSerializer
+    FIELD: total_charges (SerializerMethodField)
+    FIELD: delivery_days (SerializerMethodField)
+    META: fields=['transaction', 'days_to_first_deliver']
+
+APP: services
+  SERIALIZER: ServiceSerializer
+    META: fields=['created_at', 'updated_at']
+
+APP: products
+  SERIALIZER: ProductSerializer
+    FIELD: customer_details (SerializerMethodField)
+    META: fields=['created_at', 'updated_at']
+
+APP: orders
+  SERIALIZER: OrderSerializer
+    FIELD: status (ChoiceField, choices=Order.STATUS_CHOICES, required=False, default='draft')
+    FIELD: priority (ChoiceField, choices=Order.PRIORITY_CHOICES, required=False, default='medium')
+    META: fields=['transaction_id']
+
+APP: materials
+  SERIALIZER: MaterialSerializer
+    META: fields=['id', 'name', 'description', 'unit_price']
+  SERIALIZER: BoxPriceSerializer
+    META: fields=['id', 'box_type', 'price', 'length', 'width', 'height']
+
+APP: inserts
+  SERIALIZER: InsertSerializer
+    META: fields=['created_at', 'updated_at']
+
+APP: customer_services
+  SERIALIZER: CustomerServiceSerializer
+    FIELD: sku_list (ListField, source='get_sku_list', read_only=True)
+    META: fields=['created_at', 'updated_at', 'customer_details', 'service_details', 'sku_list']
+
+APP: customers
+  SERIALIZER: CustomerSerializer
+    META: fields=['created_at']
+
+APP: bulk_operations
+  SERIALIZER: BulkImportResponseSerializer
+    FIELD: success (BooleanField)
+    FIELD: message (CharField)
+    FIELD: errors (ListField, required=False)
+    FIELD: import_summary (DictField, required=False)
+  SERIALIZER: BulkOperationBaseSerializer
+  SERIALIZER: CustomerBulkSerializer
+    FIELD: company_name (CharField, max_length=255)
+    FIELD: legal_business_name (CharField, max_length=255)
+    FIELD: email (EmailField)
+    FIELD: phone (CharField, max_length=20, required=False, allow_blank=True)
+    FIELD: address (CharField, max_length=255, required=False, allow_blank=True)
+    FIELD: city (CharField, max_length=100, required=False, allow_blank=True)
+    FIELD: state (CharField, max_length=100, required=False, allow_blank=True)
+    FIELD: zip (CharField, max_length=20, required=False, allow_blank=True)
+    FIELD: country (CharField, max_length=100, required=False, allow_blank=True)
+    FIELD: business_type (CharField, max_length=50, required=False, allow_blank=True)
+  SERIALIZER: OrderBulkSerializer
+    FIELD: transaction_id (IntegerField)
+    FIELD: customer (IntegerField)
+    FIELD: close_date (DateTimeField, required=False, allow_null=True)
+    FIELD: reference_number (CharField, max_length=50)
+    FIELD: ship_to_name (CharField, max_length=255)
+    FIELD: ship_to_company (CharField, max_length=255, required=False, allow_blank=True)
+    FIELD: ship_to_address (CharField, max_length=255)
+    FIELD: ship_to_address2 (CharField, max_length=255, required=False, allow_blank=True)
+    FIELD: ship_to_city (CharField, max_length=100)
+    FIELD: ship_to_state (CharField, max_length=100)
+    FIELD: ship_to_zip (CharField, max_length=20)
+    FIELD: ship_to_country (CharField, max_length=100, required=False, allow_blank=True)
+    FIELD: weight_lb (DecimalField, max_digits=10, decimal_places=2, required=False, allow_null=True)
+    FIELD: line_items (IntegerField, required=False, allow_null=True)
+    FIELD: sku_quantity (JSONField, required=False, allow_null=True)
+    FIELD: total_item_qty (IntegerField, required=False, allow_null=True)
+    FIELD: volume_cuft (DecimalField, max_digits=10, decimal_places=2, required=False, allow_null=True)
+    FIELD: packages (IntegerField, required=False, allow_null=True)
+    FIELD: notes (CharField, required=False, allow_blank=True, allow_null=True)
+    FIELD: carrier (CharField, max_length=50, required=False, allow_blank=True, allow_null=True)
+    FIELD: status (ChoiceField, choices=['draft', 'submitted', 'shipped', 'delivered', 'cancelled'],
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+        default='draft')
+    FIELD: priority (ChoiceField, choices=['low', 'medium', 'high'],
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+        default='medium')
+  SERIALIZER: ProductBulkSerializer
+    FIELD: sku (CharField, max_length=50)
+    FIELD: customer (IntegerField)
+    FIELD: labeling_unit_1 (CharField, max_length=50, required=False, allow_blank=True)
+    FIELD: labeling_quantity_1 (IntegerField, required=False)
+    FIELD: labeling_unit_2 (CharField, max_length=50, required=False, allow_blank=True)
+    FIELD: labeling_quantity_2 (IntegerField, required=False)
+    FIELD: labeling_unit_3 (CharField, max_length=50, required=False, allow_blank=True)
+    FIELD: labeling_quantity_3 (IntegerField, required=False)
+    FIELD: labeling_unit_4 (CharField, max_length=50, required=False, allow_blank=True)
+    FIELD: labeling_quantity_4 (IntegerField, required=False)
+    FIELD: labeling_unit_5 (CharField, max_length=50, required=False, allow_blank=True)
+    FIELD: labeling_quantity_5 (IntegerField, required=False)
+  SERIALIZER: ServiceBulkSerializer
+    FIELD: service_name (CharField, max_length=255)
+    FIELD: description (CharField, required=False, allow_blank=True)
+    FIELD: charge_type (ChoiceField, choices=[('single', 'Single Charge')
+  SERIALIZER: MaterialBulkSerializer
+    FIELD: name (CharField, max_length=255)
+    FIELD: description (CharField, required=False, allow_blank=True)
+    FIELD: unit_price (DecimalField, max_digits=10, decimal_places=2)
+  SERIALIZER: InsertBulkSerializer
+    FIELD: sku (CharField, max_length=50)
+    FIELD: insert_name (CharField, max_length=255)
+    FIELD: insert_quantity (IntegerField)
+    FIELD: customer (IntegerField)
+  SERIALIZER: CADShippingBulkSerializer
+    FIELD: transaction (IntegerField)
+    FIELD: customer (IntegerField)
+    FIELD: service_code_description (CharField, max_length=255, required=False)
+    FIELD: ship_to_name (CharField, max_length=255)
+    FIELD: ship_to_address_1 (CharField, max_length=255)
+    FIELD: ship_to_address_2 (CharField, max_length=255, required=False, allow_blank=True)
+    FIELD: shiptoaddress3 (CharField, max_length=255, required=False, allow_blank=True)
+    FIELD: ship_to_city (CharField, max_length=100)
+    FIELD: ship_to_state (CharField, max_length=100)
+    FIELD: ship_to_country (CharField, max_length=100, required=False, default='CA')
+    FIELD: ship_to_postal_code (CharField, max_length=20)
+    FIELD: tracking_number (CharField, max_length=100, required=False, allow_blank=True)
+    FIELD: pre_tax_shipping_charge (DecimalField, max_digits=10, decimal_places=2, required=False)
+    FIELD: tax1type (CharField, max_length=50, required=False, allow_blank=True)
+    FIELD: tax1amount (DecimalField, max_digits=10, decimal_places=2, required=False)
+    FIELD: tax2type (CharField, max_length=50, required=False, allow_blank=True)
+    FIELD: tax2amount (DecimalField, max_digits=10, decimal_places=2, required=False)
+    FIELD: tax3type (CharField, max_length=50, required=False, allow_blank=True)
+    FIELD: tax3amount (DecimalField, max_digits=10, decimal_places=2, required=False)
+    FIELD: fuel_surcharge (DecimalField, max_digits=10, decimal_places=2, required=False)
+    FIELD: reference (CharField, max_length=100, required=False, allow_blank=True)
+    FIELD: weight (DecimalField, max_digits=10, decimal_places=2, required=False)
+    FIELD: gross_weight (DecimalField, max_digits=10, decimal_places=2, required=False)
+    FIELD: box_length (DecimalField, max_digits=10, decimal_places=2, required=False)
+    FIELD: box_width (DecimalField, max_digits=10, decimal_places=2, required=False)
+    FIELD: box_height (DecimalField, max_digits=10, decimal_places=2, required=False)
+    FIELD: box_name (CharField, max_length=100, required=False, allow_blank=True)
+    FIELD: carrier (CharField, max_length=100, required=False, allow_blank=True)
+  SERIALIZER: USShippingBulkSerializer
+    FIELD: transaction (IntegerField)
+    FIELD: customer (IntegerField)
+    FIELD: ship_date (DateField, required=False)
+    FIELD: ship_to_name (CharField, max_length=255)
+    FIELD: ship_to_address_1 (CharField, max_length=255)
+    FIELD: ship_to_address_2 (CharField, max_length=255, required=False, allow_blank=True)
+    FIELD: ship_to_city (CharField, max_length=100)
+    FIELD: ship_to_state (CharField, max_length=100)
+    FIELD: ship_to_zip (CharField, max_length=20)
+    FIELD: ship_to_country_code (CharField, max_length=2, default='US')
+    FIELD: tracking_number (CharField, max_length=100, required=False, allow_blank=True)
+    FIELD: service_name (CharField, max_length=100, required=False, allow_blank=True)
+    FIELD: weight_lbs (DecimalField, max_digits=10, decimal_places=2, required=False)
+    FIELD: length_in (DecimalField, max_digits=10, decimal_places=2, required=False)
+    FIELD: width_in (DecimalField, max_digits=10, decimal_places=2, required=False)
+    FIELD: height_in (DecimalField, max_digits=10, decimal_places=2, required=False)
+    FIELD: base_chg (DecimalField, max_digits=10, decimal_places=2, required=False)
+    FIELD: carrier_peak_charge (DecimalField, max_digits=10, decimal_places=2, required=False)
+    FIELD: wizmo_peak_charge (DecimalField, max_digits=10, decimal_places=2, required=False)
+    FIELD: accessorial_charges (DecimalField, max_digits=10, decimal_places=2, required=False)
+    FIELD: rate (DecimalField, max_digits=10, decimal_places=2, required=False)
+    FIELD: hst (DecimalField, max_digits=10, decimal_places=2, required=False)
+    FIELD: gst (DecimalField, max_digits=10, decimal_places=2, required=False)
+    FIELD: current_status (ChoiceField, choices=['pending', 'in_transit', 'delivered', 'exception'],
+        required=False,
+        default='pending')
+    FIELD: delivery_status (ChoiceField, choices=['pending', 'attempted', 'delivered', 'failed'],
+        required=False,
+        default='pending')
+
+APP: billing
+  SERIALIZER: BillingReportSerializer
+    FIELD: customer_name (SerializerMethodField)
+    FIELD: created_by_name (SerializerMethodField)
+    FIELD: updated_by_name (SerializerMethodField)
+  SERIALIZER: ReportRequestSerializer
+    FIELD: customer (IntegerField)
+    FIELD: start_date (DateField)
+    FIELD: end_date (DateField)
+    FIELD: output_format (ChoiceField, choices=['preview', 'excel', 'pdf', 'csv'],
+        default='preview')
+
+
+
+FRONTEND STRUCTURE:
+REACT COMPONENTS STRUCTURE:
+
+COMPONENT: main (frontend\src\main.jsx)
+
+COMPONENT: App (frontend\src\App.jsx)
+  STATE: authenticated (unknown, isAuthenticated()
+  STATE: logViewerOpen (boolean, false)
+
+COMPONENT: USShippingList (frontend\src\components\shipping\USShippingList.jsx)
+  STATE: shipments (array, [])
+  STATE: customers (array, [])
+  STATE: statuses (unknown, { current: [], delivery: [] })
+  STATE: startDate (unknown, null)
+  STATE: endDate (unknown, null)
+  STATE: error (unknown, null)
+  STATE: successMessage (string, '')
+
+COMPONENT: USShippingForm (frontend\src\components\shipping\USShippingForm.jsx)
+  STATE: formData (unknown, {
+    transaction: '',
+    customer: '',
+    ship_date: null,
+    ship_to_name: '',
+    ship_to_address_1: '',
+    ship_to_address_2: '',
+    ship_to_city: '',
+    ship_to_state: '',
+    ship_to_zip: '',
+    ship_to_country_code: 'US',
+    tracking_number: '',
+    service_name: '',
+    weight_lbs: '',
+    length_in: '',
+    width_in: '',
+    height_in: '',
+    base_chg: '',
+    carrier_peak_charge: '',
+    wizmo_peak_charge: '',
+    accessorial_charges: '',
+    rate: '',
+    hst: '',
+    gst: '',
+    current_status: '',
+    delivery_status: '',
+    first_attempt_date: null,
+    delivery_date: null,
+    days_to_first_deliver: ''
+  })
+  STATE: customers (array, [])
+  STATE: orders (array, [])
+  STATE: statuses (unknown, { current: [], delivery: [] })
+  STATE: serviceNames (array, [])
+  STATE: errors (object, {})
+  STATE: loading (boolean, false)
+  STATE: error (unknown, null)
+  STATE: success (boolean, false)
+  FORM FIELD: customer
+  FORM FIELD: transaction
+  FORM FIELD: ship_to_name
+  FORM FIELD: ship_to_address_1
+  FORM FIELD: ship_to_address_2
+  FORM FIELD: ship_to_city
+  FORM FIELD: ship_to_state
+  FORM FIELD: ship_to_zip
+  FORM FIELD: ship_to_country_code
+  FORM FIELD: service_name
+  FORM FIELD: tracking_number
+  FORM FIELD: current_status
+  FORM FIELD: delivery_status
+  FORM FIELD: weight_lbs
+  FORM FIELD: length_in
+  FORM FIELD: width_in
+  FORM FIELD: height_in
+  FORM FIELD: base_chg
+  FORM FIELD: carrier_peak_charge
+  FORM FIELD: wizmo_peak_charge
+  FORM FIELD: accessorial_charges
+  FORM FIELD: rate
+  FORM FIELD: hst
+  FORM FIELD: gst
+
+COMPONENT: CADShippingList (frontend\src\components\shipping\CADShippingList.jsx)
+  STATE: shipments (array, [])
+  STATE: customers (array, [])
+  STATE: carriers (array, [])
+  STATE: startDate (unknown, null)
+  STATE: endDate (unknown, null)
+  STATE: error (unknown, null)
+  STATE: successMessage (string, '')
+
+COMPONENT: CADShippingForm (frontend\src\components\shipping\CADShippingForm.jsx)
+  PROPS: index, style
+  STATE: formData (unknown, {
+    transaction: '',
+    customer: '',
+    service_code_description: '',
+    ship_to_name: '',
+    ship_to_address_1: '',
+    ship_to_address_2: '',
+    shiptoaddress3: '',
+    ship_to_city: '',
+    ship_to_state: '',
+    ship_to_country: '',
+    ship_to_postal_code: '',
+    tracking_number: '',
+    pre_tax_shipping_charge: '',
+    tax1type: '',
+    tax1amount: '',
+    tax2type: '',
+    tax2amount: '',
+    tax3type: '',
+    tax3amount: '',
+    fuel_surcharge: '',
+    reference: '',
+    weight: '',
+    gross_weight: '',
+    box_length: '',
+    box_width: '',
+    box_height: '',
+    box_name: '',
+    ship_date: null,
+    carrier: '',
+    raw_ship_date: ''
+  })
+  STATE: customers (array, [])
+  STATE: orders (array, [])
+  STATE: errors (object, {})
+  STATE: loading (boolean, false)
+  STATE: error (unknown, null)
+  STATE: success (boolean, false)
+  STATE: searchTerm (string, '')
+  STATE: filteredOrders (array, [])
+  FORM FIELD: customer
+  FORM FIELD: ship_to_name
+  FORM FIELD: ship_to_address_1
+  FORM FIELD: ship_to_address_2
+  FORM FIELD: ship_to_city
+  FORM FIELD: ship_to_state
+  FORM FIELD: ship_to_postal_code
+  FORM FIELD: ship_to_country
+  FORM FIELD: carrier
+  FORM FIELD: tracking_number
+  FORM FIELD: service_code_description
+  FORM FIELD: weight
+  FORM FIELD: gross_weight
+  FORM FIELD: box_length
+  FORM FIELD: box_width
+  FORM FIELD: box_height
+  FORM FIELD: box_name
+  FORM FIELD: pre_tax_shipping_charge
+  FORM FIELD: fuel_surcharge
+  FORM FIELD: tax1type
+  FORM FIELD: tax1amount
+  FORM FIELD: tax2type
+  FORM FIELD: tax2amount
+  FORM FIELD: tax3type
+  FORM FIELD: tax3amount
+  FORM FIELD: reference
+
+COMPONENT: ServiceList (frontend\src\components\services\ServiceList.jsx)
+  STATE: services (array, [])
+  STATE: chargeTypes (array, [])
+  STATE: error (unknown, null)
+  STATE: successMessage (string, '')
+
+COMPONENT: ServiceForm (frontend\src\components\services\ServiceForm.jsx)
+  STATE: formData (unknown, {
+    service_name: '',
+    description: '',
+    charge_type: 'quantity'  // Use the default value from the backend
+  })
+  STATE: chargeTypes (array, [])
+  STATE: errors (object, {})
+  STATE: loading (boolean, false)
+  STATE: error (unknown, null)
+  STATE: success (boolean, false)
+  FORM FIELD: service_name
+  FORM FIELD: description
+  FORM FIELD: charge_type
+
+COMPONENT: ServiceList.test (frontend\src\components\services\__tests__\ServiceList.test.jsx)
+
+COMPONENT: ServiceList.a11y.test (frontend\src\components\services\__tests__\ServiceList.a11y.test.jsx)
+
+COMPONENT: ServiceForm.test (frontend\src\components\services\__tests__\ServiceForm.test.jsx)
+
+COMPONENT: ServiceForm.a11y.test (frontend\src\components\services\__tests__\ServiceForm.a11y.test.jsx)
+
+COMPONENT: VisualRuleBuilder (frontend\src\components\rules\VisualRuleBuilder.jsx)
+
+COMPONENT: RuleWizard (frontend\src\components\rules\RuleWizard.jsx)
+  PROPS: open, onClose
+  STATE: activeStep (number, 0)
+  STATE: ruleType (unknown, null)
+  STATE: groupId (unknown, null)
+  STATE: rules (array, [])
+
+COMPONENT: RulesManagement (frontend\src\components\rules\RulesManagement.jsx)
+
+COMPONENT: RulesDashboard (frontend\src\components\rules\RulesDashboard.jsx)
+  STATE: activeTab (number, 0)
+  STATE: selectedGroup (unknown, null)
+  STATE: ruleGroups (array, [])
+  STATE: loading (boolean, true)
+  STATE: error (unknown, null)
+  STATE: showGroupForm (boolean, false)
+
+COMPONENT: RulePreview (frontend\src\components\rules\RulePreview.jsx)
+  PROPS: rule
+
+COMPONENT: RuleHelpDialog (frontend\src\components\rules\RuleHelpDialog.jsx)
+  PROPS: open, onClose, topic
+
+COMPONENT: RuleGroupsList (frontend\src\components\rules\RuleGroupsList.jsx)
+  PROPS: groups, onSelect, onUpdate, onDelete, onCreateNew
+  STATE: editingGroup (unknown, null)
+  STATE: selectedGroupId (unknown, null)
+  STATE: tableData (unknown, groups || [])
+  STATE: rowSelection (object, {})
+
+COMPONENT: RuleGroupForm (frontend\src\components\rules\RuleGroupForm.jsx)
+  PROPS: initialData, onSubmit, onCancel
+  STATE: formData (unknown, {
+    customer_service: '',
+    logic_operator: 'AND',
+    ...initialData,
+  })
+  STATE: customerServices (array, [])
+  STATE: loading (boolean, false)
+  STATE: error (unknown, null)
+  FORM FIELD: customer_service
+  FORM FIELD: logic_operator
+
+COMPONENT: RuleBuilder (frontend\src\components\rules\RuleBuilder.jsx)
+  PROPS: groupId, initialData, onSubmit, onCancel
+  STATE: formData (unknown, {
+    field: '',
+    operator: '',
+    value: '',
+    adjustment_amount: '',
+    ...(initialData ? {
+      ...initialData,
+      value: initialData.value || ''
+    } : {})
+  STATE: fields (array, [])
+  STATE: operators (array, [])
+  STATE: loading (boolean, false)
+  STATE: error (unknown, null)
+  FORM FIELD: field
+  FORM FIELD: operator
+  FORM FIELD: value
+  FORM FIELD: adjustment_amount
+
+COMPONENT: BasicRulesList (frontend\src\components\rules\BasicRulesList.jsx)
+  PROPS: groupId
+  STATE: rules (array, [])
+  STATE: loading (boolean, true)
+  STATE: error (unknown, null)
+  STATE: editingRule (unknown, null)
+  STATE: showRuleBuilder (boolean, false)
+  STATE: deleteConfirm (unknown, { open: false, ruleId: null })
+
+COMPONENT: AdvancedRulesList (frontend\src\components\rules\AdvancedRulesList.jsx)
+  PROPS: groupId
+  STATE: rules (array, [])
+  STATE: loading (boolean, true)
+  STATE: error (unknown, null)
+  STATE: editingRule (unknown, null)
+  STATE: showRuleBuilder (boolean, false)
+
+COMPONENT: AdvancedRuleBuilder (frontend\src\components\rules\AdvancedRuleBuilder.jsx)
+  PROPS: groupId, initialData, onSubmit, onCancel
+  STATE: formData (unknown, {
+    field: '',
+    operator: '',
+    value: '',
+    conditions: {},
+    calculations: [],
+    tier_config: {
+      ranges: [],
+      excluded_skus: []
+    },
+    ...initialData,
+  })
+  STATE: fields (array, [])
+  STATE: operators (array, [])
+  STATE: calculationTypes (array, [])
+  STATE: loading (boolean, false)
+  STATE: error (unknown, null)
+  STATE: conditionsSchema (unknown, null)
+  STATE: activeStep (number, 0)
+  STATE: validationErrors (object, {})
+  STATE: helpOpen (object, {})
+  STATE: showRuleTester (boolean, false)
+
+COMPONENT: ProductList (frontend\src\components\products\ProductList.jsx)
+  STATE: products (array, [])
+  STATE: stats (unknown, { total_products: 0, products_by_customer: [] })
+  STATE: error (unknown, null)
+  STATE: successMessage (string, '')
+
+COMPONENT: ProductForm (frontend\src\components\products\ProductForm.jsx)
+  STATE: formData (unknown, {
+    sku: '',
+    customer: '',
+    labeling_unit_1: '',
+    labeling_quantity_1: '',
+    labeling_unit_2: '',
+    labeling_quantity_2: '',
+    labeling_unit_3: '',
+    labeling_quantity_3: '',
+    labeling_unit_4: '',
+    labeling_quantity_4: '',
+    labeling_unit_5: '',
+    labeling_quantity_5: '',
+  })
+  STATE: customers (array, [])
+  STATE: errors (object, {})
+  STATE: loading (boolean, false)
+  STATE: error (unknown, null)
+  STATE: success (boolean, false)
+  FORM FIELD: sku
+  FORM FIELD: customer
+
+COMPONENT: ProductList.test (frontend\src\components\products\__tests__\ProductList.test.jsx)
+
+COMPONENT: ProductForm.test (frontend\src\components\products\__tests__\ProductForm.test.jsx)
+
+COMPONENT: ProductForm.a11y.test (frontend\src\components\products\__tests__\ProductForm.a11y.test.jsx)
+
+COMPONENT: OrderList (frontend\src\components\orders\OrderList.jsx)
+  STATE: orders (array, [])
+  STATE: statusCounts (object, {})
+  STATE: error (unknown, null)
+  STATE: successMessage (string, '')
+  STATE: pagination (unknown, {
+    pageIndex: 0,
+    pageSize: 10,
+    totalCount: 0,
+  })
+  STATE: isLoading (boolean, false)
+
+COMPONENT: OrderList.cy (frontend\src\components\orders\OrderList.cy.jsx)
+
+COMPONENT: OrderForm (frontend\src\components\orders\OrderForm.jsx)
+  STATE: formData (unknown, {
+    customer: '',
+    transaction_id: '',  // Add transaction_id field
+    reference_number: '',
+    status: 'draft',
+    priority: 'medium',
+    close_date: '',      // Add close_date field
+    ship_to_name: '',
+    ship_to_company: '',
+    ship_to_address: '',
+    ship_to_address2: '',
+    ship_to_city: '',
+    ship_to_state: '',
+    ship_to_zip: '',
+    ship_to_country: '',
+    weight_lb: '',
+    sku_quantity: { '': 0 },  // Initialize as an object mapping SKUs to quantities
+    notes: '',
+    carrier: ''
+  })
+  STATE: customers (array, [])
+  STATE: statusChoices (array, [])
+  STATE: priorityChoices (array, [])
+  STATE: errors (object, {})
+  STATE: loading (boolean, false)
+  STATE: validatingId (boolean, false)
+  STATE: error (unknown, null)
+  STATE: success (boolean, false)
+  FORM FIELD: customer
+  FORM FIELD: transaction_id
+  FORM FIELD: reference_number
+  FORM FIELD: status
+  FORM FIELD: priority
+  FORM FIELD: close_date
+  FORM FIELD: ship_to_name
+  FORM FIELD: ship_to_company
+  FORM FIELD: ship_to_address
+  FORM FIELD: ship_to_address2
+  FORM FIELD: ship_to_city
+  FORM FIELD: ship_to_state
+  FORM FIELD: ship_to_zip
+  FORM FIELD: ship_to_country
+  FORM FIELD: weight_lb
+  FORM FIELD: carrier
+  FORM FIELD: notes
+
+COMPONENT: OrderList.test (frontend\src\components\orders\__tests__\OrderList.test.jsx)
+
+COMPONENT: OrderForm.test (frontend\src\components\orders\__tests__\OrderForm.test.jsx)
+
+COMPONENT: OrderForm.a11y.test (frontend\src\components\orders\__tests__\OrderForm.a11y.test.jsx)
+
+COMPONENT: MaterialList (frontend\src\components\materials\MaterialList.jsx)
+  STATE: materials (array, [])
+  STATE: isLoading (boolean, true)
+  API CALL: axios to /api/materials/
+  API CALLS: This component makes API requests
+
+COMPONENT: MaterialForm (frontend\src\components\materials\MaterialForm.jsx)
+  STATE: formData (unknown, {
+    name: '',
+    description: '',
+    unit_price: '',
+  })
+  STATE: error (string, '')
+  STATE: isLoading (boolean, false)
+  API CALL: axios to /api/materials/
+  API CALLS: This component makes API requests
+  FORM FIELD: name
+  FORM FIELD: description
+  FORM FIELD: unit_price
+
+COMPONENT: BoxPriceList (frontend\src\components\materials\BoxPriceList.jsx)
+  STATE: boxPrices (array, [])
+  STATE: isLoading (boolean, true)
+  API CALL: axios to /api/box-prices/
+  API CALLS: This component makes API requests
+
+COMPONENT: BoxPriceForm (frontend\src\components\materials\BoxPriceForm.jsx)
+  STATE: formData (unknown, {
+    box_type: '',
+    price: '',
+    length: '',
+    width: '',
+    height: '',
+  })
+  STATE: error (string, '')
+  STATE: isLoading (boolean, false)
+  API CALL: axios to /api/box-prices/
+  API CALLS: This component makes API requests
+  FORM FIELD: box_type
+  FORM FIELD: price
+  FORM FIELD: length
+  FORM FIELD: width
+  FORM FIELD: height
+
+COMPONENT: InsertList (frontend\src\components\inserts\InsertList.jsx)
+  STATE: inserts (array, [])
+  STATE: customers (array, [])
+  STATE: stats (object, {})
+  STATE: error (unknown, null)
+  STATE: successMessage (string, '')
+
+COMPONENT: InsertForm (frontend\src\components\inserts\InsertForm.jsx)
+  STATE: formData (unknown, {
+    sku: '',
+    insert_name: '',
+    insert_quantity: 0,
+    customer: ''
+  })
+  STATE: customers (array, [])
+  STATE: availableSkus (array, [])
+  STATE: errors (object, {})
+  STATE: loading (boolean, false)
+  STATE: error (unknown, null)
+  STATE: success (boolean, false)
+  FORM FIELD: customer
+  FORM FIELD: sku
+  FORM FIELD: insert_name
+  FORM FIELD: insert_quantity
+
+COMPONENT: CustomerList (frontend\src\components\customers\CustomerList.jsx)
+  STATE: customers (array, [])
+  STATE: error (unknown, null)
+  STATE: successMessage (string, '')
+
+COMPONENT: CustomerForm (frontend\src\components\customers\CustomerForm.jsx)
+  STATE: formData (unknown, {
+    company_name: '',
+    legal_business_name: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    state: '',
+    zip: '',
+    country: '',
+    business_type: '',
+    is_active: true
+  })
+  STATE: errors (object, {})
+  STATE: loading (boolean, false)
+  STATE: error (unknown, null)
+  STATE: success (boolean, false)
+  FORM FIELD: company_name
+  FORM FIELD: legal_business_name
+  FORM FIELD: email
+  FORM FIELD: phone
+  FORM FIELD: address
+  FORM FIELD: city
+  FORM FIELD: state
+  FORM FIELD: zip
+  FORM FIELD: country
+  FORM FIELD: business_type
+
+COMPONENT: CustomerList.test (frontend\src\components\customers\__tests__\CustomerList.test.jsx)
+
+COMPONENT: CustomerList.a11y.test (frontend\src\components\customers\__tests__\CustomerList.a11y.test.jsx)
+
+COMPONENT: CustomerForm.test (frontend\src\components\customers\__tests__\CustomerForm.test.jsx)
+
+COMPONENT: CustomerServiceList (frontend\src\components\customer-services\CustomerServiceList.jsx)
+  STATE: customerServices (array, [])
+  STATE: customers (array, [])
+  STATE: error (unknown, null)
+  STATE: successMessage (string, '')
+
+COMPONENT: CustomerServiceForm (frontend\src\components\customer-services\CustomerServiceForm.jsx)
+  STATE: formData (unknown, {
+    customer: '',
+    service: '',
+    unit_price: '',
+    skus: []
+  })
+  STATE: customers (array, [])
+  STATE: services (array, [])
+  STATE: availableSkus (array, [])
+  STATE: errors (object, {})
+  STATE: loading (boolean, false)
+  STATE: error (unknown, null)
+  STATE: success (boolean, false)
+  FORM FIELD: customer
+  FORM FIELD: service
+  FORM FIELD: unit_price
+  FORM FIELD: skus
+
+COMPONENT: LogViewer (frontend\src\components\common\LogViewer.jsx)
+  PROPS: open, onClose
+  STATE: logs (array, [])
+  STATE: filteredLogs (array, [])
+  STATE: filter (unknown, {
+    level: 'all',
+    search: '',
+  })
+  STATE: saveInProgress (boolean, false)
+  STATE: saveResult (unknown, null)
+
+COMPONENT: ErrorBoundary (frontend\src\components\common\ErrorBoundary.jsx)
+
+COMPONENT: ErrorBoundary.test (frontend\src\components\common\__tests__\ErrorBoundary.test.jsx)
+
+COMPONENT: ValidationProgress (frontend\src\components\bulk-operations\ValidationProgress.jsx)
+  PROPS: progress, errors, isProcessing
+
+COMPONENT: TemplateSelector (frontend\src\components\bulk-operations\TemplateSelector.jsx)
+  PROPS: onSelect
+  STATE: templates (array, [])
+  STATE: loading (boolean, true)
+  STATE: error (unknown, null)
+  STATE: selectedTemplate (unknown, null)
+  API CALL: fetch to /api/v1/bulk-operations/templates/
+  API CALLS: This component makes API requests
+
+COMPONENT: ResultsSummary (frontend\src\components\bulk-operations\ResultsSummary.jsx)
+  PROPS: summary, errors, onRetry
+  STATE: showErrors (boolean, true)
+
+COMPONENT: FileUploader (frontend\src\components\bulk-operations\FileUploader.jsx)
+  PROPS: selectedTemplate, onFileSelect, error
+  STATE: dragActive (boolean, false)
+  STATE: validating (boolean, false)
+  STATE: selectedFile (unknown, null)
+  STATE: clientValidationErrors (array, [])
+
+COMPONENT: ErrorDisplay (frontend\src\components\bulk-operations\ErrorDisplay.jsx)
+
+COMPONENT: BulkOperations (frontend\src\components\bulk-operations\BulkOperations.jsx)
+  STATE: activeStep (number, 0)
+  STATE: selectedTemplate (unknown, null)
+  STATE: file (unknown, null)
+  STATE: validationProgress (number, 0)
+  STATE: validationErrors (array, [])
+  STATE: importSummary (unknown, null)
+  STATE: isProcessing (boolean, false)
+  STATE: error (unknown, null)
+
+COMPONENT: ValidationProgress.test (frontend\src\components\bulk-operations\__tests__\ValidationProgress.test.jsx)
+
+COMPONENT: TemplateSelector.test (frontend\src\components\bulk-operations\__tests__\TemplateSelector.test.jsx)
+
+COMPONENT: ResultsSummary.test (frontend\src\components\bulk-operations\__tests__\ResultsSummary.test.jsx)
+
+COMPONENT: FileUploader.test (frontend\src\components\bulk-operations\__tests__\FileUploader.test.jsx)
+
+COMPONENT: FileUploader.a11y.test (frontend\src\components\bulk-operations\__tests__\FileUploader.a11y.test.jsx)
+
+COMPONENT: ErrorDisplay.test (frontend\src\components\bulk-operations\__tests__\ErrorDisplay.test.jsx)
+
+COMPONENT: BulkOperations.test (frontend\src\components\bulk-operations\__tests__\BulkOperations.test.jsx)
+
+COMPONENT: BulkOperations.a11y.test (frontend\src\components\bulk-operations\__tests__\BulkOperations.a11y.test.jsx)
+
+COMPONENT: BillingList (frontend\src\components\billing\BillingList.jsx)
+  STATE: reports (array, [])
+  STATE: customers (array, [])
+  STATE: selectedCustomer (string, '')
+  STATE: startDate (unknown, null)
+  STATE: endDate (unknown, null)
+  STATE: billingData (array, [])
+  STATE: loading (boolean, false)
+  STATE: error (unknown, null)
+
+COMPONENT: BillingForm (frontend\src\components\billing\BillingForm.jsx)
+  STATE: formData (unknown, {
+    customer: '',
+    start_date: null,
+    end_date: null,
+    output_format: 'json'
+  })
+  STATE: customers (array, [])
+  STATE: errors (object, {})
+  STATE: loading (boolean, false)
+  STATE: error (unknown, null)
+  STATE: success (boolean, false)
+  STATE: report (unknown, null)
+  STATE: previewData (unknown, null)
+  STATE: showPreview (boolean, false)
+  STATE: selectedFormat (string, 'excel')
+  FORM FIELD: customer
+  FORM FIELD: format
+
+COMPONENT: BillingList.test (frontend\src\components\billing\__tests__\BillingList.test.jsx)
+
+COMPONENT: BillingList.a11y.test (frontend\src\components\billing\__tests__\BillingList.a11y.test.jsx)
+
+COMPONENT: BillingForm.test (frontend\src\components\billing\__tests__\BillingForm.test.jsx)
+
+COMPONENT: BillingForm.a11y.test (frontend\src\components\billing\__tests__\BillingForm.a11y.test.jsx)
+
+COMPONENT: ProtectedRoute (frontend\src\components\auth\ProtectedRoute.jsx)
+  PROPS: children
+  PROPTYPE: children (node)
+
+COMPONENT: Login (frontend\src\components\auth\Login.jsx)
+  STATE: username (string, '')
+  STATE: password (string, '')
+  STATE: error (string, '')
+  FORM FIELD: username
+  FORM FIELD: password
+
+COMPONENT: ProtectedRoute.test (frontend\src\components\auth\__tests__\ProtectedRoute.test.jsx)
+
+COMPONENT: Login.test (frontend\src\components\auth\__tests__\Login.test.jsx)
+
+COMPONENT: Login.a11y.test (frontend\src\components\auth\__tests__\Login.a11y.test.jsx)
+
+COMPONENT: ServiceForm.cy (frontend\cypress\component\ServiceForm.cy.jsx)
+
+COMPONENT: ProductForm.cy (frontend\cypress\component\ProductForm.cy.jsx)
+
+COMPONENT: BillingForm.cy (frontend\cypress\component\BillingForm.cy.jsx)
+
+
+
+API ENDPOINTS:
+DJANGO API ENDPOINTS:
+
+APP: shipping
+
+APP: services
+
+APP: rules
+  ENDPOINT: operators/ → views.get_operator_choices (get_operators)
+  ENDPOINT: validate-conditions/ → views.validate_conditions (validate_conditions)
+  ENDPOINT: validate-calculations/ → views.validate_calculations (validate_calculations)
+  ENDPOINT: conditions-schema/ → views.get_conditions_schema (get_conditions_schema)
+  ENDPOINT: calculations-schema/ → views.get_calculations_schema (get_calculations_schema)
+  ENDPOINT: fields/ → views.get_available_fields (get_available_fields)
+  ENDPOINT: calculation-types/ → views.get_calculation_types (get_calculation_types)
+  ENDPOINT: validate-rule-value/ → views.validate_rule_value (validate_rule_value)
+  ENDPOINT: test-rule/ → views.test_rule (test_rule)
+  ENDPOINT: group/<int:group_id>/rules/ → views.get_rules (get_rules)
+  ENDPOINT: group/<int:group_id>/rule/create/api/ → views.create_or_update_rule (api_create_rule)
+  ENDPOINT: rule/<int:pk>/edit/api/ → views.create_or_update_rule (api_update_rule)
+  ENDPOINT: rule/<int:pk>/delete/api/ → views.delete_rule (api_delete_rule)
+  ENDPOINT: group/<int:pk>/delete/api/ → views.delete_rule_group (api_delete_rule_group)
+  ENDPOINT: group/<int:group_id>/advanced-rules/ → views.get_advanced_rules (get_advanced_rules)
+  ENDPOINT: group/<int:group_id>/advanced-rule/create/ → views.create_or_update_rule (api_create_advanced_rule)
+  ENDPOINT: advanced-rule/<int:pk>/edit/ → views.create_or_update_rule (api_update_advanced_rule)
+  ENDPOINT: advanced-rule/<int:pk>/delete/ → views.delete_rule (api_delete_advanced_rule)
+  ENDPOINT: group/<int:group_id>/advanced-rule/create/api/ → views.create_or_update_rule (api_create_advanced_rule)
+  ENDPOINT: advanced-rule/<int:pk>/edit/api/ → views.create_or_update_rule (api_update_advanced_rule)
+  ENDPOINT: advanced-rule/<int:pk>/delete/api/ → views.delete_rule (api_delete_advanced_rule)
+  ENDPOINT: group/<int:group_id>/skus/ → views.get_customer_skus (get_customer_skus)
+
+APP: products
+
+APP: orders
+
+APP: materials
+
+APP: LedgerLink
+  ENDPOINT: admin/ → admin.site.urls ((unnamed))
+
+APP: inserts
+
+APP: customer_services
+
+APP: customers
+
+APP: bulk_operations
+
+APP: billing
+
+APP: api
+  ENDPOINT:  → views.logging_views.save_client_logs (save_client_logs)
+  ENDPOINT: list/ → views.logging_views.list_client_logs (list_client_logs)
+  ENDPOINT: <str:filename>/ → views.logging_views.get_client_log_file (get_client_log_file)
+  ENDPOINT: pact/provider-states → views.pact_views.provider_states (pact_provider_states)
+
+
+
+API USAGE:
+Error extracting React API usage: EISDIR: illegal operation on a directory, read
+
+SERIALIZER AND PROP TYPE CORRELATION:
+SERIALIZER AND COMPONENT CORRELATION:
+
+COMPONENT: TemplateSelector
+  POTENTIAL SERIALIZER MATCH: services.ServiceSerializer
+    MATCHING FIELDS: 
+  POTENTIAL SERIALIZER MATCH: products.ProductSerializer
+    MATCHING FIELDS: 
+  POTENTIAL SERIALIZER MATCH: materials.MaterialSerializer
+    MATCHING FIELDS: 
+  POTENTIAL SERIALIZER MATCH: materials.BoxPriceSerializer
+    MATCHING FIELDS: 
+  POTENTIAL SERIALIZER MATCH: inserts.InsertSerializer
+    MATCHING FIELDS: 
+  POTENTIAL SERIALIZER MATCH: customer_services.CustomerServiceSerializer
+    MATCHING FIELDS: 
+  POTENTIAL SERIALIZER MATCH: customers.CustomerSerializer
+    MATCHING FIELDS: 
+  POTENTIAL SERIALIZER MATCH: bulk_operations.BulkOperationBaseSerializer
+    MATCHING FIELDS: 
+
+
+AUTO-FIX SUGGESTIONS:
+
+COMPONENT: TemplateSelector -> SERIALIZER: services.ServiceSerializer
+  MISMATCHED FIELDS: onselect, templates, loading, error, selectedtemplate
+  SUGGESTED FIXES:
+    - Add "onselect" to TemplateSelector
+    - Add "templates" to TemplateSelector
+    - Add "loading" to TemplateSelector
+    - Add "error" to TemplateSelector
+    - Add "selectedtemplate" to TemplateSelector
+
+COMPONENT: TemplateSelector -> SERIALIZER: products.ProductSerializer
+  MISMATCHED FIELDS: onselect, templates, loading, error, selectedtemplate
+  SUGGESTED FIXES:
+    - Add "onselect" to TemplateSelector
+    - Add "templates" to TemplateSelector
+    - Add "loading" to TemplateSelector
+    - Add "error" to TemplateSelector
+    - Add "selectedtemplate" to TemplateSelector
+
+COMPONENT: TemplateSelector -> SERIALIZER: materials.MaterialSerializer
+  MISMATCHED FIELDS: onselect, templates, loading, error, selectedtemplate
+  SUGGESTED FIXES:
+    - Add "onselect" to TemplateSelector
+    - Add "templates" to TemplateSelector
+    - Add "loading" to TemplateSelector
+    - Add "error" to TemplateSelector
+    - Add "selectedtemplate" to TemplateSelector
+
+COMPONENT: TemplateSelector -> SERIALIZER: materials.BoxPriceSerializer
+  MISMATCHED FIELDS: onselect, templates, loading, error, selectedtemplate
+  SUGGESTED FIXES:
+    - Add "onselect" to TemplateSelector
+    - Add "templates" to TemplateSelector
+    - Add "loading" to TemplateSelector
+    - Add "error" to TemplateSelector
+    - Add "selectedtemplate" to TemplateSelector
+
+COMPONENT: TemplateSelector -> SERIALIZER: inserts.InsertSerializer
+  MISMATCHED FIELDS: onselect, templates, loading, error, selectedtemplate
+  SUGGESTED FIXES:
+    - Add "onselect" to TemplateSelector
+    - Add "templates" to TemplateSelector
+    - Add "loading" to TemplateSelector
+    - Add "error" to TemplateSelector
+    - Add "selectedtemplate" to TemplateSelector
+
+COMPONENT: TemplateSelector -> SERIALIZER: customer_services.CustomerServiceSerializer
+  MISMATCHED FIELDS: onselect, templates, loading, error, selectedtemplate
+  SUGGESTED FIXES:
+    - Add "onselect" to TemplateSelector
+    - Add "templates" to TemplateSelector
+    - Add "loading" to TemplateSelector
+    - Add "error" to TemplateSelector
+    - Add "selectedtemplate" to TemplateSelector
+
+COMPONENT: TemplateSelector -> SERIALIZER: customers.CustomerSerializer
+  MISMATCHED FIELDS: onselect, templates, loading, error, selectedtemplate
+  SUGGESTED FIXES:
+    - Add "onselect" to TemplateSelector
+    - Add "templates" to TemplateSelector
+    - Add "loading" to TemplateSelector
+    - Add "error" to TemplateSelector
+    - Add "selectedtemplate" to TemplateSelector
+
+COMPONENT: TemplateSelector -> SERIALIZER: bulk_operations.BulkOperationBaseSerializer
+  MISMATCHED FIELDS: onselect, templates, loading, error, selectedtemplate
+  SUGGESTED FIXES:
+    - Add "onselect" to TemplateSelector
+    - Add "templates" to TemplateSelector
+    - Add "loading" to TemplateSelector
+    - Add "error" to TemplateSelector
+    - Add "selectedtemplate" to TemplateSelector
+
+
+
+DEPENDENCIES BETWEEN FILES:
+Error analyzing dependencies: EISDIR: illegal operation on a directory, read
+
+Based on this information, identify:
+
+1. CRITICAL ISSUES:
+   - API endpoint mismatches between Django URLs and React API calls
+   - Data structure inconsistencies between Django models and React state/props
+   - Missing error handling for API calls
+   - Security vulnerabilities
+   - Serializer field mismatches with React prop types
+
+2. IMPORTANT ISSUES:
+   - Django model fields that don't match React component props/state
+   - Missing validation in forms
+   - Performance bottlenecks in API calls or React rendering
+   - Authentication/authorization issues
+   - Inconsistent typing between serializers and components
+
+3. STANDARD ISSUES:
+   - Code style inconsistencies
+   - Potential bugs in either frontend or backend
+   - Edge cases not handled
+   - Missing documentation
+
+For each issue found, format your response exactly as follows:
+FILENAME:LINE_NUMBER
+ISSUE: Brief description of the problem
+FIX: Specific recommendation on how to fix it
+SEVERITY: [Critical/High/Medium/Low]
+RELATED_FILES: [List any files affected by or related to this issue]
+AUTO_FIX: [If available, provide exact code replacement to fix the issue]
+---
+
+When providing AUTO_FIX, make sure it's a precise code snippet that can be automatically applied to fix the issue. For complex fixes that can't be automated, leave the AUTO_FIX field empty.
+
+Sort issues by severity, then by filename and line number. Only report actual issues - do not include compliments or other text.
