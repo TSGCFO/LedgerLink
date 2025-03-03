@@ -28,7 +28,7 @@ from orders.models import Order
 from .models import RuleGroup, Rule, AdvancedRule
 from .forms import RuleGroupForm, RuleForm, AdvancedRuleForm
 from customer_services.models import CustomerService
-from .utils.validators import validate_field_operator_value, validate_calculation
+from .utils import validate_field_operator_value, validate_calculation
 
 logger = logging.getLogger(__name__)
 

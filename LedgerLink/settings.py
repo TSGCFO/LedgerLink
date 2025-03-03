@@ -90,7 +90,7 @@ if 'test' in sys.argv:
             'NAME': 'postgres',
             'USER': 'postgres',
             'PASSWORD': 'Hassan8488$',
-            'HOST': 'db.aqlxkyvyprmmufpejzlf.supabase.co',
+            'HOST': 'db.dorunzumqoeiozqiyiux.supabase.co',
             'PORT': '5432',
         }
     }
@@ -101,7 +101,7 @@ else:
             'NAME': 'postgres',
             'USER': 'postgres',
             'PASSWORD': 'Hassan8488$',
-            'HOST': 'db.aqlxkyvyprmmufpejzlf.supabase.co',
+            'HOST': 'db.dorunzumqoeiozqiyiux.supabase.co',
             'PORT': '5432',
         }
     }
