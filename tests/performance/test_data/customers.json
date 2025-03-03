@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "company_name": "ABC Manufacturing",
+    "legal_business_name": "ABC Manufacturing Inc.",
+    "email": "contact@abcmanufacturing.com",
+    "phone": "123-456-7890",
+    "is_active": true
+  },
+  {
+    "id": 2,
+    "company_name": "XYZ Logistics",
+    "legal_business_name": "XYZ Logistics LLC",
+    "email": "info@xyzlogistics.com",
+    "phone": "987-654-3210",
+    "is_active": true
+  },
+  {
+    "id": 3,
+    "company_name": "Global Shipping Co.",
+    "legal_business_name": "Global Shipping Corporation",
+    "email": "support@globalshipping.com",
+    "phone": "555-123-4567",
+    "is_active": true
+  },
+  {
+    "id": 4,
+    "company_name": "Best Supplies",
+    "legal_business_name": "Best Supplies & Equipment Ltd.",
+    "email": "sales@bestsupplies.com",
+    "phone": "888-777-6666",
+    "is_active": true
+  },
+  {
+    "id": 5,
+    "company_name": "Quick Delivery",
+    "legal_business_name": "Quick Delivery Services Inc.",
+    "email": "contact@quickdelivery.com",
+    "phone": "444-555-6666",
+    "is_active": true
+  }
+]

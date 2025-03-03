@@ -1,0 +1,68 @@
+name: Django Tests
+
+on:
+  push:
+    branches: [ master, develop ]
+  pull_request:
+    branches: [ master, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ledgerlink_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Run migrations and prepare database objects
+      env:
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/ledgerlink_test
+        DJANGO_SETTINGS_MODULE: tests.settings
+      run: |
+        python manage.py migrate
+        psql -h localhost -U postgres -d ledgerlink_test -f tests/test_postgresql_objects.sql
+      
+    - name: Run Tests
+      env:
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/ledgerlink_test
+        DJANGO_SETTINGS_MODULE: tests.settings
+      run: |
+        pytest
+    
+    - name: Run Coverage
+      env:
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/ledgerlink_test
+        DJANGO_SETTINGS_MODULE: tests.settings
+      run: |
+        pytest --cov=. --cov-report=xml
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        fail_ci_if_error: false
