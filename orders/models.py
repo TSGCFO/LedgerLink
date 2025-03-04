@@ -17,7 +17,7 @@ class Order(models.Model):
         ('delivered', 'Delivered'),
         ('cancelled', 'Cancelled'),
     ]
-    transaction_id = models.IntegerField(primary_key=True)  # Externally assigned
+    transaction_id = models.BigIntegerField(primary_key=True)  # Externally assigned
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     close_date = models.DateTimeField(blank=True, null=True)
     reference_number = models.CharField(max_length=100)
@@ -89,7 +89,7 @@ class Order(models.Model):
 
 
 class OrderSKUView(models.Model):
-    transaction_id = models.IntegerField(primary_key=True)
+    transaction_id = models.BigIntegerField(primary_key=True)
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     close_date = models.DateTimeField(blank=True, null=True)
     reference_number = models.CharField(max_length=100)
