@@ -82,19 +82,21 @@ WSGI_APPLICATION = 'LedgerLink.wsgi.application'
 
 import sys
 
-# Use dedicated PostgreSQL database for testing
-if 'test' in sys.argv:
+# Use appropriate database for the current environment
+if 'test' in sys.argv or os.environ.get('IN_DOCKER') == 'true':
+    # Use environment variables or fall back to defaults for test/Docker environment
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'postgres',
-            'USER': 'postgres',
-            'PASSWORD': 'Hassan8488$',
-            'HOST': 'db.dorunzumqoeiozqiyiux.supabase.co',
-            'PORT': '5432',
+            'NAME': os.environ.get('DB_NAME', 'ledgerlink_test'),
+            'USER': os.environ.get('DB_USER', 'postgres'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', 'postgres'),
+            'HOST': os.environ.get('DB_HOST', 'db'),
+            'PORT': os.environ.get('DB_PORT', '5432'),
         }
     }
 else:
+    # Production database settings
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',

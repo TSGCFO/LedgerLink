@@ -55,12 +55,12 @@ def postgres_container():
     
     # TestContainers implementation
     try:
-        # Define container configuration
+        # Define container configuration - match version in docker-compose.test.yml
         postgres_container = PostgresContainer(
-            image="postgres:14.5",
+            image="postgres:15",
             username="postgres",
             password="postgres",
-            dbname="test_ledgerlink",
+            dbname="ledgerlink_test",
             port=5432
         )
         

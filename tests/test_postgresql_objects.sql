@@ -22,8 +22,13 @@ JOIN
     products_product p ON p.customer_id = o.customer_id
 WITH NO DATA;
 
--- Refresh the materialized view
-REFRESH MATERIALIZED VIEW orders_orderskuview;
+-- Conditional refresh of materialized view
+DO $$
+BEGIN
+    IF (SELECT COUNT(*) FROM orders_order) > 0 THEN
+        EXECUTE 'REFRESH MATERIALIZED VIEW orders_orderskuview';
+    END IF;
+END $$;
 
 -- CustomerServiceView materialized view (from customer_services app)
 CREATE MATERIALIZED VIEW IF NOT EXISTS customer_services_customerserviceview AS
@@ -44,8 +49,13 @@ JOIN
     services_service s ON cs.service_id = s.id
 WITH NO DATA;
 
--- Refresh the materialized view
-REFRESH MATERIALIZED VIEW customer_services_customerserviceview;
+-- Conditional refresh of materialized view
+DO $$
+BEGIN
+    IF (SELECT COUNT(*) FROM customer_services_customerservice) > 0 THEN
+        EXECUTE 'REFRESH MATERIALIZED VIEW customer_services_customerserviceview';
+    END IF;
+END $$;
 
 -- Create indexes for materialized views
 CREATE INDEX IF NOT EXISTS idx_orderskuview_order_id ON orders_orderskuview(order_id);
