@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.11-slim
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
@@ -11,27 +11,28 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-dev \
     postgresql-client \
     libpq-dev \
+    wget \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
+# Install Python dependencies with a compatible psycopg2 version
 COPY requirements.txt .
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 
 # Install testing dependencies
-RUN pip install pytest pytest-django pytest-cov factory-boy
+RUN pip install pytest pytest-django pytest-cov factory-boy testcontainers
 
 # Copy project
 COPY . .
 
-# Wait for database command
-RUN echo 'from django.core.management.base import BaseCommand; from django.db import connections; import time, psycopg2; class Command(BaseCommand): help = "Wait for database"; def handle(self, *args, **kwargs): self.stdout.write("Waiting for database..."); db_ready = False; while not db_ready: try: db_conn = psycopg2.connect(host="db", user="postgres", password="postgres", dbname="ledgerlink_test"); db_conn.close(); db_ready = True; self.stdout.write(self.style.SUCCESS("Database ready!")); except psycopg2.OperationalError: self.stdout.write("Database not ready, waiting 1 second..."); time.sleep(1);' > LedgerLink/management/commands/wait_for_db.py
-
 # Create init file to make management a module
-RUN mkdir -p LedgerLink/management && \
+RUN mkdir -p LedgerLink/management/commands && \
     touch LedgerLink/management/__init__.py && \
     touch LedgerLink/management/commands/__init__.py
+
+# Wait for database command
+RUN echo 'from django.core.management.base import BaseCommand; from django.db import connections; import time, psycopg2; class Command(BaseCommand): help = "Wait for database"; def handle(self, *args, **kwargs): self.stdout.write("Waiting for database..."); db_ready = False; while not db_ready: try: db_conn = psycopg2.connect(host="db", user="postgres", password="postgres", dbname="ledgerlink_test"); db_conn.close(); db_ready = True; self.stdout.write(self.style.SUCCESS("Database ready!")); except psycopg2.OperationalError: self.stdout.write("Database not ready, waiting 1 second..."); time.sleep(1);' > LedgerLink/management/commands/wait_for_db.py
 
 # Set the entrypoint
 ENTRYPOINT ["python"]

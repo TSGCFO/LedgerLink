@@ -13,7 +13,7 @@ flake8
 gunicorn
 isort
 Pillow
-psycopg2-binary==2.8.4
+psycopg2-binary>=2.9.0,<2.10.0  # Compatible with Python 3.11 and 3.12
 pytest
 pytest-django
 pytest-cov

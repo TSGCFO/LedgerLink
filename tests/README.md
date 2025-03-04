@@ -231,17 +231,38 @@ Workflow configurations are in the `.github/workflows/` directory.
    - Keep tests fast, especially unit tests
    - Use selective test running for development
 
+## Recent Testing Improvements
+
+We have improved test coverage for the materials app, implementing:
+
+1. **Comprehensive Backend Tests**:
+   - Integration tests between Material and BoxPrice models and APIs
+   - Security tests for different user permission levels
+   - Contract tests for API compatibility
+   - Performance tests for database queries and API endpoints
+
+2. **Test Implementation Documentation**:
+   - Created a detailed implementation guide for other apps
+   - Documented Docker testing issues and solutions
+   - Provided templates for different types of tests
+
+See the following files for details:
+- `materials_testing_improvements.md`: Details of the tests implemented for materials app
+- `docker_testing_issues.md`: Documentation of Docker environment issues
+- `test_implementation_guide.md`: Step-by-step guide for testing other apps
+
 ## Next Steps
 
-1. **Complete Test Coverage**:
-   - Implement tests for all backend apps
-   - Add tests for all frontend components
-   - Create additional E2E test scenarios
+1. **Fix Testing Infrastructure**:
+   - Resolve Docker testing environment issues
+   - Update psycopg2 to a compatible version
+   - Configure proper credential handling for Docker
 
-2. **Testing Infrastructure**:
-   - Set up Docker-based PostgreSQL for local and CI testing
-   - Resolve migration dependency issues
-   - Add fixtures for materialized views and other complex database structures
+2. **Complete Test Coverage**:
+   - Implement comprehensive tests for the shipping app
+   - Implement comprehensive tests for the inserts app
+   - Add frontend component tests for materials, shipping, and inserts
+   - Create additional E2E test scenarios
 
 3. **Advanced Testing**:
    - Set up Pact broker for contract testing

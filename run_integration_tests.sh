@@ -1,6 +1,7 @@
 #!/bin/bash
+set -e
 
-# Script to run LedgerLink tests with Docker and PostgreSQL
+# Script to run LedgerLink integration tests with Docker and PostgreSQL
 
 # Fix Docker credential issue
 if [ ! -f ~/.docker/config.json ]; then
@@ -9,7 +10,7 @@ if [ ! -f ~/.docker/config.json ]; then
   echo '{"credsStore":""}' > ~/.docker/config.json
 fi
 
-echo "=== Running LedgerLink tests with PostgreSQL ==="
+echo "=== Running LedgerLink Integration Tests with PostgreSQL ==="
 echo "Building and starting test containers..."
 
 # Stop any existing test containers
@@ -23,8 +24,10 @@ echo "Waiting for PostgreSQL to initialize..."
 sleep 5
 
 # Run the tests
-echo "Running tests..."
-docker compose -f docker-compose.test.yml run --rm test
+echo "Running integration tests..."
+docker compose -f docker-compose.test.yml run --rm \
+  test \
+  -c "sleep 5 && python manage.py migrate && python -m pytest tests/integration/ -v"
 
 # Get the exit code
 EXIT_CODE=$?
@@ -35,9 +38,9 @@ docker compose -f docker-compose.test.yml down
 
 # Display results
 if [ $EXIT_CODE -eq 0 ]; then
-  echo "=== All tests passed! ==="
+  echo "=== All integration tests passed! ==="
 else
-  echo "=== Tests failed with exit code $EXIT_CODE ==="
+  echo "=== Integration tests failed with exit code $EXIT_CODE ==="
 fi
 
 exit $EXIT_CODE

@@ -23,18 +23,23 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.test
+    entrypoint: /bin/sh
     command: >
-      sh -c "python manage.py wait_for_db &&
-             python manage.py migrate &&
-             python -m pytest"
+      -c "sleep 5 &&
+          python manage.py migrate &&
+          python -m pytest"
     volumes:
       - .:/app
     depends_on:
       db:
         condition: service_healthy
     environment:
-      - DJANGO_SETTINGS_MODULE=LedgerLink.settings.test
-      - DATABASE_URL=postgres://postgres:postgres@db:5432/ledgerlink_test
+      - DJANGO_SETTINGS_MODULE=LedgerLink.settings
+      - DB_HOST=db
+      - DB_NAME=ledgerlink_test
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - IN_DOCKER=true
 
 volumes:
   postgres_test_data:
