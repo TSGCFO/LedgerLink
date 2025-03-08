@@ -25,9 +25,10 @@ sleep 5
 
 # Run the tests
 echo "Running tests for Customer Services app only..."
+# Run the TestCase implementation in tests.py which uses simple Django TestCase setup
 docker compose -f docker-compose.test.yml run --rm \
   test \
-  -c "sleep 5 && python manage.py migrate && python -m pytest customer_services/tests/ customer_services/test_*.py -v"
+  -c "python manage.py test customer_services.tests -v 2"
 
 # Get the exit code
 EXIT_CODE=$?

@@ -256,6 +256,17 @@ python manage.py test app_name.tests.test_models.ModelTest.test_model_creation
 coverage run --source='app_name' manage.py test app_name
 coverage report
 coverage html
+
+# Run tests with pytest (handling materialized views)
+SKIP_MATERIALIZED_VIEWS=True python -m pytest app_name/tests/ -v
+
+# Test in Docker environment (recommended for database tests)
+./test_scripts/run_docker_tests.sh
+
+# Run app-specific tests in Docker
+docker compose -f docker-compose.test.yml run --rm \
+  -e SKIP_MATERIALIZED_VIEWS=True \
+  test python -m pytest customer_services/tests/ -v
 ```
 
 ### Docker Testing Environment

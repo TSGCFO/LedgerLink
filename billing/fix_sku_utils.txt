@@ -1,0 +1,38 @@
+
+def normalize_sku(sku):
+    """Normalize SKU by removing hyphens and spaces, and converting to uppercase."""
+    if sku is None:
+        return ""
+    # Remove hyphens and spaces, convert to uppercase
+    return re.sub(r'[-\s]', '', sku.upper())
+
+def convert_sku_format(sku_data):
+    """
+    Convert SKU data from various formats to a normalized dictionary.
+    
+    Args:
+        sku_data: String JSON or list of dictionaries with SKU info
+        
+    Returns:
+        Dictionary with normalized SKUs as keys and quantities as values
+    """
+    result = {}
+    
+    if sku_data is None:
+        return result
+        
+    try:
+        if isinstance(sku_data, str):
+            data = json.loads(sku_data)
+        else:
+            data = sku_data
+            
+        for item in data:
+            sku = normalize_sku(item.get('sku'))
+            quantity = item.get('quantity')
+            if sku and quantity is not None:
+                result[sku] = int(quantity)  # Convert to integer
+    except (json.JSONDecodeError, TypeError, ValueError):
+        pass
+        
+    return result

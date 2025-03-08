@@ -62,3 +62,64 @@ CREATE INDEX IF NOT EXISTS idx_orderskuview_order_id ON orders_orderskuview(orde
 CREATE INDEX IF NOT EXISTS idx_orderskuview_sku ON orders_orderskuview(sku);
 CREATE INDEX IF NOT EXISTS idx_customerserviceview_customer_id ON customer_services_customerserviceview(customer_id);
 CREATE INDEX IF NOT EXISTS idx_customerserviceview_service_id ON customer_services_customerserviceview(service_id);
+
+-- Create orders_sku_view materialized view required by test methods
+CREATE MATERIALIZED VIEW IF NOT EXISTS orders_sku_view AS
+SELECT 
+    o.transaction_id,
+    (o.sku_quantity->>'name')::text AS sku_name,
+    (o.sku_quantity->>'cases')::integer AS cases,
+    (o.sku_quantity->>'picks')::integer AS picks,
+    (o.sku_quantity->>'case_size')::integer AS case_size,
+    (o.sku_quantity->>'case_unit')::text AS case_unit
+FROM 
+    orders_order o
+WHERE 
+    o.sku_quantity IS NOT NULL
+WITH NO DATA;
+
+-- Create indexes on the materialized view
+CREATE UNIQUE INDEX IF NOT EXISTS orders_sku_view_transaction_id_idx ON orders_sku_view (transaction_id);
+CREATE INDEX IF NOT EXISTS orders_sku_view_sku_name_idx ON orders_sku_view (sku_name);
+
+-- Conditional refresh of the materialized view
+DO $$
+BEGIN
+    IF (SELECT COUNT(*) FROM orders_order) > 0 THEN
+        EXECUTE 'REFRESH MATERIALIZED VIEW orders_sku_view';
+    END IF;
+END $$;
+
+-- Create any missing tables required for testing
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_name = 'billing_billingreportdetail'
+    ) THEN
+        CREATE TABLE billing_billingreportdetail (
+            id SERIAL PRIMARY KEY,
+            service_breakdown JSONB NOT NULL,
+            total_amount DECIMAL(10, 2) NOT NULL,
+            order_id INT NOT NULL,
+            report_id INT NOT NULL,
+            CONSTRAINT fk_order FOREIGN KEY(order_id) REFERENCES orders_order(transaction_id) ON DELETE CASCADE,
+            CONSTRAINT fk_report FOREIGN KEY(report_id) REFERENCES billing_billingreport(id) ON DELETE CASCADE
+        );
+        
+        -- Create indexes
+        CREATE INDEX idx_billingreportdetail_report_order ON billing_billingreportdetail(report_id, order_id);
+        CREATE INDEX idx_billingreportdetail_total_amount ON billing_billingreportdetail(total_amount);
+    END IF;
+END $$;
+
+-- Add any missing columns to existing tables
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT FROM information_schema.columns 
+        WHERE table_name = 'billing_billingreport' AND column_name = 'generated_at'
+    ) THEN
+        ALTER TABLE billing_billingreport ADD COLUMN generated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+    END IF;
+END $$;

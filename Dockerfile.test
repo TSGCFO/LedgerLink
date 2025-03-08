@@ -1,64 +1,63 @@
-FROM python:3.11-slim
+FROM python:3.11
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
+ENV PYTHONPATH=/app
 
 WORKDIR /app
 
-# Install dependencies
+# Install system dependencies with full debugging tools
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     python3-dev \
     postgresql-client \
     libpq-dev \
     wget \
+    curl \
+    netcat-traditional \
+    vim \
+    procps \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies with a compatible psycopg2 version
+# Install Python dependencies
 COPY requirements.txt .
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 
-# Install testing dependencies
-RUN pip install pytest pytest-django pytest-cov factory-boy testcontainers
+# Install additional testing dependencies
+RUN pip install pytest pytest-django pytest-cov factory-boy testcontainers pytest-xdist pytest-mock
 
-# Copy project
+# Copy wait_for_db command first to handle database connection
+RUN mkdir -p /app/LedgerLink/management/commands
+COPY test_scripts/wait_for_db.py /app/LedgerLink/management/commands/wait_for_db.py
+RUN touch /app/LedgerLink/management/__init__.py && \
+    touch /app/LedgerLink/management/commands/__init__.py
+
+# Copy the rest of the project
 COPY . .
 
-# Create init file to make management a module
-RUN mkdir -p LedgerLink/management/commands && \
-    touch LedgerLink/management/__init__.py && \
-    touch LedgerLink/management/commands/__init__.py
+# Create a better wait_for_db script if it doesn't exist
+RUN if [ ! -f /app/LedgerLink/management/commands/wait_for_db.py ]; then \
+    echo "from django.core.management.base import BaseCommand\nimport time\nimport os\nimport psycopg2\n\nclass Command(BaseCommand):\n    help = 'Wait for database'\n    \n    def handle(self, *args, **kwargs):\n        self.stdout.write('Waiting for database...')\n        db_host = os.environ.get('DB_HOST', 'db')\n        db_name = os.environ.get('DB_NAME', 'ledgerlink_test')\n        db_user = os.environ.get('DB_USER', 'postgres')\n        db_password = os.environ.get('DB_PASSWORD', 'postgres')\n        \n        self.stdout.write(f'Connecting to {db_host}/{db_name} as {db_user}')\n        \n        for attempt in range(1, 31):\n            try:\n                self.stdout.write(f'Attempt {attempt}/30')\n                conn = psycopg2.connect(\n                    host=db_host,\n                    user=db_user,\n                    password=db_password,\n                    dbname=db_name\n                )\n                conn.close()\n                self.stdout.write(self.style.SUCCESS('Database available!'))\n                return 0\n            except psycopg2.OperationalError as e:\n                self.stdout.write(f'Database unavailable, waiting: {e}')\n                time.sleep(1)\n        \n        self.stdout.write(self.style.ERROR('Database unavailable after 30 attempts'))\n        return 1" > /app/LedgerLink/management/commands/wait_for_db.py; \
+    fi
 
-# Wait for database command - Fix command format with proper line breaks
-RUN echo '
-from django.core.management.base import BaseCommand
-from django.db import connections
-import time
-import psycopg2
+# Clean all __pycache__ directories to prevent import issues
+RUN find . -type d -name __pycache__ -exec rm -rf {} +
 
-class Command(BaseCommand):
-    help = "Wait for database"
-    
-    def handle(self, *args, **kwargs):
-        self.stdout.write("Waiting for database...")
-        db_ready = False
-        while not db_ready:
-            try:
-                db_conn = psycopg2.connect(
-                    host="db", 
-                    user="postgres", 
-                    password="postgres", 
-                    dbname="ledgerlink_test"
-                )
-                db_conn.close()
-                db_ready = True
-                self.stdout.write(self.style.SUCCESS("Database ready!"))
-            except psycopg2.OperationalError:
-                self.stdout.write("Database not ready, waiting 1 second...")
-                time.sleep(1)
-' > LedgerLink/management/commands/wait_for_db.py
+# Create a proper entry point script
+RUN echo '#!/bin/bash\n\
+echo "Setting up test environment..."\n\
+\n\
+# Wait for database to be ready\n\
+python manage.py wait_for_db || {\n\
+    echo "Database not ready, falling back to manual wait..."\n\
+    sleep 10\n\
+}\n\
+\n\
+# Execute the command passed to docker run\n\
+exec "$@"' > /entrypoint.sh && chmod +x /entrypoint.sh
 
-# Set the entrypoint
-ENTRYPOINT ["python"]
+# Default entrypoint is bash shell to allow flexibility
+ENTRYPOINT ["/bin/bash", "-c"]
+CMD ["python manage.py test"]

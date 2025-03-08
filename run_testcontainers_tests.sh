@@ -16,11 +16,17 @@ if [ -d "venv" ]; then
 fi
 
 # Run the tests with pytest and skip using the main conftest.py
-echo "Running the tests..."
+echo "Running Materials TestContainers tests..."
 python -m pytest materials/tests/test_testcontainers.py -v --no-header --no-summary
 
+echo "Running Orders TestContainers tests..."
+python -m pytest orders/tests/test_testcontainers.py -v --no-header --no-summary
+
+echo "Running Orders materialized view tests with TestContainers..."
+SKIP_MATERIALIZED_VIEWS=False python -m pytest orders/tests/test_materialized_views.py -v --no-header --no-summary
+
 # If you want to run a specific test:
-# python -m pytest materials/tests/test_testcontainers.py::TestTestContainersSetup::test_postgresql_connection -v
+# python -m pytest orders/tests/test_testcontainers.py::TestContainersOrdersTest::test_postgresql_connection -v
 
 # If you want to run all tests:
 # python -m pytest

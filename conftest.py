@@ -130,18 +130,56 @@ def django_db_setup(request, postgres_container):
     
     # When not in Docker, we need to set up the database schema
     if not in_docker:
-        # Create all tables directly using Django's ORM 
-        with connection.schema_editor() as schema_editor:
-            for app_config in apps.get_app_configs():
-                if app_config.models_module:
-                    for model in app_config.get_models():
-                        try:
-                            schema_editor.create_model(model)
-                        except Exception as e:
-                            print(f"Failed to create table for {model.__name__}: {e}")
+        # Apply migrations using Django's migration executor
+        from django.core.management import call_command
+        from django.db.migrations.executor import MigrationExecutor
+        
+        print("Applying migrations for test database...")
+        try:
+            # First method: Using migration executor
+            executor = MigrationExecutor(connection)
+            plan = executor.migration_plan(executor.loader.graph.leaf_nodes())
+            
+            if plan:
+                print(f"Applying {len(plan)} pending migrations...")
+                executor.migrate(executor.loader.graph.leaf_nodes())
+                print("Migrations applied successfully")
+            else:
+                print("No migrations to apply")
+            
+            # Force pre-created ContentType creation
+            from django.contrib.contenttypes.models import ContentType
+            ContentType.objects.clear_cache()
+            
+            # Verify database schema matches models
+            print("Verifying database schema...")
+            try:
+                from django.db import models
+                from customers.models import Customer
+                
+                # Verify critical fields exist
+                with connection.cursor() as cursor:
+                    cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_name = 'customers_customer'")
+                    columns = [row[0] for row in cursor.fetchall()]
+                    
+                    # Check for is_active field
+                    if 'is_active' not in columns:
+                        print("WARNING: 'is_active' field not found in customers_customer table!")
+                        print(f"Available columns: {', '.join(columns)}")
+                        print("Using second method: call_command to apply migrations...")
+                        call_command('migrate', interactive=False, verbosity=1)
+            except Exception as e:
+                print(f"Schema verification error: {e}")
+                print("Using second method: call_command to apply migrations...")
+                call_command('migrate', interactive=False, verbosity=1)
+        except Exception as e:
+            print(f"Migration application error: {e}")
+            print("Using fallback method: call_command to apply migrations...")
+            call_command('migrate', interactive=False, verbosity=1)
         
         # If using PostgreSQL, create materialized views and other PostgreSQL-specific objects
-        if is_postgresql_db():
+        create_materialized_views = os.environ.get('SKIP_MATERIALIZED_VIEWS') != 'True'
+        if is_postgresql_db() and create_materialized_views:
             print("PostgreSQL detected - creating materialized views and other PostgreSQL-specific objects")
             try:
                 # Execute SQL from test_postgresql_objects.sql
@@ -156,6 +194,8 @@ def django_db_setup(request, postgres_container):
                     print(f"WARNING: Could not find {sql_file_path}")
             except Exception as e:
                 print(f"Failed to create PostgreSQL-specific objects: {e}")
+        elif is_postgresql_db():
+            print("Skipping materialized view creation for tests (SKIP_MATERIALIZED_VIEWS=True)")
 
 
 @pytest.fixture

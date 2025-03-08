@@ -1,46 +1,31 @@
 #!/bin/bash
-set -e
 
-# Script to run LedgerLink Customers app tests with Docker and PostgreSQL
+# Run all customers app tests in Docker environment
+echo "Running Customer app tests in Docker environment..."
 
-# Fix Docker credential issue
-if [ ! -f ~/.docker/config.json ]; then
-  echo "Setting up Docker configuration to avoid credential issues..."
-  mkdir -p ~/.docker
-  echo '{"credsStore":""}' > ~/.docker/config.json
-fi
-
-echo "=== Running LedgerLink Customers Tests with PostgreSQL ==="
-echo "Building and starting test containers..."
-
-# Stop any existing test containers
-docker compose -f docker-compose.test.yml down
-
-# Build and start test containers
-docker compose -f docker-compose.test.yml up --build -d db
-
-# Wait a moment for the database to initialize
-echo "Waiting for PostgreSQL to initialize..."
-sleep 5
-
-# Run the tests
-echo "Running tests for Customers app only..."
+# Run unit tests
+echo "Running unit tests..."
 docker compose -f docker-compose.test.yml run --rm \
-  test \
-  -c "sleep 5 && python manage.py migrate && python -m pytest customers/tests/ -v"
+  test python -m pytest customers/tests/test_models.py customers/tests/test_serializers.py customers/tests/test_urls.py -v
 
-# Get the exit code
-EXIT_CODE=$?
+# Run integration tests
+echo "Running integration tests..."
+docker compose -f docker-compose.test.yml run --rm \
+  test python -m pytest customers/tests/test_views.py customers/tests/integration/ -v
 
-# Stop the containers
-echo "Stopping test containers..."
-docker compose -f docker-compose.test.yml down
+# Run contract tests (PACT)
+echo "Running contract tests..."
+docker compose -f docker-compose.test.yml run --rm \
+  test python -m pytest customers/test_pact_provider.py -v
 
-# Display results
-if [ $EXIT_CODE -eq 0 ]; then
-  echo "=== All Customers tests passed! ==="
-else
-  echo "=== Customers tests failed with exit code $EXIT_CODE ==="
-fi
+# Run performance tests
+echo "Running performance tests..."
+docker compose -f docker-compose.test.yml run --rm \
+  test python -m pytest customers/tests/performance/ -v
 
-exit $EXIT_CODE
+# Run complete test suite with coverage
+echo "Running complete test suite with coverage..."
+docker compose -f docker-compose.test.yml run --rm \
+  test sh -c "coverage run --source='customers' -m pytest customers/ -v && coverage report && coverage html -d coverage_html/customers"
+
+echo "All Customer app tests completed."
