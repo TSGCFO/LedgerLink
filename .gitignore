@@ -130,3 +130,4 @@ frontend/src/components/rules/RuleTester.jsx
 frontend/src/utils/validationUtils.js
 rules/migrations/0012_alter_rule_adjustment_amount_alter_rule_field_and_more.py
 rules/utils/
+venv311/
