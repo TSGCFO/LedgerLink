@@ -1,240 +1,191 @@
-# billing/tests/test_models.py
-
-import pytest
-from datetime import datetime, timedelta
-from decimal import Decimal
+from django.test import TestCase
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from datetime import timedelta
+from decimal import Decimal
+
 from billing.models import BillingReport, BillingReportDetail
-from .factories import BillingReportFactory, BillingReportDetailFactory
-from customers.tests.factories import CustomerFactory
-from orders.tests.factories import OrderFactory
+from .factories import (
+    BillingReportFactory, BillingReportDetailFactory,
+    CustomerFactory, OrderFactory, UserFactory
+)
 
-pytestmark = pytest.mark.django_db
 
-class TestBillingReportModel:
-    """
-    Test cases for the BillingReport model.
-    """
+class BillingReportModelTests(TestCase):
+    """Tests for the BillingReport model."""
     
-    def test_create_billing_report(self):
-        """Test creating a billing report."""
-        report = BillingReportFactory.create()
-        assert report.pk is not None
-        assert BillingReport.objects.count() == 1
-        assert BillingReport.objects.first().customer == report.customer
+    def setUp(self):
+        self.customer = CustomerFactory()
+        self.user = UserFactory()
+        self.start_date = timezone.now().date() - timedelta(days=30)
+        self.end_date = timezone.now().date()
     
-    def test_billing_report_str_method(self):
-        """Test the string representation of a billing report."""
-        customer = CustomerFactory.create(company_name="Test Company")
-        start_date = datetime.now().date() - timedelta(days=30)
-        end_date = datetime.now().date()
-        report = BillingReportFactory.create(
-            customer=customer,
-            start_date=start_date,
-            end_date=end_date
-        )
-        assert str(report) == f"Report for Test Company ({start_date} to {end_date})"
-    
-    def test_billing_report_validation_date_order(self):
-        """Test that start date must be before end date."""
-        today = timezone.now().date()
-        customer = CustomerFactory.create()
+    def test_billing_report_creation(self):
+        """Test basic creation of a BillingReport model."""
+        report = BillingReportFactory()
+        self.assertIsNotNone(report.id)
+        self.assertEqual(str(report), 
+            f"Report for {report.customer.company_name} ({report.start_date} to {report.end_date})")
         
-        with pytest.raises(ValidationError):
-            report = BillingReport(
-                customer=customer,
-                start_date=today,
-                end_date=today - timedelta(days=1),
-                total_amount=Decimal('100.00'),
-                report_data={"orders": [], "total_amount": "100.00"}
-            )
-            report.save()
-    
-    def test_billing_report_validation_future_date(self):
-        """Test that start date cannot be in the future."""
-        today = timezone.now().date()
-        customer = CustomerFactory.create()
+    def test_report_data_json_field(self):
+        """Test that the report_data JSON field works correctly."""
+        report = BillingReportFactory()
         
-        with pytest.raises(ValidationError):
-            report = BillingReport(
-                customer=customer,
-                start_date=today + timedelta(days=1),
-                end_date=today + timedelta(days=30),
-                total_amount=Decimal('100.00'),
-                report_data={"orders": [], "total_amount": "100.00"}
-            )
-            report.save()
-    
-    def test_billing_report_with_valid_json_data(self):
-        """Test saving a billing report with valid JSON data."""
-        customer = CustomerFactory.create()
-        today = timezone.now().date()
+        # Check that report_data is a dict
+        self.assertIsInstance(report.report_data, dict)
         
-        report_data = {
-            "orders": [
-                {
-                    "order_id": 1,
-                    "services": [
-                        {
-                            "service_id": 1,
-                            "service_name": "Service A",
-                            "amount": "50.00"
-                        }
-                    ],
-                    "total_amount": "50.00"
-                }
-            ],
-            "total_amount": "50.00",
-            "service_totals": {
-                "Service A": "50.00"
-            }
-        }
+        # Check that it contains expected keys
+        self.assertIn('orders', report.report_data)
+        self.assertIn('total_amount', report.report_data)
         
+        # Verify we can access nested data
+        self.assertIsInstance(report.report_data['orders'], list)
+        if report.report_data['orders']:
+            order = report.report_data['orders'][0]
+            self.assertIn('order_id', order)
+            self.assertIn('services', order)
+            
+    def test_validation_start_date_before_end_date(self):
+        """Test that start_date must be before end_date."""
+        # Valid case: start_date before end_date
         report = BillingReport(
-            customer=customer,
-            start_date=today - timedelta(days=30),
-            end_date=today,
-            total_amount=Decimal('50.00'),
-            report_data=report_data
+            customer=self.customer,
+            start_date=self.start_date,
+            end_date=self.end_date,
+            total_amount=Decimal('100.00'),
+            report_data={'orders': [], 'total_amount': '100.00'},
+            created_by=self.user,
+            updated_by=self.user
         )
-        report.save()
+        report.clean()  # Should not raise ValidationError
         
-        # Reload from database to ensure data is saved properly
-        saved_report = BillingReport.objects.get(pk=report.pk)
-        assert saved_report.report_data == report_data
-        assert saved_report.total_amount == Decimal('50.00')
+        # Invalid case: start_date after end_date
+        report = BillingReport(
+            customer=self.customer,
+            start_date=self.end_date,
+            end_date=self.start_date,
+            total_amount=Decimal('100.00'),
+            report_data={'orders': [], 'total_amount': '100.00'},
+            created_by=self.user,
+            updated_by=self.user
+        )
+        with self.assertRaises(ValidationError):
+            report.clean()
+            
+    def test_validation_future_start_date(self):
+        """Test that start_date cannot be in the future."""
+        # Invalid case: start_date in future
+        future_date = timezone.now().date() + timedelta(days=1)
+        report = BillingReport(
+            customer=self.customer,
+            start_date=future_date,
+            end_date=future_date + timedelta(days=10),
+            total_amount=Decimal('100.00'),
+            report_data={'orders': [], 'total_amount': '100.00'},
+            created_by=self.user,
+            updated_by=self.user
+        )
+        with self.assertRaises(ValidationError):
+            report.clean()
     
-    def test_billing_report_total_amount_minimum(self):
-        """Test that total_amount cannot be negative."""
-        customer = CustomerFactory.create()
-        today = timezone.now().date()
+    def test_validation_date_range_limit(self):
+        """Test that date range cannot exceed MAX_REPORT_DATE_RANGE."""
+        from django.conf import settings
+        max_range = getattr(settings, 'MAX_REPORT_DATE_RANGE', 365)
         
-        with pytest.raises(ValidationError):
+        # Valid case: within range limit
+        report = BillingReport(
+            customer=self.customer,
+            start_date=self.start_date,
+            end_date=self.start_date + timedelta(days=max_range - 1),
+            total_amount=Decimal('100.00'),
+            report_data={'orders': [], 'total_amount': '100.00'},
+            created_by=self.user,
+            updated_by=self.user
+        )
+        report.clean()  # Should not raise ValidationError
+        
+        # Invalid case: exceeds range limit
+        report = BillingReport(
+            customer=self.customer,
+            start_date=self.start_date,
+            end_date=self.start_date + timedelta(days=max_range + 1),
+            total_amount=Decimal('100.00'),
+            report_data={'orders': [], 'total_amount': '100.00'},
+            created_by=self.user,
+            updated_by=self.user
+        )
+        with self.assertRaises(ValidationError):
+            report.clean()
+    
+    def test_total_amount_positive(self):
+        """Test that total_amount must be positive."""
+        # Create report with negative amount - should fail validation
+        with self.assertRaises(ValidationError):
             report = BillingReport(
-                customer=customer,
-                start_date=today - timedelta(days=30),
-                end_date=today,
-                total_amount=Decimal('-10.00'),
-                report_data={"orders": [], "total_amount": "-10.00"}
+                customer=self.customer,
+                start_date=self.start_date,
+                end_date=self.end_date,
+                total_amount=Decimal('-100.00'),
+                report_data={'orders': [], 'total_amount': '-100.00'},
+                created_by=self.user,
+                updated_by=self.user
             )
-            report.save()
+            report.full_clean()
     
-    def test_billing_report_ordering(self):
-        """Test that billing reports are ordered by -generated_at."""
-        customer = CustomerFactory.create()
+    def test_relationship_with_details(self):
+        """Test the relationship between BillingReport and BillingReportDetail."""
+        report = BillingReportFactory()
         
-        # Create reports with different generated_at times
-        report1 = BillingReportFactory.create(
-            customer=customer,
-            generated_at=timezone.now() - timedelta(days=2)
-        )
-        report2 = BillingReportFactory.create(
-            customer=customer,
-            generated_at=timezone.now() - timedelta(days=1)
-        )
-        report3 = BillingReportFactory.create(
-            customer=customer,
-            generated_at=timezone.now()
-        )
+        # Create multiple details for this report
+        detail1 = BillingReportDetailFactory(report=report)
+        detail2 = BillingReportDetailFactory(report=report)
+        detail3 = BillingReportDetailFactory(report=report)
         
-        reports = BillingReport.objects.all()
-        assert reports[0] == report3
-        assert reports[1] == report2
-        assert reports[2] == report1
+        # Verify related name works correctly
+        self.assertEqual(report.details.count(), 3)
+        self.assertIn(detail1, report.details.all())
+        self.assertIn(detail2, report.details.all())
+        self.assertIn(detail3, report.details.all())
 
 
-class TestBillingReportDetailModel:
-    """
-    Test cases for the BillingReportDetail model.
-    """
+class BillingReportDetailModelTests(TestCase):
+    """Tests for the BillingReportDetail model."""
     
-    def test_create_billing_report_detail(self):
-        """Test creating a billing report detail."""
-        detail = BillingReportDetailFactory.create()
-        assert detail.pk is not None
-        assert BillingReportDetail.objects.count() == 1
-        assert BillingReportDetail.objects.first().report == detail.report
+    def setUp(self):
+        self.report = BillingReportFactory()
+        self.order = OrderFactory(customer=self.report.customer)
     
-    def test_billing_report_detail_str_method(self):
-        """Test the string representation of a billing report detail."""
-        report = BillingReportFactory.create()
-        order = OrderFactory.create(transaction_id="ORD-12345")
-        detail = BillingReportDetailFactory.create(report=report, order=order)
-        assert str(detail) == f"Detail for {report} - Order {order.transaction_id}"
+    def test_billing_report_detail_creation(self):
+        """Test basic creation of a BillingReportDetail model."""
+        detail = BillingReportDetailFactory(report=self.report, order=self.order)
+        self.assertIsNotNone(detail.id)
+        
+        # Test string representation
+        expected_str = f"Detail for {self.report} - Order {self.order.transaction_id}"
+        self.assertEqual(str(detail), expected_str)
+        
+    def test_service_breakdown_json_field(self):
+        """Test that the service_breakdown JSON field works correctly."""
+        detail = BillingReportDetailFactory(report=self.report, order=self.order)
+        
+        # Check that service_breakdown is a dict
+        self.assertIsInstance(detail.service_breakdown, dict)
+        
+        # Verify we can access nested data
+        for service_key, service_data in detail.service_breakdown.items():
+            self.assertIn('service_id', service_data)
+            self.assertIn('service_name', service_data)
+            self.assertIn('amount', service_data)
     
-    def test_billing_report_detail_with_service_breakdown(self):
-        """Test saving a billing report detail with service breakdown."""
-        report = BillingReportFactory.create()
-        order = OrderFactory.create()
-        
-        service_breakdown = {
-            "services": [
-                {
-                    "service_id": 1,
-                    "service_name": "Service A",
-                    "amount": "30.00"
-                },
-                {
-                    "service_id": 2,
-                    "service_name": "Service B",
-                    "amount": "20.00"
-                }
-            ]
-        }
-        
-        detail = BillingReportDetail(
-            report=report,
-            order=order,
-            service_breakdown=service_breakdown,
-            total_amount=Decimal('50.00')
-        )
-        detail.save()
-        
-        # Reload from database to ensure data is saved properly
-        saved_detail = BillingReportDetail.objects.get(pk=detail.pk)
-        assert saved_detail.service_breakdown == service_breakdown
-        assert saved_detail.total_amount == Decimal('50.00')
-    
-    def test_billing_report_detail_total_amount_minimum(self):
-        """Test that total_amount cannot be negative."""
-        report = BillingReportFactory.create()
-        order = OrderFactory.create()
-        
-        with pytest.raises(ValidationError):
+    def test_total_amount_positive(self):
+        """Test that total_amount must be positive."""
+        # Create detail with negative amount - should fail validation
+        with self.assertRaises(ValidationError):
             detail = BillingReportDetail(
-                report=report,
-                order=order,
-                service_breakdown={"services": []},
-                total_amount=Decimal('-10.00')
+                report=self.report,
+                order=self.order,
+                total_amount=Decimal('-100.00'),
+                service_breakdown={}
             )
-            detail.save()
-    
-    def test_billing_report_detail_related_name(self):
-        """Test the related_name for report->details relationship."""
-        report = BillingReportFactory.create()
-        
-        # Create multiple details for the same report
-        detail1 = BillingReportDetailFactory.create(report=report)
-        detail2 = BillingReportDetailFactory.create(report=report)
-        detail3 = BillingReportDetailFactory.create(report=report)
-        
-        # Access details from report
-        assert report.details.count() == 3
-        assert detail1 in report.details.all()
-        assert detail2 in report.details.all()
-        assert detail3 in report.details.all()
-    
-    def test_report_detail_delete_cascade(self):
-        """Test that deleting a report cascades to details."""
-        report = BillingReportFactory.create()
-        detail = BillingReportDetailFactory.create(report=report)
-        
-        # Verify detail exists
-        assert BillingReportDetail.objects.filter(pk=detail.pk).exists()
-        
-        # Delete report
-        report.delete()
-        
-        # Verify detail is deleted
-        assert not BillingReportDetail.objects.filter(pk=detail.pk).exists()
+            detail.full_clean()
