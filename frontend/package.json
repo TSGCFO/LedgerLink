@@ -29,6 +29,8 @@
     "@mui/x-date-pickers": "^7.24.1",
     "axios": "^1.7.9",
     "date-fns": "^2.30.0",
+    "express": "^4.21.2",
+    "http-proxy-middleware": "^3.0.3",
     "lodash": "^4.17.21",
     "material-react-table": "^2.0.0",
     "react": "^18.2.0",

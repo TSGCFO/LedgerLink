@@ -1,10 +1,17 @@
 import pytest
 import os
 import sys
+import json
+import random
+import uuid
+from datetime import datetime, timedelta
+from decimal import Decimal
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import RequestFactory
 from django.db import connections, connection
+from django.utils import timezone
+import factory
 
 # Only import testcontainers if not in Docker environment
 try:
@@ -219,6 +226,356 @@ def authenticated_client(client, admin_user):
     client.force_login(admin_user)
     return client
 
+# Shared Factory classes for consistent test data across all apps
+
+class CustomerFactory(factory.django.DjangoModelFactory):
+    """Factory for creating Customer instances with unique emails"""
+    
+    class Meta:
+        model = 'customers.Customer'
+    
+    company_name = factory.Sequence(lambda n: f"Test Company {n}")
+    legal_business_name = factory.Sequence(lambda n: f"Test Company {n} LLC")
+    email = factory.Sequence(lambda n: f"test{n}@example.com")
+    phone = factory.Sequence(lambda n: f"555-123-{n:04d}")
+    address = factory.Faker('street_address')
+    city = factory.Faker('city')
+    state = factory.Faker('state_abbr')
+    zip = factory.Faker('zipcode')
+    country = 'US'
+    business_type = factory.Iterator(['Retail', 'Manufacturing', 'Distribution', 'Service'])
+    is_active = True
+
+class OrderFactory(factory.django.DjangoModelFactory):
+    """Factory for creating Order instances with numeric transaction IDs"""
+    
+    class Meta:
+        model = 'orders.Order'
+    
+    # Required fields
+    transaction_id = factory.Sequence(lambda n: 100000 + n)  # Use a simple integer sequence
+    customer = factory.SubFactory(CustomerFactory)
+    reference_number = factory.Sequence(lambda n: f"ORD-{n:06d}")
+    
+    # Optional fields with defaults
+    status = 'draft'
+    priority = 'medium'
+    close_date = factory.LazyFunction(lambda: timezone.now() + timedelta(days=30))
+    
+    # Shipping information
+    ship_to_name = factory.Faker('name')
+    ship_to_company = factory.Faker('company')
+    ship_to_address = factory.Faker('street_address')
+    ship_to_city = factory.Faker('city')
+    ship_to_state = factory.Faker('state_abbr')
+    ship_to_zip = factory.Faker('zipcode')
+    ship_to_country = 'US'
+    
+    # Order details
+    weight_lb = factory.LazyFunction(lambda: round(random.uniform(1, 100), 2))
+    total_item_qty = factory.LazyFunction(lambda: random.randint(1, 100))
+    volume_cuft = factory.LazyFunction(lambda: round(random.uniform(1, 50), 2))
+    packages = factory.LazyFunction(lambda: random.randint(1, 10))
+    notes = factory.Faker('paragraph')
+    carrier = factory.Iterator(['FedEx', 'UPS', 'USPS', 'DHL'])
+    
+    # Generate random SKU quantities
+    @factory.lazy_attribute
+    def sku_quantity(self):
+        num_skus = random.randint(1, 5)
+        skus = {f"SKU-{i:04d}": random.randint(1, 20) for i in range(num_skus)}
+        return skus
+    
+    # Set line_items based on sku_quantity
+    @factory.lazy_attribute
+    def line_items(self):
+        return len(self.sku_quantity) if self.sku_quantity else 0
+
+class ServiceFactory(factory.django.DjangoModelFactory):
+    """Factory for creating Service instances"""
+    
+    class Meta:
+        model = 'services.Service'
+    
+    service_name = factory.Sequence(lambda n: f"Test Service {n}")
+    description = factory.Faker('sentence')
+    charge_type = factory.Iterator(['fixed', 'per_unit', 'tiered', 'case_based_tier'])
+    
+class UserFactory(factory.django.DjangoModelFactory):
+    """Factory for creating User instances"""
+    
+    class Meta:
+        model = get_user_model()
+    
+    username = factory.Sequence(lambda n: f'testuser{n}')
+    email = factory.LazyAttribute(lambda o: f'{o.username}@example.com')
+    first_name = factory.Faker('first_name')
+    last_name = factory.Faker('last_name')
+    is_staff = False
+    is_active = True
+
+    @factory.post_generation
+    def password(self, create, extracted, **kwargs):
+        """Set password after user creation."""
+        self.set_password(extracted or 'password123')
+
+class CustomerServiceFactory(factory.django.DjangoModelFactory):
+    """Factory for creating CustomerService instances"""
+    
+    class Meta:
+        model = 'customer_services.CustomerService'
+    
+    customer = factory.SubFactory(CustomerFactory)
+    service = factory.SubFactory(ServiceFactory)
+    unit_price = factory.LazyFunction(lambda: Decimal(str(round(random.uniform(10, 1000), 2))))
+    is_active = True
+
+class BillingReportFactory(factory.django.DjangoModelFactory):
+    """Factory for creating BillingReport instances"""
+    
+    class Meta:
+        model = 'billing.BillingReport'
+    
+    customer = factory.SubFactory(CustomerFactory)
+    start_date = factory.LazyFunction(lambda: timezone.now().date() - timedelta(days=30))
+    end_date = factory.LazyFunction(lambda: timezone.now().date())
+    total_amount = factory.LazyFunction(lambda: Decimal(str(round(random.uniform(100, 5000), 2))))
+    
+    @factory.lazy_attribute
+    def report_data(self):
+        """Generate realistic report data with numeric transaction IDs."""
+        num_orders = random.randint(1, 5)
+        orders = []
+        
+        for i in range(num_orders):
+            # Use numeric order_id
+            order_id = 100000 + i
+            
+            num_services = random.randint(1, 3)
+            services = []
+            
+            service_total = Decimal('0.00')
+            
+            for j in range(num_services):
+                service_amount = Decimal(str(round(random.uniform(10, 500), 2)))
+                services.append({
+                    'service_id': j + 1,
+                    'service_name': f'Test Service {j + 1}',
+                    'amount': str(service_amount)
+                })
+                service_total += service_amount
+            
+            orders.append({
+                'order_id': order_id,
+                'services': services,
+                'total_amount': str(service_total)
+            })
+        
+        return {
+            'orders': orders,
+            'total_amount': str(sum(Decimal(order['total_amount']) for order in orders)),
+            'service_totals': {
+                '1': {'name': 'Test Service 1', 'amount': str(Decimal('100.00'))},
+                '2': {'name': 'Test Service 2', 'amount': str(Decimal('200.00'))},
+                '3': {'name': 'Test Service 3', 'amount': str(Decimal('300.00'))}
+            }
+        }
+    
+    created_by = factory.SubFactory(UserFactory)
+    updated_by = factory.SubFactory(UserFactory)
+
+class BillingReportDetailFactory(factory.django.DjangoModelFactory):
+    """Factory for creating BillingReportDetail instances"""
+    
+    class Meta:
+        model = 'billing.BillingReportDetail'
+    
+    report = factory.SubFactory(BillingReportFactory)
+    order = factory.SubFactory(OrderFactory)
+    
+    @factory.lazy_attribute
+    def service_breakdown(self):
+        services = []
+        total = Decimal('0.00')
+        
+        for i in range(1, 4):
+            amount = Decimal(str(round(random.uniform(10, 200), 2)))
+            services.append({
+                'service_id': i,
+                'service_name': f'Test Service {i}',
+                'amount': str(amount)
+            })
+            total += amount
+        
+        return {'services': services}
+    
+    total_amount = factory.LazyFunction(lambda: Decimal(str(round(random.uniform(10, 1000), 2))))
+
+
+@pytest.fixture
+def test_customer():
+    """Create a test customer with unique email."""
+    # Use a random suffix to ensure unique email
+    random_suffix = str(uuid.uuid4())[:8]
+    return CustomerFactory(email=f'customer_{random_suffix}@example.com')
+
+@pytest.fixture
+def test_service():
+    """Create a test service."""
+    return ServiceFactory()
+
+@pytest.fixture
+def test_order(test_customer):
+    """Create a test order with numeric transaction ID."""
+    return OrderFactory(customer=test_customer)
+
+@pytest.fixture
+def test_customer_service(test_customer, test_service):
+    """Create a test customer service relationship."""
+    return CustomerServiceFactory(customer=test_customer, service=test_service)
+
+@pytest.fixture
+def test_billing_report(test_customer, admin_user):
+    """Create a test billing report."""
+    return BillingReportFactory(
+        customer=test_customer,
+        created_by=admin_user,
+        updated_by=admin_user
+    )
+
+@pytest.fixture
+def test_billing_report_detail(test_billing_report, test_order):
+    """Create a test billing report detail."""
+    return BillingReportDetailFactory(
+        report=test_billing_report,
+        order=test_order
+    )
+
+# Define helper methods for order models
+@pytest.fixture(autouse=False)
+def add_case_methods_to_order(monkeypatch):
+    """
+    Add methods to Order for case-based calculations during tests.
+    Not auto-applied to avoid conflicting with existing methods.
+    """
+    # Only import Order here to avoid circular imports
+    from orders.models import Order
+    
+    def get_case_summary(self, exclude_skus=None):
+        """Get case summary for the order."""
+        try:
+            if not hasattr(self, 'sku_quantity') or not self.sku_quantity:
+                return {"total_cases": 0, "total_picks": 0, "sku_breakdown": []}
+                
+            # Handle both string and dict formats
+            if isinstance(self.sku_quantity, str):
+                try:
+                    skus = json.loads(self.sku_quantity)
+                except json.JSONDecodeError:
+                    return {"total_cases": 0, "total_picks": 0, "sku_breakdown": []}
+            else:
+                skus = self.sku_quantity
+                
+            excluded = set(exclude_skus or [])
+            sku_cases = {}
+            total_cases = 0
+            total_picks = 0
+            
+            # Format could be a list of dicts or a dict with SKUs as keys
+            if isinstance(skus, list):
+                for item in skus:
+                    sku = item.get('sku', '')
+                    if sku and sku not in excluded:
+                        # Default to 1 case per 10 items
+                        quantity = float(item.get('quantity', 0))
+                        cases = int(quantity / 10)
+                        picks = quantity % 10
+                        
+                        if cases > 0 or picks > 0:
+                            sku_cases[sku] = {'cases': cases, 'picks': picks}
+                            total_cases += cases
+                            total_picks += picks
+            elif isinstance(skus, dict):
+                for sku, data in skus.items():
+                    if sku not in excluded:
+                        if isinstance(data, dict):
+                            cases = data.get('cases', 0)
+                            picks = data.get('picks', 0)
+                        else:
+                            # Default to 1 case per 10 items
+                            quantity = float(data)
+                            cases = int(quantity / 10)
+                            picks = quantity % 10
+                        
+                        if cases > 0 or picks > 0:
+                            sku_cases[sku] = {'cases': cases, 'picks': picks}
+                            total_cases += cases
+                            total_picks += picks
+                    
+            return {
+                "total_cases": total_cases,
+                "total_picks": total_picks,
+                "sku_breakdown": [
+                    {
+                        "sku_name": sku,
+                        "cases": data['cases'],
+                        "picks": data['picks'],
+                        "case_size": 10,
+                        "case_unit": "each"
+                    } 
+                    for sku, data in sku_cases.items()
+                ]
+            }
+        except Exception as e:
+            print(f"Error in get_case_summary: {e}")
+            return {"total_cases": 0, "total_picks": 0, "sku_breakdown": []}
+    
+    def get_total_cases(self, exclude_skus=None):
+        """Get total cases across all SKUs"""
+        summary = self.get_case_summary(exclude_skus)
+        return summary.get("total_cases", 0)
+    
+    def get_total_picks(self, exclude_skus=None):
+        """Get total picks across all SKUs"""
+        summary = self.get_case_summary(exclude_skus)
+        return summary.get("total_picks", 0)
+    
+    def has_only_excluded_skus(self, exclude_skus):
+        """Check if order has only excluded SKUs."""
+        if not exclude_skus:
+            return False
+            
+        try:
+            if not hasattr(self, 'sku_quantity') or not self.sku_quantity:
+                return False
+                
+            # Handle both string and list formats
+            if isinstance(self.sku_quantity, str):
+                try:
+                    skus = json.loads(self.sku_quantity)
+                except json.JSONDecodeError:
+                    return False
+            else:
+                skus = self.sku_quantity
+                
+            excluded = set(exclude_skus)
+            
+            # Format could be a list of dicts or a dict with SKUs as keys
+            if isinstance(skus, list):
+                return all(item.get('sku', '') in excluded for item in skus)
+            elif isinstance(skus, dict):
+                return all(sku in excluded for sku in skus.keys())
+                
+            return False
+        except Exception as e:
+            print(f"Error in has_only_excluded_skus: {e}")
+            return False
+    
+    # Add methods to Order model
+    monkeypatch.setattr(Order, "get_case_summary", get_case_summary)
+    monkeypatch.setattr(Order, "get_total_cases", get_total_cases)
+    monkeypatch.setattr(Order, "get_total_picks", get_total_picks)
+    monkeypatch.setattr(Order, "has_only_excluded_skus", has_only_excluded_skus)
 
 @pytest.fixture(scope='function')
 def _django_db_helper(request, django_db_setup, django_db_blocker):

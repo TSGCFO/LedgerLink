@@ -271,9 +271,103 @@ Based on the implementation, the following future improvements are recommended:
 4. Expand rule permutation testing
 5. Implement visual verification for report formats
 
+## Recent Test Improvements
+
+The following improvements have been made to the testing infrastructure based on patterns from the orders app:
+
+### 1. Fixed Transaction ID Type Issue
+
+We identified and fixed an issue with the `transaction_id` field type in test data:
+
+1. **Issue**: The `Order` model uses a `BigIntegerField` for `transaction_id`, but tests were using string values like 'ORD-12345'
+2. **Solution**: Updated the `OrderFactory` to generate numeric IDs and fixed all fixtures
+
+```python
+class OrderFactory(factory.django.DjangoModelFactory):
+    """Factory for creating Order instances with numeric transaction IDs"""
+    
+    class Meta:
+        model = 'orders.Order'
+    
+    # Required fields with numeric transaction_id
+    transaction_id = factory.Sequence(lambda n: 100000 + n)  # Use a simple integer sequence
+    customer = factory.SubFactory(CustomerFactory)
+    reference_number = factory.Sequence(lambda n: f"ORD-{n:06d}")
+    
+    # Other fields...
+```
+
+This ensures all test data is compatible with the model field type definition.
+
+### 2. Added Test Utilities (utils.py)
+
+Created a `billing/tests/utils.py` file with essential schema verification utilities:
+
+```python
+# Key utility functions
+def verify_field_exists(model_class, field_name):
+    """Verify that a specific field exists in the database."""
+    # Implementation details...
+
+def verify_model_schema(model_class):
+    """Verify all model fields exist in the database."""
+    # Implementation details...
+
+def verify_billing_schema():
+    """Verify billing-specific tables and views."""
+    # Implementation details...
+```
+
+These utilities help verify database schema integrity before running tests, providing better error diagnostics.
+
+### 2. Improved Test Resilience
+
+Added two complementary test approaches to improve test reliability:
+
+1. **Minimal Test** (`minimal_test.py`): 
+   - Basic functionality test with minimal database requirements
+   - Simple assertions to verify core models work
+   - Quick sanity check for the test environment
+
+2. **Direct Test** (`test_direct.py`):
+   - Django TestCase-based for reliable database setup
+   - Combined with pytest features
+   - Tests core model functionality with reliable cleanup
+
+### 3. Enhanced Test Script
+
+Updated `run_billing_tests.sh` to implement a progressive test strategy:
+
+```bash
+# Progressive test strategy - start simple, add complexity
+# 1. Run minimal test
+# 2. Run direct test
+# 3. Run functional tests
+# 4. Run component tests
+# 5. Run integration tests
+```
+
+This approach allows for early detection of environment issues before running more complex tests.
+
+### 4. Improved Error Handling
+
+Enhanced error handling in the test script:
+- Each test section has detailed error reporting
+- Early exit on critical failures
+- Summary table of all test results
+
+### 5. Docker Integration
+
+Improved Docker test integration:
+- Better container cleanup
+- Proper volume handling
+- More reliable database initialization
+
 ## Conclusion
 
 The implemented test suite provides comprehensive coverage of the Billing app's functionality. The modular structure allows for easy maintenance and expansion, while the extensive use of fixtures and factory classes ensures consistent test data. The test coverage is strong, with most components exceeding 85% coverage, and all critical paths are thoroughly tested.
+
+With the recent improvements, the tests are now more resilient to different environments and provide better diagnostics when issues occur. The multi-layered testing approach allows for flexible execution while maintaining comprehensive coverage.
 
 The implementation follows best practices for Django and pytest testing, making use of features like fixtures, parameterization, and mocking. The tests are designed to run in various environments (Docker, TestContainers, local) and provide consistent results.
 

@@ -1,0 +1,21 @@
+FROM postgres:15
+
+# Set environment variables
+ENV POSTGRES_DB=ledgerlink_test
+ENV POSTGRES_USER=postgres
+ENV POSTGRES_PASSWORD=postgres
+
+# Copy initialization scripts
+COPY database/init-scripts/ /docker-entrypoint-initdb.d/
+
+# Create directory for initialization scripts
+RUN mkdir -p /docker-entrypoint-initdb.d/
+
+# Create directory for schema files
+RUN mkdir -p /schema
+
+# Copy schema files
+COPY database/schema/ /schema/
+
+# Initialize and expose PostgreSQL
+EXPOSE 5432

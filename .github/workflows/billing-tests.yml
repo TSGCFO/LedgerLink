@@ -1,0 +1,294 @@
+name: Billing App Tests
+
+on:
+  push:
+    branches: [ master, develop ]
+    paths:
+      - 'billing/**'
+      - '.github/workflows/billing-tests.yml'
+      - 'docker-compose.test.yml'
+      - 'Dockerfile.test'
+      - 'run_billing_tests.sh'
+      - 'run_billing_coverage.sh'
+  pull_request:
+    branches: [ master, develop ]
+    paths:
+      - 'billing/**'
+      - '.github/workflows/billing-tests.yml'
+      - 'docker-compose.test.yml'
+      - 'Dockerfile.test'
+      - 'run_billing_tests.sh'
+      - 'run_billing_coverage.sh'
+  # Manual trigger 
+  workflow_dispatch:
+
+jobs:
+  billing-tests:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: ledgerlink_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-django pytest-cov factory-boy
+    
+    - name: Run database migrations
+      run: |
+        python manage.py migrate
+      env:
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/ledgerlink_test
+        DJANGO_SETTINGS_MODULE: LedgerLink.settings
+        SECRET_KEY: testsecretkey
+    
+    - name: Run billing model tests
+      run: |
+        python -m pytest billing/tests/test_models/ -v
+      env:
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/ledgerlink_test
+        DJANGO_SETTINGS_MODULE: LedgerLink.settings
+        SECRET_KEY: testsecretkey
+        SKIP_MATERIALIZED_VIEWS: "True"
+    
+    - name: Run billing serializer tests
+      run: |
+        python -m pytest billing/tests/test_serializers/ -v
+      env:
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/ledgerlink_test
+        DJANGO_SETTINGS_MODULE: LedgerLink.settings
+        SECRET_KEY: testsecretkey
+        SKIP_MATERIALIZED_VIEWS: "True"
+    
+    - name: Run billing views tests
+      run: |
+        python -m pytest billing/tests/test_views/ -v
+      env:
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/ledgerlink_test
+        DJANGO_SETTINGS_MODULE: LedgerLink.settings
+        SECRET_KEY: testsecretkey
+        SKIP_MATERIALIZED_VIEWS: "True"
+    
+    - name: Run billing integration tests
+      run: |
+        python -m pytest billing/tests/test_integration/ -v
+      env:
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/ledgerlink_test
+        DJANGO_SETTINGS_MODULE: LedgerLink.settings
+        SECRET_KEY: testsecretkey
+        SKIP_MATERIALIZED_VIEWS: "True"
+    
+    - name: Run billing calculator tests
+      run: |
+        python -m pytest billing/test_billing_calculator.py billing/test_case_based_tiers.py -v
+      env:
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/ledgerlink_test
+        DJANGO_SETTINGS_MODULE: LedgerLink.settings
+        SECRET_KEY: testsecretkey
+        SKIP_MATERIALIZED_VIEWS: "True"
+    
+    - name: Run comprehensive service and utility tests
+      run: |
+        python -m pytest billing/test_services.py billing/test_utils.py -v
+      env:
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/ledgerlink_test
+        DJANGO_SETTINGS_MODULE: LedgerLink.settings
+        SECRET_KEY: testsecretkey
+        SKIP_MATERIALIZED_VIEWS: "True"
+    
+    - name: Generate coverage report
+      run: |
+        python -m pytest --cov=billing --cov-report=xml
+      env:
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/ledgerlink_test
+        DJANGO_SETTINGS_MODULE: LedgerLink.settings
+        SECRET_KEY: testsecretkey
+        SKIP_MATERIALIZED_VIEWS: "True"
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: billing
+        fail_ci_if_error: false
+        verbose: true
+
+  billing-docker-tests:
+    runs-on: ubuntu-latest
+    needs: billing-tests
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Docker
+      uses: docker/setup-buildx-action@v2
+    
+    - name: Run billing tests with Docker
+      run: |
+        chmod +x run_billing_tests.sh
+        ./run_billing_tests.sh
+    
+    - name: Run billing coverage analysis
+      run: |
+        chmod +x run_billing_coverage.sh
+        ./run_billing_coverage.sh
+      
+    - name: Upload coverage artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: billing-coverage-report
+        path: |
+          billing/COVERAGE_REPORT.md
+          htmlcov/
+
+  billing-frontend-tests:
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: ./frontend
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: './frontend/package-lock.json'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run billing component tests
+      run: |
+        npm test -- --testPathPattern=src/components/billing --coverage
+    
+    - name: Run billing accessibility tests
+      run: |
+        npm run test:a11y -- --testPathPattern=src/components/billing
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        directory: ./frontend/coverage/
+        flags: billing-frontend
+        fail_ci_if_error: false
+    
+  billing-e2e-tests:
+    runs-on: ubuntu-latest
+    needs: [billing-tests, billing-frontend-tests]
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: ledgerlink_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: './frontend/package-lock.json'
+    
+    - name: Install Node dependencies
+      run: |
+        cd frontend
+        npm ci
+    
+    - name: Run database migrations
+      run: |
+        python manage.py migrate
+        python manage.py loaddata billing/fixtures/test_data.json
+      env:
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/ledgerlink_test
+        DJANGO_SETTINGS_MODULE: LedgerLink.settings
+        SECRET_KEY: testsecretkey
+    
+    - name: Start Django server
+      run: |
+        python manage.py runserver &
+        sleep 5
+      env:
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/ledgerlink_test
+        DJANGO_SETTINGS_MODULE: LedgerLink.settings
+        SECRET_KEY: testsecretkey
+    
+    - name: Start frontend dev server
+      run: |
+        cd frontend
+        npm run dev &
+        sleep 10
+    
+    - name: Run Cypress E2E tests for billing
+      run: |
+        cd frontend
+        npm run cypress:run -- --spec "cypress/e2e/billing.cy.js"
+    
+    - name: Upload Cypress screenshots on failure
+      uses: actions/upload-artifact@v3
+      if: failure()
+      with:
+        name: cypress-screenshots
+        path: frontend/cypress/screenshots
+        if-no-files-found: ignore
+    
+    - name: Upload Cypress videos
+      uses: actions/upload-artifact@v3
+      with:
+        name: cypress-videos
+        path: frontend/cypress/videos
+        if-no-files-found: ignore

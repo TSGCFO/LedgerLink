@@ -349,3 +349,6 @@ LOGGING['loggers']['bulk_operations'] = {
     'level': 'DEBUG',
     'propagate': False,
 }
+
+# Billing app settings
+MAX_REPORT_DATE_RANGE = 365  # Maximum date range for billing reports in days

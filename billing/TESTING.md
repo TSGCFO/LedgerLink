@@ -278,6 +278,61 @@ The goal is to maintain at least 90% test coverage for the Billing app, with par
 3. **Service Logic**: All service types and charge types should be covered.
 4. **Error Handling**: All error and edge cases should be covered.
 
+## Important Notes and Troubleshooting
+
+### Transaction ID Format
+
+The `Order` model in our system uses a `BigIntegerField` for the `transaction_id` field. All tests and factories must use numeric transaction IDs, not string values. 
+
+```python
+# Correct:
+order = OrderFactory(transaction_id=12345)
+
+# Incorrect - will cause validation errors:
+order = OrderFactory(transaction_id="ORD-12345")
+```
+
+The shared `OrderFactory` has been updated to automatically generate numeric transaction IDs:
+
+```python
+class OrderFactory(factory.django.DjangoModelFactory):
+    """Factory for creating Order instances with numeric transaction IDs"""
+    
+    class Meta:
+        model = 'orders.Order'
+    
+    # Required fields with numeric transaction_id
+    transaction_id = factory.Sequence(lambda n: 100000 + n)  # Use a simple integer sequence
+    customer = factory.SubFactory(CustomerFactory)
+    reference_number = factory.Sequence(lambda n: f"ORD-{n:06d}")
+    
+    # Other fields...
+```
+
+### Handling Materialized Views
+
+Testing with materialized views can be challenging. To avoid issues:
+
+1. Use the `SKIP_MATERIALIZED_VIEWS=True` environment variable
+2. Use `--fake` flag with migrations that contain materialized views
+3. Add proper mocks for materialized view access if needed
+
+### Solving Common Issues
+
+#### "Field transaction_id expected a number but got 'ORD-12345'"
+- Use numeric transaction IDs in all test data
+- Update factory definitions to generate numeric IDs
+- Check all fixtures for string transaction IDs
+
+#### "relation customer_services_customerserviceview already exists"
+- Use `SKIP_MATERIALIZED_VIEWS=True` environment variable
+- Use `--fake` flag with migrations that contain materialized views
+
+#### "django.db.utils.IntegrityError: duplicate key value violates unique constraint"
+- Use factory sequences to generate unique values
+- Add random suffixes to emails and usernames
+- Reset the database between test runs
+
 ---
 
 For any questions or suggestions about testing the Billing app, please contact the development team.

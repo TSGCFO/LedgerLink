@@ -145,3 +145,37 @@ USE_TESTCONTAINERS=True python -m pytest
 2. Implement comprehensive test coverage across all apps
 3. Update CI/CD pipeline configuration
 4. Document testing patterns and best practices
+
+## Persistent Database Approach
+
+To improve testing performance and avoid migration order issues, we've added a persistent database approach:
+
+### Persistent Database Benefits
+
+- Avoids dependency issues in migration order (like products_product table requirement)
+- Much faster test runs by not rebuilding schema each time
+- Maintains consistent test environment
+
+### How to Use Persistent Database
+
+1. **First-time setup** (creates schema and initial test data):
+   ```bash
+   ./init_test_db.sh
+   ```
+
+2. **Run tests without rebuilding database**:
+   ```bash
+   ./run_billing_tests_docker.sh
+   ```
+
+3. **Reset database to clean state** (without rebuilding schema):
+   ```bash
+   ./reset_test_db.sh
+   ```
+
+4. **Rebuild database when schema changes**:
+   ```bash
+   ./run_billing_tests_docker.sh --rebuild
+   ```
+
+This approach significantly improves test reliability and performance while still maintaining test isolation.
