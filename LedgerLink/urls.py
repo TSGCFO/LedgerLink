@@ -10,6 +10,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenVerifyView,
 )
+from api.views.api_root import api_root
 
 # Swagger/OpenAPI documentation setup
 schema_view = get_schema_view(
@@ -27,6 +28,9 @@ schema_view = get_schema_view(
 
 # API URL patterns
 api_patterns = [
+    # API Root
+    path('', api_root, name='api-root'),
+    
     # Authentication endpoints
     path('auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
@@ -51,6 +55,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('billing/', include('billing.urls')),
     path('billing-v2/', include('Billing_V2.urls')),
+
     
     # API endpoints
     path('api/v1/', include(api_patterns)),

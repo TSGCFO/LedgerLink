@@ -1,0 +1,10 @@
+{
+  "gitPath": "git",
+  "djangoAppsPaths": ["./"],
+  "reactAppPath": "./frontend",
+  "ignorePaths": ["node_modules", "venv", "__pycache__", "migrations", "dist", "build"],
+  "analyzeCommits": true,
+  "claude": {
+    "model": "claude-3-sonnet-20240229"
+  }
+}

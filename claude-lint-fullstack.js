@@ -157,6 +157,16 @@ When providing AUTO_FIX, make sure it's a precise code snippet that can be autom
 
 Sort issues by severity, then by filename and line number. Only report actual issues - do not include compliments or other text.`;
 
+// Check if the current directory is a git repository
+function isGitRepository() {
+  try {
+    execSync('git rev-parse --is-inside-work-tree', { stdio: 'ignore' });
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
 // Get git diffs
 function getGitDiffs() {
   try {
@@ -171,8 +181,33 @@ function getGitDiffs() {
       return "Git not available. Skipping diff analysis.";
     }
     
+    // Check if the current directory is a git repository
+    if (!isGitRepository()) {
+      return "Not a git repository. Skipping diff analysis.";
+    }
+    
+    // Try to find a suitable comparison branch (origin/main, main, origin/master, master)
+    let baseBranch = null;
+    const possibleBranches = ['origin/main', 'main', 'origin/master', 'master'];
+    
+    for (const branch of possibleBranches) {
+      try {
+        execSync(`git rev-parse --verify ${branch}`, { stdio: 'ignore' });
+        baseBranch = branch;
+        console.log(`Using ${baseBranch} as the base branch for diff analysis`);
+        break;
+      } catch (error) {
+        // Continue to next branch
+      }
+    }
+    
+    if (!baseBranch) {
+      console.log("No suitable base branch found. Using current files for analysis.");
+      return "No suitable branch for comparison found. Analyzing current files only.";
+    }
+    
     // Get list of changed files
-    const changedFiles = execSync(`${gitCmd} diff --name-only origin/main`).toString().trim().split('\n');
+    const changedFiles = execSync(`${gitCmd} diff --name-only ${baseBranch}`).toString().trim().split('\n');
     if (!changedFiles[0]) return "No changed files detected.";
 
     let diffs = "";
@@ -181,7 +216,7 @@ function getGitDiffs() {
       diffs += `--- ${file} ---\n`;
       // Quote the file path for Windows
       const quotedFile = isWindows ? `"${file}"` : `"${file}"`;
-      diffs += execSync(`${gitCmd} diff origin/main -- ${quotedFile}`).toString().trim() + "\n\n";
+      diffs += execSync(`${gitCmd} diff ${baseBranch} -- ${quotedFile}`).toString().trim() + "\n\n";
     }
     return diffs || "No meaningful diffs detected.";
   } catch (error) {
@@ -1098,18 +1133,42 @@ function isGitAvailable() {
 
 // Check if Claude CLI is available and where (Windows or WSL)
 function checkClaudeCli() {
-  try {
-    // Try native Windows first
-    execSync('claude --version', { stdio: 'ignore' });
-    return { available: true, inWSL: false };
-  } catch (winError) {
-    // Try WSL next
+  // Detect if we're in WSL
+  const inWSL = fs.existsSync('/proc/version') && 
+                fs.readFileSync('/proc/version', 'utf8').toLowerCase().includes('microsoft');
+  
+  if (inWSL) {
+    console.log("Running in WSL environment");
+    // First try native WSL Claude
     try {
-      execSync('wsl claude --version', { stdio: 'ignore' });
+      execSync('claude --version', { stdio: 'ignore' });
       console.log('Claude CLI detected in WSL environment');
       return { available: true, inWSL: true };
     } catch (wslError) {
-      return { available: false, inWSL: false };
+      // Then try Windows Claude via cmd.exe
+      try {
+        execSync('cmd.exe /c claude --version', { stdio: 'ignore' });
+        console.log('Claude CLI detected in Windows environment');
+        return { available: true, inWSL: false };
+      } catch (winError) {
+        return { available: false, inWSL: false };
+      }
+    }
+  } else {
+    // We're in Windows
+    try {
+      // Try native Windows first
+      execSync('claude --version', { stdio: 'ignore' });
+      return { available: true, inWSL: false };
+    } catch (winError) {
+      // Try WSL next
+      try {
+        execSync('wsl claude --version', { stdio: 'ignore' });
+        console.log('Claude CLI detected in WSL environment');
+        return { available: true, inWSL: true };
+      } catch (wslError) {
+        return { available: false, inWSL: false };
+      }
     }
   }
 }
@@ -1198,25 +1257,58 @@ async function runAnalysis(modifiedFiles = []) {
     
     if (claudeCliInfo.available) {
       console.log("Sending code to Claude for analysis...");
+      
+      // Create a concise prompt file following Claude Code documentation
+      const codeLintInstructions = `You are a linter. Please look at the changes in this codebase and identify:
+1. API mismatches between Django and React
+2. Data structure inconsistencies between models and components 
+3. Security issues
+4. Performance bottlenecks
+5. Missing error handling
+
+Format findings as:
+FILENAME:LINE_NUMBER
+ISSUE: Brief description
+FIX: Recommendation
+SEVERITY: [Critical/High/Medium/Low]
+`;
+      fs.writeFileSync('.claude-lint-instructions.txt', codeLintInstructions);
+      
       try {
         // Create a command based on where Claude CLI is available
         let claudeCmd;
+        
         if (claudeCliInfo.inWSL) {
-          // Fix path for WSL by replacing backslashes and escaping properly
+          // Claude is in WSL, we need to use wsl command with simplified approach
+          // Direct wsl command without bash -c to avoid timeout issues
           const wslPath = process.cwd().replace(/\\/g, '/').replace(/^([A-Z]):/i, '/mnt/$1').toLowerCase();
           console.log(`Converting Windows path to WSL path: ${wslPath}`);
-          claudeCmd = `wsl bash -c "cd \\"${wslPath}\\" && claude -p \\".claude-temp-prompt.txt\\""`;
+          
+          // Create a temporary script to execute in WSL
+          const wslScript = `
+cd '${wslPath}'
+cat .claude-lint-instructions.txt | claude -p 'You are a linter. Please look at the changes'
+`;
+          fs.writeFileSync('.wsl-claude-command.sh', wslScript);
+          console.log("Created temporary WSL script file for execution");
+          
+          // Use simpler WSL command approach to avoid timeout
+          claudeCmd = `wsl bash .wsl-claude-command.sh`;  
         } else {
-          claudeCmd = 'claude -p ".claude-temp-prompt.txt"';
+          // Claude is in Windows
+          claudeCmd = 'cat .claude-lint-instructions.txt | claude -p "You are a linter. Please look at the changes"';
         }
         
         console.log(`Executing Claude with command: ${claudeCmd}`);
+        console.log("Using Claude as a unix-style utility with proper pipe syntax as per documentation");
         
-        // Set a timeout for the claude command to avoid hanging
+        // Set a longer timeout for the claude command to avoid ETIMEDOUT errors
+        console.log("Executing Claude with increased timeout (15 minutes)...");
         const result = execSync(claudeCmd, { 
-          timeout: 120000, // 2 minutes timeout
-          stdio: ['ignore', 'pipe', 'pipe'],
-          windowsHide: true // Hide command window on Windows
+          timeout: 900000, // 15 minutes timeout (significantly increased)
+          stdio: 'pipe', // Capture all outputs
+          windowsHide: true, // Hide command window on Windows
+          maxBuffer: 10 * 1024 * 1024 // 10MB buffer for larger outputs
         }).toString();
         
         // Display results with timestamp
@@ -1227,13 +1319,31 @@ async function runAnalysis(modifiedFiles = []) {
       } catch (cliRunError) {
         console.log("Error running Claude analysis: " + cliRunError.message);
         console.log("Analysis may have timed out or encountered an error.");
-        console.log("You can try running 'claude -p \".claude-temp-prompt.txt\"' manually.");
+        
+        if (cliRunError.message.includes('ETIMEDOUT')) {
+          console.log("\nTIMEOUT ERROR: The WSL command timed out. Try these alternatives:");
+          if (claudeCliInfo.inWSL) {
+            console.log("1. Run the generated script directly in WSL: wsl bash .wsl-claude-command.sh");
+            console.log("2. Open WSL manually and run: cat .claude-lint-instructions.txt | claude -p 'You are a linter'");
+          } else {
+            console.log("1. Run directly in cmd: cat .claude-lint-instructions.txt | claude -p \"You are a linter\"");
+          }
+        } else {
+          console.log("\nTry using one of these commands manually:");
+          console.log("1. claude -p \"You are a linter\" < .claude-lint-instructions.txt");
+          console.log("2. cat .claude-lint-instructions.txt | claude -p \"You are a linter\"");
+        }
+        
+        // Check if script file was created
+        if (fs.existsSync('.wsl-claude-command.sh')) {
+          console.log("\nA WSL script was created at .wsl-claude-command.sh with the command that would have been executed.");
+        }
       }
     } else {
       console.log("Claude CLI not found or not properly configured.");
       console.log("To install Claude CLI, visit: https://github.com/anthropics/claude-cli");
-      console.log("\nPrompt has been saved to .claude-temp-prompt.txt for manual analysis.");
-      console.log("You can view this file and send its contents to Claude API directly.");
+      console.log("\nPrompt file has been saved to .claude-temp-prompt.txt for manual analysis.");
+      console.log("Instructions file has been saved to .claude-lint-instructions.txt.");
     }
   } catch (error) {
     console.error("Error during analysis preparation:", error.message);

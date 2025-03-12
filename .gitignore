@@ -98,6 +98,7 @@ PGSQL_commands.md
 package-lock.json
 node_modules
 
+
 # Temporary data import and database alignment scripts
 import_orders.py
 import_shipping.py
@@ -135,4 +136,5 @@ venv311/
 # Additional ignores
 logs/
 *.log
+
 
