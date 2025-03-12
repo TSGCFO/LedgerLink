@@ -386,15 +386,22 @@ class BillingCalculator:
             # Update progress
             self.update_progress('processing', 'Saving final report', 95)
             
-            # Make sure the total amount is accurate
-            if 'total_amount' not in dir(self.report) or self.report.total_amount == 0:
-                # Calculate total from service totals if not already set
+            # Always recalculate and update the total amount at the end to ensure accuracy
+            # This addresses issues where reports with filtered services might not show correct totals
+            if self.report.service_totals:
                 total = sum(data['amount'] for data in self.report.service_totals.values())
-                self.report.total_amount = total
-                logger.info(f"Total amount calculated from service totals: {total}")
+                if abs(float(self.report.total_amount) - total) > 0.01:  # Allow for small decimal differences
+                    self.report.total_amount = total
+                    logger.info(f"Final report generation: Updated total amount to {total} based on service totals")
+            else:
+                # No services - total should be zero
+                self.report.total_amount = 0
+                logger.info("Final report generation: Set total amount to zero (no service totals)")
             
-            # Save the report with final totals
-            self.report.save()
+            # Save the report with final totals using an explicit transaction
+            from django.db import transaction
+            with transaction.atomic():
+                self.report.save()
             
             # Log performance metrics
             end_time = time.time()

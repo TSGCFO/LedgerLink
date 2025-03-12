@@ -39,7 +39,7 @@ class BillingReportSerializer(serializers.ModelSerializer):
         model = BillingReport
         fields = [
             'id', 'customer_id', 'customer_name', 'start_date', 'end_date',
-            'created_at', 'order_costs', 'service_totals', 'total_amount'
+            'created_at', 'order_costs', 'service_totals', 'total_amount', 'metadata'
         ]
         
 
@@ -123,7 +123,7 @@ class BillingReportSummarySerializer(serializers.ModelSerializer):
         model = BillingReport
         fields = [
             'id', 'customer_id', 'customer_name', 'start_date', 'end_date',
-            'created_at', 'total_amount', 'order_count'
+            'created_at', 'total_amount', 'order_count', 'metadata'
         ]
         
     def get_order_count(self, obj):

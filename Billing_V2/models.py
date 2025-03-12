@@ -43,6 +43,18 @@ class BillingReport(models.Model):
             total = sum(data['amount'] for data in self.service_totals.values())
             self.total_amount = total
             logger.info(f"Updated report #{self.id} total_amount to {total} based on service totals")
+            
+            # Force save to ensure the total_amount is persisted
+            from django.db import connection
+            if connection.in_atomic_block:
+                # We're in a transaction, just save normally
+                self.save(update_fields=['total_amount'])
+            else:
+                # Use a separate transaction
+                from django.db import transaction
+                with transaction.atomic():
+                    self.save(update_fields=['total_amount'])
+            
         except Exception as e:
             logger.error(f"Error updating total amount: {str(e)}")
             # Fallback to calculating from order costs
@@ -51,6 +63,15 @@ class BillingReport(models.Model):
                 total = self.order_costs.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
                 self.total_amount = total
                 logger.info(f"Fallback: Updated report #{self.id} total_amount to {total} based on order costs")
+                
+                # Force save the fallback value
+                try:
+                    from django.db import transaction
+                    with transaction.atomic():
+                        self.save(update_fields=['total_amount'])
+                except Exception as save_e:
+                    logger.error(f"Error saving fallback total: {str(save_e)}")
+                    
             except Exception as inner_e:
                 logger.error(f"Fallback failed: {str(inner_e)}")
         
@@ -72,9 +93,13 @@ class BillingReport(models.Model):
                     'amount': float(service_cost.amount)
                 }
         
-        # Update total amount from service totals
+        # Save the updated service_totals first
+        from django.db import transaction
+        with transaction.atomic():
+            self.save(update_fields=['service_totals'])
+            
+        # Update total amount from service totals - this will also save
         self.update_total_amount()
-        self.save()
     
     def to_dict(self):
         """
@@ -83,6 +108,21 @@ class BillingReport(models.Model):
         Returns:
             Dictionary representation of the report
         """
+        # Ensure total_amount is correct before returning
+        if self.service_totals:
+            # Double-check the total amount matches service_totals
+            calculated_total = sum(data['amount'] for data in self.service_totals.values())
+            if abs(float(self.total_amount) - calculated_total) > 0.01:  # Allow for small decimal differences
+                logger.warning(f"Total amount discrepancy detected: DB={self.total_amount}, calculated={calculated_total}")
+                # Update the total_amount to match service_totals
+                self.total_amount = calculated_total
+                try:
+                    from django.db import transaction
+                    with transaction.atomic():
+                        self.save(update_fields=['total_amount'])
+                except Exception as e:
+                    logger.error(f"Error saving corrected total amount: {str(e)}")
+                    
         return {
             'id': self.id,
             'customer_id': self.customer.id,
