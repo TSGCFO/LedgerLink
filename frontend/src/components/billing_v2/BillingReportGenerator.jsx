@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Button, 
   FormControl, 
@@ -13,10 +13,17 @@ import {
   Autocomplete,
   Box,
   Alert,
-  FormHelperText
+  FormHelperText,
+  Checkbox,
+  ListItemText,
+  LinearProgress,
+  Card,
+  CardContent,
+  Divider,
+  Chip
 } from '@mui/material';
 // Removed date picker imports in favor of native date input
-import { format, addDays } from 'date-fns';
+import { format, addDays, parseISO } from 'date-fns';
 import { billingV2Api } from '../../utils/api/billingV2Api';
 import logger from '../../utils/logger';
 
@@ -27,14 +34,71 @@ const BillingReportGenerator = ({ onReportGenerated, customers, loading: custome
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const [customerServices, setCustomerServices] = useState([]);
+  const [loadingServices, setLoadingServices] = useState(false);
+  const [progress, setProgress] = useState(null);
+  const progressInterval = useRef(null);
+  
   const [formData, setFormData] = useState({
     customerId: '',
     customer: null, // For Autocomplete
     startDate: null, // Using null for date pickers
     endDate: null,
-    outputFormat: 'json'
+    outputFormat: 'json',
+    customerServices: [], // IDs of selected customer services
+    customerServicesSelectAll: true // Whether to select all customer services
   });
   const [validationErrors, setValidationErrors] = useState({});
+  
+  // Fetch customer services when customer changes
+  useEffect(() => {
+    const fetchCustomerServices = async () => {
+      if (!formData.customerId) {
+        setCustomerServices([]);
+        return;
+      }
+      
+      setLoadingServices(true);
+      try {
+        logger.info('Fetching customer services for customer ID:', formData.customerId);
+        const response = await billingV2Api.getCustomerServices(formData.customerId);
+        logger.info('Customer services response:', response);
+        
+        if (response.success && response.data) {
+          setCustomerServices(response.data);
+          logger.info('Customer services set:', response.data);
+          
+          // By default, select all services
+          if (formData.customerServicesSelectAll) {
+            const serviceIds = response.data.map(service => service.id);
+            logger.info('Selecting all service IDs:', serviceIds);
+            setFormData(prev => ({
+              ...prev,
+              customerServices: serviceIds
+            }));
+          }
+        } else {
+          logger.warn('Invalid response format from customer services API', response);
+          setCustomerServices([]);
+        }
+      } catch (err) {
+        logger.error('Error fetching customer services', err);
+        setCustomerServices([]);
+      } finally {
+        setLoadingServices(false);
+      }
+    };
+    
+    fetchCustomerServices();
+    
+    // Clean up any progress polling
+    return () => {
+      if (progressInterval.current) {
+        clearInterval(progressInterval.current);
+        progressInterval.current = null;
+      }
+    };
+  }, [formData.customerId, formData.customerServicesSelectAll]);
   
   const validateForm = () => {
     const errors = {};
@@ -76,8 +140,83 @@ const BillingReportGenerator = ({ onReportGenerated, customers, loading: custome
     setFormData({
       ...formData,
       customer: value,
-      customerId: value ? value.id : ''
+      customerId: value ? value.id : '',
+      customerServices: [] // Reset selected services when customer changes
     });
+  };
+  
+  const handleCustomerServicesChange = (event) => {
+    const { value } = event.target;
+    
+    // Check if "All" was selected or deselected
+    if (value.includes('all')) {
+      if (formData.customerServices.length === customerServices.length) {
+        // If all were already selected, deselect all
+        setFormData({
+          ...formData,
+          customerServices: [],
+          customerServicesSelectAll: false
+        });
+      } else {
+        // Select all
+        setFormData({
+          ...formData,
+          customerServices: customerServices.map(service => service.id),
+          customerServicesSelectAll: true
+        });
+      }
+    } else {
+      // Regular service selection
+      setFormData({
+        ...formData,
+        customerServices: value,
+        customerServicesSelectAll: value.length === customerServices.length
+      });
+    }
+  };
+  
+  // Check progress for a report generation
+  const checkProgress = async (params) => {
+    try {
+      logger.info('Checking progress with params', params);
+      const response = await billingV2Api.getReportProgress(params);
+      logger.info('Progress response', response);
+      
+      if (response.success && response.data) {
+        setProgress(response.data);
+        logger.info('Progress data set', response.data);
+        
+        // Stop polling when completed
+        if (response.data.status === 'completed' || response.data.status === 'error') {
+          if (progressInterval.current) {
+            clearInterval(progressInterval.current);
+            progressInterval.current = null;
+          }
+          
+          // If completed successfully, trigger the success state
+          if (response.data.status === 'completed' && response.data.report_id) {
+            setSuccess(true);
+            setLoading(false);
+            
+            // Notify parent component
+            if (onReportGenerated) {
+              onReportGenerated({ id: response.data.report_id });
+            }
+          }
+          
+          // If error occurred, show error message
+          if (response.data.status === 'error') {
+            setError(response.data.current_step || 'An error occurred during report generation');
+            setLoading(false);
+          }
+        }
+      } else {
+        logger.warn('Invalid progress response format', response);
+      }
+    } catch (err) {
+      // If progress checking fails, we just log it but don't stop the polling
+      logger.error('Error checking report progress', err);
+    }
   };
   
   const handleSubmit = async (e) => {
@@ -86,6 +225,13 @@ const BillingReportGenerator = ({ onReportGenerated, customers, loading: custome
     // Clear previous states
     setError(null);
     setSuccess(false);
+    setProgress(null);
+    
+    // Stop any existing progress polling
+    if (progressInterval.current) {
+      clearInterval(progressInterval.current);
+      progressInterval.current = null;
+    }
     
     // Validate form
     if (!validateForm()) {
@@ -102,9 +248,36 @@ const BillingReportGenerator = ({ onReportGenerated, customers, loading: custome
       output_format: formData.outputFormat
     };
     
+    // Add customer services if not using "all" and some services are selected
+    if (!formData.customerServicesSelectAll && formData.customerServices.length > 0) {
+      apiData.customer_services = formData.customerServices;
+    }
+    
+    logger.info('Submitting report generation with data:', apiData);
+    
     try {
+      // For CSV output format that downloads directly, handle differently
+      if (apiData.output_format === 'csv') {
+        logger.info('CSV format requested, using direct download method');
+        await billingV2Api.generateBillingReport(apiData);
+        
+        // Since the CSV download happens via file download, we can consider this successful
+        setSuccess(true);
+        setLoading(false);
+        
+        // Reset form dates after successful submission
+        setFormData({
+          ...formData,
+          startDate: null,
+          endDate: null
+        });
+        
+        return;
+      }
+      
+      // Start report generation for non-CSV formats
       const response = await billingV2Api.generateBillingReport(apiData);
-      setLoading(false);
+      logger.info('Report generation response:', response);
       
       // Check if response has expected format
       if (!response || typeof response !== 'object') {
@@ -116,19 +289,44 @@ const BillingReportGenerator = ({ onReportGenerated, customers, loading: custome
         throw new Error(response.error || 'Failed to generate billing report');
       }
       
-      setSuccess(true);
-      
-      // Reset form after successful submission
-      setFormData({
-        ...formData,
-        startDate: null,
-        endDate: null
-      });
-      
-      // Notify parent component
-      if (onReportGenerated && response.data) {
-        onReportGenerated(response.data);
+      // If we have a quick response with data, handle it directly
+      if (response.data) {
+        setSuccess(true);
+        setLoading(false);
+        
+        // Reset form dates after successful submission
+        setFormData({
+          ...formData,
+          startDate: null,
+          endDate: null
+        });
+        
+        // Notify parent component
+        if (onReportGenerated) {
+          onReportGenerated(response.data);
+        }
+        
+        return;
       }
+      
+      // Otherwise, start polling for progress
+      // Configure progress polling parameters
+      const progressParams = {
+        customer_id: apiData.customer_id,
+        start_date: apiData.start_date,
+        end_date: apiData.end_date
+      };
+      
+      logger.info('Setting up progress polling with params:', progressParams);
+      
+      // Start with an immediate progress check
+      await checkProgress(progressParams);
+      
+      // Set up polling for progress updates
+      progressInterval.current = setInterval(() => {
+        checkProgress(progressParams);
+      }, 1000); // Check every second
+      
     } catch (err) {
       logger.error('Error generating billing report', err);
       
@@ -157,6 +355,73 @@ const BillingReportGenerator = ({ onReportGenerated, customers, loading: custome
     }
   };
   
+  // Progress indicator component
+  const ProgressIndicator = ({ progress }) => {
+    // Always render progress indicator, even with minimal data
+    const progressData = progress || {
+      percent_complete: 0,
+      current_step: "Initializing...",
+      status: "initializing"
+    };
+    
+    // Format estimated completion time if available
+    let estimatedTimeDisplay = 'Calculating...';
+    if (progressData.estimated_completion_time) {
+      try {
+        const estimatedTime = parseISO(progressData.estimated_completion_time);
+        estimatedTimeDisplay = format(estimatedTime, 'h:mm:ss a');
+      } catch (err) {
+        estimatedTimeDisplay = 'Calculating...';
+      }
+    }
+    
+    return (
+      <Card variant="outlined" sx={{ mb: 2, mt: 2 }}>
+        <CardContent>
+          <Typography variant="h6" gutterBottom>
+            Report Generation Progress
+          </Typography>
+          
+          <Box sx={{ mb: 2 }}>
+            <LinearProgress 
+              variant="determinate" 
+              value={progressData.percent_complete || 0} 
+              sx={{ height: 10, borderRadius: 5 }}
+            />
+            <Box display="flex" justifyContent="space-between" mt={0.5}>
+              <Typography variant="body2" color="text.secondary">
+                {progressData.percent_complete || 0}% Complete
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {progressData.processed_orders || 0} / {progressData.total_orders || '?'} Orders
+              </Typography>
+            </Box>
+          </Box>
+          
+          <Box sx={{ mb: 1 }}>
+            <Typography variant="body1" fontWeight="bold">
+              Current Step:
+            </Typography>
+            <Typography variant="body1">
+              {progressData.current_step || 'Initializing...'}
+            </Typography>
+          </Box>
+          
+          <Box sx={{ mb: 1 }}>
+            <Typography variant="body2" color="text.secondary">
+              Status: {progressData.status || 'processing'}
+            </Typography>
+            {progressData.status !== 'completed' && progressData.estimated_completion_time && (
+              <Typography variant="body2" color="text.secondary">
+                Estimated completion: {estimatedTimeDisplay}
+              </Typography>
+            )}
+          </Box>
+        </CardContent>
+      </Card>
+    );
+  };
+
   return (
     <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
       <Typography variant="h5" component="h2" gutterBottom>
@@ -173,6 +438,17 @@ const BillingReportGenerator = ({ onReportGenerated, customers, loading: custome
         <Alert severity="success" sx={{ mb: 2 }} data-testid="success-alert">
           Report generated successfully!
         </Alert>
+      )}
+      
+      {/* Progress indicator - show if either loading with progress, or loading for more than 2 seconds */}
+      {loading && (
+        <ProgressIndicator 
+          progress={progress || { 
+            percent_complete: 0, 
+            current_step: "Initializing report...",
+            status: "initializing" 
+          }} 
+        />
       )}
       
       <form onSubmit={handleSubmit}>
@@ -252,6 +528,71 @@ const BillingReportGenerator = ({ onReportGenerated, customers, loading: custome
             />
           </Grid>
           
+          {/* Customer Services Selection */}
+          {formData.customerId && customerServices.length > 0 && (
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <InputLabel id="customer-services-label">Services to Include</InputLabel>
+                <Select
+                  labelId="customer-services-label"
+                  id="customer-services-select"
+                  multiple
+                  value={formData.customerServices}
+                  onChange={handleCustomerServicesChange}
+                  renderValue={(selected) => {
+                    if (selected.includes('all') || selected.length === customerServices.length) {
+                      return <Chip label="All Services" />;
+                    }
+                    
+                    return (
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                        {selected.map((value) => {
+                          const service = customerServices.find(s => s.id === value);
+                          return service ? (
+                            <Chip key={value} label={service.service_name} />
+                          ) : null;
+                        })}
+                      </Box>
+                    );
+                  }}
+                  label="Services to Include"
+                  MenuProps={{
+                    PaperProps: {
+                      style: {
+                        maxHeight: 300,
+                      },
+                    },
+                  }}
+                >
+                  <MenuItem value="all">
+                    <Checkbox 
+                      checked={formData.customerServicesSelectAll || formData.customerServices.length === customerServices.length} 
+                    />
+                    <ListItemText primary="All Services" />
+                  </MenuItem>
+                  
+                  <Divider />
+                  
+                  {customerServices.map((service) => (
+                    <MenuItem key={service.id} value={service.id}>
+                      <Checkbox checked={formData.customerServices.indexOf(service.id) > -1} />
+                      <ListItemText 
+                        primary={service.service_name} 
+                        secondary={`${service.charge_type} - $${service.unit_price}`} 
+                      />
+                    </MenuItem>
+                  ))}
+                </Select>
+                <FormHelperText>
+                  {loadingServices ? 'Loading services...' : 
+                    customerServices.length > 0 ? 
+                    `${formData.customerServices.length} of ${customerServices.length} services selected` : 
+                    'No services available'}
+                </FormHelperText>
+              </FormControl>
+            </Grid>
+          )}
+          
           <Grid item xs={12}>
             <Box display="flex" justifyContent="flex-start" mt={2}>
               <Button
@@ -259,10 +600,10 @@ const BillingReportGenerator = ({ onReportGenerated, customers, loading: custome
                 variant="contained"
                 color="primary"
                 disabled={loading}
-                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
+                startIcon={loading && !progress ? <CircularProgress size={20} color="inherit" /> : null}
                 data-testid="generate-report-button"
               >
-                {loading ? 'Generating Report...' : 'Generate Report'}
+                {loading && !progress ? 'Initializing...' : loading ? 'Generating Report...' : 'Generate Report'}
               </Button>
             </Box>
           </Grid>

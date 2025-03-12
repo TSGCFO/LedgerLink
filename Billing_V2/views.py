@@ -103,77 +103,157 @@ class BillingReportViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'])
     def generate(self, request):
         """Generate a new billing report"""
+        import time
+        start_time = time.time()
+        
         # Validate request data
+        validation_start = time.time()
         serializer = BillingReportRequestSerializer(data=request.data)
         if not serializer.is_valid():
             return Response({
                 'success': False,
                 'error': serializer.errors
             }, status=status.HTTP_400_BAD_REQUEST)
+        
+        validation_time = time.time() - validation_start
+        logger.info(f"Request validation completed in {validation_time:.2f} seconds")
             
         data = serializer.validated_data
         
         # Generate report
         try:
+            # Initialize calculator
+            init_start = time.time()
             calculator = BillingCalculator(
                 customer_id=data['customer_id'],
                 start_date=data['start_date'],
-                end_date=data['end_date']
+                end_date=data['end_date'],
+                customer_service_ids=data.get('customer_services')
             )
+            init_time = time.time() - init_start
+            
+            # Store the calculator in request.session for progress tracking
+            # We'll use a unique key based on customer and date range
+            progress_key = f"billing_report_progress_{data['customer_id']}_{data['start_date']}_{data['end_date']}"
+            
+            # Store in Django's cache
+            from django.core.cache import cache
+            cache.set(progress_key, calculator.progress, 3600)  # Cache for 1 hour
             
             # Generate the report
-            logger.info(f"Starting report generation for customer {data['customer_id']}")
+            logger.info(f"Starting report generation for customer {data['customer_id']} from {data['start_date']} to {data['end_date']}")
+            report_gen_start = time.time()
             report = calculator.generate_report()
-            logger.info(f"Completed report generation: Report ID {report.id}")
+            report_gen_time = time.time() - report_gen_start
+            
+            # Store the report ID in the progress data for reference
+            calculator.progress['report_id'] = report.id
+            cache.set(progress_key, calculator.progress, 3600)  # Update cache
+            
+            logger.info(f"Completed report generation: Report ID {report.id} in {report_gen_time:.2f} seconds")
             
             # Return based on requested format
             output_format = data.get('output_format', 'json')
             
+            # Start formatting response
+            format_start = time.time()
+            
             if output_format == 'json':
                 # Return report as JSON with consistent format
                 report_serializer = self.get_serializer(report)
-                return Response({
+                response = Response({
                     'success': True,
-                    'data': report_serializer.data
+                    'data': report_serializer.data,
+                    'metrics': {
+                        'generation_time': report_gen_time,
+                        'total_time': time.time() - start_time
+                    }
                 }, status=status.HTTP_201_CREATED)
                 
             elif output_format == 'csv':
                 # Return report as CSV file
-                response = HttpResponse(content_type='text/csv')
-                filename = f"billing_report_{data['customer_id']}_{data['start_date']}.csv"
+                csv_start = time.time()
+                csv_content = calculator.to_csv()
+                csv_time = time.time() - csv_start
+                logger.info(f"CSV generation completed in {csv_time:.2f} seconds")
+                
+                # Get customer name for better filename
+                try:
+                    from customers.models import Customer
+                    customer = Customer.objects.get(id=data['customer_id'])
+                    customer_name = customer.company_name.replace(" ", "_")
+                except Exception:
+                    customer_name = f"customer_{data['customer_id']}"
+                
+                # Format dates for filename
+                start_date_str = data['start_date'].strftime('%Y%m%d')
+                end_date_str = data['end_date'].strftime('%Y%m%d')
+                
+                # Create response with CSV content
+                response = HttpResponse(content_type='text/csv; charset=utf-8')
+                filename = f"billing_report_{customer_name}_{start_date_str}_to_{end_date_str}.csv"
+                
+                # Use proper Content-Disposition header with quoted filename
                 response['Content-Disposition'] = f'attachment; filename="{filename}"'
-                response.write(calculator.to_csv())
-                return response
+                # Add additional headers to prevent caching
+                response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+                response['Pragma'] = 'no-cache'
+                response['Expires'] = '0'
+                
+                # Write the CSV content to the response
+                response.write(csv_content)
+                
+                # Log success
+                logger.info(f"CSV file prepared for download: {filename} ({len(csv_content)} bytes)")
                 
             elif output_format == 'pdf':
                 # PDF generation would go here (requires additional libraries)
-                return Response({
+                response = Response({
                     "success": False,
-                    "error": "PDF generation not implemented yet"
+                    "error": "PDF generation not implemented yet",
+                    "metrics": {
+                        "generation_time": report_gen_time,
+                        "total_time": time.time() - start_time
+                    }
                 }, 
                 status=status.HTTP_501_NOT_IMPLEMENTED
                 )
                 
             elif output_format == 'dict':
                 # Return as dictionary directly (useful for internal API calls)
-                return Response({
+                response = Response({
                     "success": True,
-                    "data": report.to_dict()
+                    "data": report.to_dict(),
+                    "metrics": {
+                        "generation_time": report_gen_time,
+                        "total_time": time.time() - start_time
+                    }
                 }, status=status.HTTP_201_CREATED)
             
             else:
-                return Response({
+                response = Response({
                     "success": False,
                     "error": f"Invalid output format: {output_format}"
                 },
                 status=status.HTTP_400_BAD_REQUEST
                 )
+            
+            # Log total processing time
+            format_time = time.time() - format_start
+            total_time = time.time() - start_time
+            logger.info(f"Report response formatting completed in {format_time:.2f} seconds")
+            logger.info(f"Total report generation and response time: {total_time:.2f} seconds")
+            
+            return response
                 
         except ValidationError as e:
             logger.error(f"Validation error generating billing report: {str(e)}")
             return Response({
                 "success": False,
-                "error": str(e)
+                "error": str(e),
+                "metrics": {
+                    "total_time": time.time() - start_time
+                }
             },
             status=status.HTTP_400_BAD_REQUEST
             )
@@ -181,7 +261,10 @@ class BillingReportViewSet(viewsets.ModelViewSet):
             logger.error(f"Error generating billing report: {str(e)}")
             return Response({
                 "success": False,
-                "error": "An unexpected error occurred generating the report. Please try again."
+                "error": "An unexpected error occurred generating the report. Please try again.",
+                "metrics": {
+                    "total_time": time.time() - start_time
+                }
             },
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
@@ -189,13 +272,21 @@ class BillingReportViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get'], url_path='download')
     def download(self, request, pk=None):
         """Download a billing report in specified format"""
-        report = self.get_object()
-        
-        format_type = request.query_params.get('format', 'csv')
+        import time
+        start_time = time.time()
         
         try:
+            # Get the report - use get_object() which handles permissions
+            report = self.get_object()
+            
+            # Get requested format - default to CSV
+            format_type = request.query_params.get('format', 'csv')
+            
+            # Log download request
+            logger.info(f"Download requested for report {report.id} in {format_type} format")
+            
             if format_type == 'csv':
-                # Return report as CSV file
+                # Initialize calculator with the existing report
                 calculator = BillingCalculator(
                     customer_id=report.customer_id,
                     start_date=report.start_date,
@@ -203,52 +294,154 @@ class BillingReportViewSet(viewsets.ModelViewSet):
                 )
                 calculator.report = report  # Set existing report
                 
-                # Create response with CSV content type
-                response = HttpResponse(content_type='text/csv; charset=utf-8')
-                
                 # Set filename with customer name and date range for better identification
-                customer_name = report.customer.company_name.replace(" ", "_")
+                try:
+                    customer_name = report.customer.company_name.replace(" ", "_")
+                except Exception:
+                    customer_name = f"customer_{report.customer_id}"
+                    
                 start_date_str = report.start_date.strftime('%Y%m%d')
                 end_date_str = report.end_date.strftime('%Y%m%d')
                 filename = f"billing_report_{customer_name}_{start_date_str}_to_{end_date_str}.csv"
                 
-                # Set headers for file download
-                response['Content-Disposition'] = f'attachment; filename="{filename}"'
-                
                 # Generate CSV content
+                csv_start = time.time()
                 csv_content = calculator.to_csv()
+                csv_time = time.time() - csv_start
+                
+                # Create response with proper headers
+                response = HttpResponse(content_type='text/csv; charset=utf-8')
+                response['Content-Disposition'] = f'attachment; filename="{filename}"'
+                response['Content-Length'] = len(csv_content)
+                response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+                response['Pragma'] = 'no-cache'
+                response['Expires'] = '0'
+                
+                # Write CSV content to response
                 response.write(csv_content)
                 
                 # Log the successful download
-                logger.info(f"Generated CSV download for report {report.id} ({len(csv_content)} bytes)")
+                total_time = time.time() - start_time
+                logger.info(f"CSV download prepared for report {report.id}: {filename} ({len(csv_content)} bytes) in {total_time:.2f}s")
                 
                 return response
                 
             elif format_type == 'json':
                 # Return as JSON data
                 serializer = self.get_serializer(report)
-                return Response(serializer.data)
+                return Response({
+                    'success': True,
+                    'data': serializer.data
+                })
                 
             elif format_type == 'pdf':
                 # PDF generation would go here
-                return Response(
-                    {"error": "PDF generation not implemented yet"}, 
-                    status=status.HTTP_501_NOT_IMPLEMENTED
-                )
+                return Response({
+                    'success': False,
+                    'error': "PDF generation not implemented yet"
+                }, status=status.HTTP_501_NOT_IMPLEMENTED)
                 
             else:
-                return Response(
-                    {"error": f"Invalid format: {format_type}"},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                return Response({
+                    'success': False,
+                    'error': f"Invalid format: {format_type}"
+                }, status=status.HTTP_400_BAD_REQUEST)
                 
         except Exception as e:
             logger.error(f"Error downloading report: {str(e)}")
-            return Response(
-                {"error": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return Response({
+                'success': False,
+                'error': f"Error downloading report: {str(e)}"
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
+    @action(detail=False, methods=['get'], url_path='progress')
+    def progress(self, request):
+        """Get progress of report generation"""
+        try:
+            # Get required parameters
+            customer_id = request.query_params.get('customer_id')
+            start_date = request.query_params.get('start_date')
+            end_date = request.query_params.get('end_date')
+            
+            # Validate required parameters
+            if not all([customer_id, start_date, end_date]):
+                return Response({
+                    'success': False,
+                    'error': "Missing required parameters: customer_id, start_date, end_date"
+                }, status=status.HTTP_400_BAD_REQUEST)
+                
+            # Construct progress key
+            progress_key = f"billing_report_progress_{customer_id}_{start_date}_{end_date}"
+            
+            # Get progress from cache
+            from django.core.cache import cache
+            progress = cache.get(progress_key)
+            
+            if not progress:
+                return Response({
+                    'success': False,
+                    'error': "No progress information found for the given parameters"
+                }, status=status.HTTP_404_NOT_FOUND)
+                
+            # Add the progress_key to the response
+            progress['progress_key'] = progress_key
+            
+            return Response({
+                'success': True,
+                'data': progress
+            })
+            
+        except Exception as e:
+            logger.error(f"Error getting progress: {str(e)}")
+            return Response({
+                'success': False,
+                'error': f"Error getting progress: {str(e)}"
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    @action(detail=False, methods=['get'], url_path='customer-services/(?P<customer_id>[^/.]+)')
+    def customer_services(self, request, customer_id=None):
+        """Get customer services for a specific customer"""
+        try:
+            # Validate customer ID
+            from customers.models import Customer
+            try:
+                customer = Customer.objects.get(pk=customer_id)
+            except Customer.DoesNotExist:
+                return Response({
+                    'success': False,
+                    'error': f"Customer with ID {customer_id} not found"
+                }, status=status.HTTP_404_NOT_FOUND)
+                
+            # Get all customer services with their related service
+            from customer_services.models import CustomerService
+            customer_services = CustomerService.objects.filter(
+                customer_id=customer_id
+            ).select_related('service')
+            
+            # Format the response
+            services_data = []
+            for cs in customer_services:
+                services_data.append({
+                    'id': cs.id,
+                    'service_id': cs.service.id,
+                    'service_name': cs.service.service_name,
+                    'charge_type': cs.service.charge_type,
+                    'unit_price': float(cs.unit_price) if cs.unit_price else 0,
+                    'active': True  # Assuming all customer services are active by default
+                })
+            
+            return Response({
+                'success': True,
+                'data': services_data
+            })
+            
+        except Exception as e:
+            logger.error(f"Error getting customer services: {str(e)}")
+            return Response({
+                'success': False,
+                'error': f"Error getting customer services: {str(e)}"
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
     @action(detail=False, methods=['get'])
     def customer_summary(self, request):
         """Get summary of billing reports by customer"""

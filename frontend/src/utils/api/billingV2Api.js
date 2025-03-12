@@ -38,6 +38,54 @@ export const billingV2Api = {
    * @returns {Promise} Promise with response
    */
   generateBillingReport: async (data) => {
+    // For CSV downloads, use a different approach
+    if (data.output_format === 'csv') {
+      // Get CSRF token
+      const csrfToken = document.cookie.split('; ')
+        .find(row => row.startsWith('csrftoken='))
+        ?.split('=')[1];
+        
+      // Make a direct fetch request to handle the file download
+      const response = await fetch('/api/v1/billing-v2/reports/generate/', {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': csrfToken,
+          'Content-Type': 'application/json'  // This was missing - causing 415 error
+        },
+        body: JSON.stringify(data),
+        credentials: 'include',
+      });
+      
+      // Check if response is ok
+      if (!response.ok) {
+        throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
+      }
+      
+      // Get the filename from Content-Disposition header
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let filename = 'billing_report.csv';
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="(.+?)"/);
+        if (filenameMatch && filenameMatch[1]) {
+          filename = filenameMatch[1];
+        }
+      }
+      
+      // Create a blob from the response and download it
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+      
+      return { success: true };
+    }
+    
+    // For other formats, use the normal request function
     return request('/api/v1/billing-v2/reports/generate/', {
       method: 'POST',
       body: JSON.stringify(data),
@@ -68,6 +116,46 @@ export const billingV2Api = {
     
     const queryString = queryParams.toString();
     return request(`/api/v1/billing-v2/reports/customer-summary/${queryString ? `?${queryString}` : ''}`, {}, false);
+  },
+
+  /**
+   * Get customer services for a specific customer
+   * @param {number} customerId - Customer ID
+   * @returns {Promise} Promise with response
+   */
+  getCustomerServices: async (customerId) => {
+    if (!customerId) {
+      throw new Error('Customer ID is required');
+    }
+    return request(`/api/v1/billing-v2/reports/customer-services/${customerId}/`, {}, false);
+  },
+  
+  /**
+   * Check progress of a report generation
+   * @param {Object} params - Parameters matching the report generation request
+   * @returns {Promise} Promise with response
+   */
+  getReportProgress: async (params) => {
+    if (!params.customer_id || !params.start_date || !params.end_date) {
+      throw new Error('Missing required parameters: customer_id, start_date, end_date');
+    }
+    
+    const queryParams = new URLSearchParams();
+    queryParams.append('customer_id', params.customer_id);
+    queryParams.append('start_date', params.start_date);
+    queryParams.append('end_date', params.end_date);
+    
+    // Add a cache-busting timestamp to prevent browser caching
+    queryParams.append('_t', Date.now());
+    
+    return request(`/api/v1/billing-v2/reports/progress/?${queryParams.toString()}`, {
+      // Add no-cache headers to prevent caching of progress responses
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    }, false);
   }
 };
 
