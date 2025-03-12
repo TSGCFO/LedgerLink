@@ -198,9 +198,23 @@ const BillingReportGenerator = ({ onReportGenerated, customers, loading: custome
             setSuccess(true);
             setLoading(false);
             
-            // Notify parent component
-            if (onReportGenerated) {
-              onReportGenerated({ id: response.data.report_id });
+            // Fetch full report data to ensure accurate information
+            try {
+              const reportId = response.data.report_id;
+              const fullReport = await billingV2Api.getBillingReport(reportId);
+              
+              // Notify parent component with the full report data
+              if (onReportGenerated && fullReport.success) {
+                onReportGenerated(fullReport.data);
+              } else {
+                onReportGenerated({ id: response.data.report_id });
+              }
+            } catch (err) {
+              logger.error("Error fetching full report after completion", err);
+              // Fall back to just the ID if fetch fails
+              if (onReportGenerated) {
+                onReportGenerated({ id: response.data.report_id });
+              }
             }
           }
           
@@ -301,9 +315,23 @@ const BillingReportGenerator = ({ onReportGenerated, customers, loading: custome
           endDate: null
         });
         
-        // Notify parent component
-        if (onReportGenerated) {
-          onReportGenerated(response.data);
+        // Explicitly fetch the report to ensure we have the most accurate data
+        try {
+          const reportId = response.data.id;
+          const fullReport = await billingV2Api.getBillingReport(reportId);
+          
+          // Notify parent component with the full report data
+          if (onReportGenerated && fullReport.success) {
+            onReportGenerated(fullReport.data);
+          } else {
+            onReportGenerated(response.data);
+          }
+        } catch (err) {
+          logger.error("Error fetching full report after generation", err);
+          // Fall back to original data if fetch fails
+          if (onReportGenerated) {
+            onReportGenerated(response.data);
+          }
         }
         
         return;
