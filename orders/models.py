@@ -47,6 +47,19 @@ class Order(models.Model):
         choices=PRIORITY_CHOICES,
         default='medium'
     )
+    
+    def save(self, *args, **kwargs):
+        # Validate status choice
+        valid_statuses = [choice[0] for choice in self.STATUS_CHOICES]
+        if self.status not in valid_statuses:
+            raise ValueError(f"Invalid status '{self.status}'. Valid options are: {', '.join(valid_statuses)}")
+            
+        # Validate priority choice  
+        valid_priorities = [choice[0] for choice in self.PRIORITY_CHOICES]
+        if self.priority not in valid_priorities:
+            raise ValueError(f"Invalid priority '{self.priority}'. Valid options are: {', '.join(valid_priorities)}")
+            
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Order {self.transaction_id} for {self.customer}"

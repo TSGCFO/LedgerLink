@@ -98,6 +98,7 @@ PGSQL_commands.md
 package-lock.json
 node_modules
 
+
 # Temporary data import and database alignment scripts
 import_orders.py
 import_shipping.py
@@ -130,11 +131,10 @@ frontend/src/components/rules/RuleTester.jsx
 frontend/src/utils/validationUtils.js
 rules/migrations/0012_alter_rule_adjustment_amount_alter_rule_field_and_more.py
 rules/utils/
+venv311/
 
-# Stand Alone Scripts
-import_orders_from_csv.py
-apply_migration.py
-checkserver.py
-desktop.ini
-check_db_alignment.py
-check_db_alignment_v2.py
+# Additional ignores
+logs/
+*.log
+
+

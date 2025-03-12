@@ -61,8 +61,9 @@ const AdvancedRulesList = ({ groupId }) => {
         const fieldMap = Object.fromEntries(
           row.original.FIELD_CHOICES?.map(([value, label]) => [value, label]) || []
         );
-        return <Typography>{fieldMap[row.original.field] || row.original.field}</Typography>;
+        return <Typography fontWeight="medium">{fieldMap[row.original.field] || row.original.field}</Typography>;
       },
+      size: 150,
     },
     {
       accessorKey: 'operator',
@@ -71,30 +72,82 @@ const AdvancedRulesList = ({ groupId }) => {
         const operatorMap = Object.fromEntries(
           row.original.OPERATOR_CHOICES?.map(([value, label]) => [value, label]) || []
         );
-        return <Typography>{operatorMap[row.original.operator] || row.original.operator}</Typography>;
+        return (
+          <Chip 
+            label={operatorMap[row.original.operator] || row.original.operator} 
+            size="small" 
+            variant="outlined"
+            color="primary"
+          />
+        );
       },
+      size: 120,
     },
     {
       accessorKey: 'value',
       header: 'Value',
+      Cell: ({ row }) => (
+        <Typography 
+          sx={{ 
+            fontFamily: 'monospace', 
+            bgcolor: 'grey.100', 
+            px: 1, 
+            py: 0.5, 
+            borderRadius: 1,
+            display: 'inline-block'
+          }}
+        >
+          {row.original.value}
+        </Typography>
+      ),
+      size: 150,
     },
     {
       accessorKey: 'conditions',
       header: 'Conditions',
-      Cell: ({ row }) => (
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-          {formatConditions(row.original.conditions)}
-        </Box>
-      ),
+      Cell: ({ row }) => {
+        const conditionEntries = Object.entries(row.original.conditions || {});
+        if (conditionEntries.length === 0) {
+          return (
+            <Typography variant="body2" color="text.secondary" fontStyle="italic">
+              No additional conditions
+            </Typography>
+          );
+        }
+        return (
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+            {formatConditions(row.original.conditions)}
+          </Box>
+        );
+      },
+      size: 200,
     },
     {
       accessorKey: 'calculations',
       header: 'Calculations',
-      Cell: ({ row }) => (
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-          {formatCalculations(row.original.calculations)}
-        </Box>
-      ),
+      Cell: ({ row }) => {
+        // Check for case-based tier calculations
+        const hasCaseTiers = row.original.calculations?.some(calc => calc.type === 'case_based_tier');
+        
+        return (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+              {formatCalculations(row.original.calculations)}
+            </Box>
+            
+            {hasCaseTiers && (
+              <Chip 
+                label="Case-Based Tier Pricing" 
+                size="small" 
+                color="secondary"
+                variant="outlined"
+                sx={{ alignSelf: 'flex-start' }}
+              />
+            )}
+          </Box>
+        );
+      },
+      size: 200,
     },
   ];
 
@@ -162,8 +215,21 @@ const AdvancedRulesList = ({ groupId }) => {
       setRules(fetchedRules);
       setError(null);
     } catch (err) {
-      setError('Failed to fetch advanced rules. Please try again.');
       console.error('Error fetching advanced rules:', err);
+      // Check if it's a connection error
+      if (err.message && (
+          err.message.includes('connect to the server') ||
+          err.message.includes('Network error') ||
+          err.message.includes('Failed to fetch')
+      )) {
+        setError('Cannot connect to the server. Please make sure the backend is running.');
+      } else if (err.status === 404) {
+        setError(`Advanced rules endpoint not found. There may be an API path mismatch. Check the /api/v1/rules/group/${groupId}/advanced-rules/ endpoint.`);
+      } else if (err.status === 500) {
+        setError('Server error processing this request. This might be due to incorrect API paths or route configuration. Check server logs for more details.');
+      } else {
+        setError(`Failed to fetch advanced rules: ${err.message || 'Unknown error'}. Please try again.`);
+      }
     } finally {
       setLoading(false);
     }
@@ -203,13 +269,26 @@ const AdvancedRulesList = ({ groupId }) => {
 
   return (
     <Box>
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
-
-      <Box mb={2} display="flex" justifyContent="flex-end">
+      <Box mb={2} display="flex" justifyContent="space-between" alignItems="center">
+        <Box>
+          {error && (
+            <Alert 
+              severity="error" 
+              sx={{ mb: 2, maxWidth: '600px' }}
+              action={
+                <Button 
+                  color="inherit" 
+                  size="small" 
+                  onClick={() => fetchRules()}
+                >
+                  Retry
+                </Button>
+              }
+            >
+              {error}
+            </Alert>
+          )}
+        </Box>
         <Button
           variant="contained"
           color="primary"
@@ -220,7 +299,18 @@ const AdvancedRulesList = ({ groupId }) => {
         </Button>
       </Box>
 
-      <MaterialReactTable table={table} />
+      {!loading && rules.length === 0 && !error ? (
+        <Box sx={{ p: 4, textAlign: 'center', border: '1px dashed', borderColor: 'grey.300', borderRadius: 1 }}>
+          <Typography variant="body1" color="text.secondary" gutterBottom>
+            No advanced rules found for this group.
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Click the "Create Advanced Rule" button to add a new rule.
+          </Typography>
+        </Box>
+      ) : (
+        <MaterialReactTable table={table} />
+      )}
 
       {showRuleBuilder && (
         <AdvancedRuleBuilder

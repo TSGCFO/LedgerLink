@@ -42,6 +42,7 @@ api_patterns = [
     path('orders/', include('orders.urls')),
     path('products/', include('products.urls')),
     path('billing/', include('billing.urls')),
+    path('billing-v2/', include('Billing_V2.urls')),
     path('services/', include('services.urls')),
     path('shipping/', include('shipping.urls')),
     path('inserts/', include('inserts.urls')),
@@ -52,10 +53,13 @@ api_patterns = [
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('billing/', include('billing.urls', namespace='billing_main')),
+    path('billing/', include('billing.urls')),
+    path('billing-v2/', include('Billing_V2.urls')),
+
     
     # API endpoints
     path('api/v1/', include(api_patterns)),
+    path('api/v2/', include('Billing_V2.urls')),  # Add API v2 endpoint
     
     # API documentation
     path('docs/', include([

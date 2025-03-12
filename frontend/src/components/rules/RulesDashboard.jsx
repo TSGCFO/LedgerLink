@@ -46,8 +46,15 @@ const RulesDashboard = () => {
       setRuleGroups(groups);
       setError(null);
     } catch (err) {
-      setError('Failed to fetch rule groups. Please try again.');
       console.error('Error fetching rule groups:', err);
+      // Provide more detailed error message
+      if (err.message && err.message.includes('Cannot connect')) {
+        setError('Cannot connect to the server. Please make sure the backend is running.');
+      } else if (err.status === 404) {
+        setError('Rule groups endpoint not found. There may be an API path mismatch. Check /api/v1/rules/api/groups/ endpoint.');
+      } else {
+        setError(`Failed to fetch rule groups: ${err.message || 'Unknown error'}. Please try again.`);
+      }
     } finally {
       setLoading(false);
     }

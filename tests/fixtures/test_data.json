@@ -1,0 +1,103 @@
+[
+  {
+    "model": "auth.user",
+    "pk": 1,
+    "fields": {
+      "username": "admin",
+      "password": "pbkdf2_sha256$600000$VQPW2hVxmYZFOhwl3OaU6f$9Yd5QngJhisgZRiHQ4Y4Mbs9b1FUqFfFsGBEhXd7K9E=",
+      "email": "admin@example.com",
+      "first_name": "Admin",
+      "last_name": "User",
+      "is_staff": true,
+      "is_active": true,
+      "is_superuser": true,
+      "date_joined": "2025-03-01T00:00:00.000Z"
+    }
+  },
+  {
+    "model": "customers.customer",
+    "pk": 1,
+    "fields": {
+      "company_name": "Test Company",
+      "contact_name": "John Doe",
+      "email": "john@example.com",
+      "phone": "555-1234",
+      "address": "123 Test Street",
+      "city": "Testville",
+      "state": "TS",
+      "zip_code": "12345",
+      "country": "US",
+      "is_active": true
+    }
+  },
+  {
+    "model": "services.service",
+    "pk": 1,
+    "fields": {
+      "name": "Basic Fulfillment",
+      "description": "Standard fulfillment service",
+      "base_price": "10.00",
+      "charge_type": "per_order"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 1,
+    "fields": {
+      "sku": "TEST-SKU-001",
+      "name": "Test Product",
+      "description": "A test product for E2E testing",
+      "weight": "1.00",
+      "dimensions": "10x10x10",
+      "color": "Red",
+      "customer": 1
+    }
+  },
+  {
+    "model": "orders.order",
+    "pk": 1,
+    "fields": {
+      "customer": 1,
+      "order_number": "TEST-ORDER-001",
+      "order_date": "2025-03-01T00:00:00.000Z",
+      "shipping_address": "123 Test Street, Testville, TS 12345",
+      "shipping_method": "Standard",
+      "status": "pending",
+      "priority": "normal",
+      "notes": "Test order for E2E testing"
+    }
+  },
+  {
+    "model": "customer_services.customerservice",
+    "pk": 1,
+    "fields": {
+      "customer": 1,
+      "service": 1,
+      "price": "12.00",
+      "notes": "Custom pricing for test customer"
+    }
+  },
+  {
+    "model": "rules.rulegroup",
+    "pk": 1,
+    "fields": {
+      "name": "Test Rule Group",
+      "description": "Rule group for testing",
+      "is_active": true
+    }
+  },
+  {
+    "model": "rules.rule",
+    "pk": 1,
+    "fields": {
+      "group": 1,
+      "name": "Test Basic Rule",
+      "description": "A basic test rule",
+      "field": "weight",
+      "operator": "gt",
+      "value": "5",
+      "tier_price": "15.00",
+      "is_active": true
+    }
+  }
+]

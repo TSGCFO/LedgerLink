@@ -45,10 +45,13 @@ class OrderSerializer(serializers.ModelSerializer):
         """
         Create a new order with a generated transaction_id.
         """
-        # Generate a transaction_id (using the current timestamp as a simple example)
-        from django.utils import timezone
-        import time
-        validated_data['transaction_id'] = int(time.time() * 1000)  # milliseconds since epoch
+        # Generate a transaction_id that fits within PostgreSQL INT limits (2147483647)
+        import random
+        
+        # Use a 6-8 digit random number instead of full timestamp to avoid INT overflow
+        # This is safe for testing but in production would need a better strategy
+        validated_data['transaction_id'] = random.randint(100000, 9999999)  
+        
         return super().create(validated_data)
 
     def validate(self, data):

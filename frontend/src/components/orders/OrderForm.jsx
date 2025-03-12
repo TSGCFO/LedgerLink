@@ -31,6 +31,7 @@ const OrderForm = () => {
     reference_number: '',
     status: 'draft',
     priority: 'medium',
+    close_date: '',      // Add close_date field
     ship_to_name: '',
     ship_to_company: '',
     ship_to_address: '',
@@ -438,6 +439,20 @@ const OrderForm = () => {
                   ))}
                 </Select>
               </FormControl>
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Close Date"
+                name="close_date"
+                type="date"
+                value={formData.close_date}
+                onChange={handleChange}
+                InputLabelProps={{ shrink: true }}
+                inputProps={{ max: "9999-12-31" }}
+                helperText="Date when the order should be completed"
+              />
             </Grid>
 
             <Grid item xs={12}>

@@ -1,0 +1,94 @@
+name: Contract Testing with Pact
+
+on:
+  push:
+    branches: [ master, main ]
+    paths:
+      - 'frontend/**'
+      - '**/views/**'
+      - '**/serializers/**'
+  pull_request:
+    branches: [ master, main ]
+    paths:
+      - 'frontend/**'
+      - '**/views/**'
+      - '**/serializers/**'
+
+jobs:
+  consumer-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+    
+    - name: Install dependencies
+      run: |
+        npm ci
+        npm install @pact-foundation/pact
+    
+    - name: Run consumer Pact tests
+      run: npm run test:pact
+    
+    - name: Upload Pact contracts
+      uses: actions/upload-artifact@v3
+      with:
+        name: pact-contracts
+        path: frontend/pacts/
+  
+  provider-tests:
+    needs: consumer-tests
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ledgerlink_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pactman
+    
+    - name: Download Pact contracts
+      uses: actions/download-artifact@v3
+      with:
+        name: pact-contracts
+        path: pacts/
+    
+    - name: Run provider verification
+      env:
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/ledgerlink_test
+        DJANGO_SETTINGS_MODULE: LedgerLink.settings
+        SECRET_KEY: testsecretkey
+      run: |
+        python manage.py pact_verify --pact-url=./pacts --provider-base-url=http://localhost:8000

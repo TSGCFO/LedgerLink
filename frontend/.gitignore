@@ -1,0 +1,21 @@
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+coverage/
+build/
+dist/
+
+# Pact
+pacts/
+logs/pact.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing
+/cypress/videos/
+/cypress/screenshots/

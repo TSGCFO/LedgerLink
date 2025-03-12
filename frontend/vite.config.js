@@ -5,7 +5,9 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 5175,
+    port: 5176, // Changed to match your actual server port
+    host: '0.0.0.0', // Add this line to bind to all network interfaces
+    cors: true, // Enable CORS for all origins
     proxy: {
       // Proxy API requests to Django backend
       '/api/v1': {
@@ -15,7 +17,11 @@ export default defineConfig({
         ws: true,
         rewrite: (path) => path
       }
-    }
+    },
+    allowedHosts: [
+      'localhost',
+      '*.ngrok-free.app' // This will allow all ngrok domains
+    ]
   },
   build: {
     outDir: 'dist',

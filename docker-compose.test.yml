@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # PostgreSQL database for testing
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=ledgerlink_test
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+      # Mount init script folders (for the future pre-built container)
+      - ./database/init-scripts:/docker-entrypoint-initdb.d
+      - ./database/schema:/schema
+
+  # Test runner service
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    # Use bash for commands
+    # Default command if none provided
+    command: >
+      "python manage.py wait_for_db &&
+      python manage.py migrate --noinput &&
+      python -c 'print(\"\\nSchema verification: SUCCESS\")'"
+    volumes:
+      - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DJANGO_SETTINGS_MODULE=LedgerLink.settings
+      - DB_HOST=db
+      - DB_NAME=ledgerlink_test
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - IN_DOCKER=true
+      - PYTHONPATH=/app
+
+volumes:
+  postgres_test_data:

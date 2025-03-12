@@ -227,6 +227,110 @@ def create_order(self):
 - Use `test_logging.js` for scripted test cases
 - Use `test_server_logging.py` to test server-side API
 
+## Testing Framework
+
+LedgerLink has a comprehensive testing framework with the following test types:
+
+1. **Unit Tests**: Test individual components in isolation
+2. **Integration Tests**: Test interactions between components
+3. **Security Tests**: Test authentication and permissions
+4. **Contract Tests**: Test API compatibility between frontend and backend
+5. **Performance Tests**: Test database and API performance
+
+### Running Tests
+
+```bash
+# Run all tests
+python manage.py test
+
+# Run tests for a specific app
+python manage.py test app_name
+
+# Run tests for a specific test class
+python manage.py test app_name.tests.test_models.ModelTest
+
+# Run a specific test method
+python manage.py test app_name.tests.test_models.ModelTest.test_model_creation
+
+# Run with coverage
+coverage run --source='app_name' manage.py test app_name
+coverage report
+coverage html
+
+# Run tests with pytest (handling materialized views)
+SKIP_MATERIALIZED_VIEWS=True python -m pytest app_name/tests/ -v
+
+# Test in Docker environment (recommended for database tests)
+./test_scripts/run_docker_tests.sh
+
+# Run app-specific tests in Docker
+docker compose -f docker-compose.test.yml run --rm \
+  -e SKIP_MATERIALIZED_VIEWS=True \
+  test python -m pytest customer_services/tests/ -v
+```
+
+### Docker Testing Environment
+
+We've implemented Docker-based testing for reliable and consistent test environments. This approach ensures that tests run in an environment that matches production more closely.
+
+#### Setup Test Scripts (first time only)
+```bash
+# Make all test scripts executable
+./setup_test_scripts.sh
+```
+
+#### Run Tests with Docker
+
+```bash
+# Run all tests in Docker
+./run_docker_tests.sh
+
+# Run tests for a specific app
+./run_materials_tests.sh
+./run_api_tests.sh
+./run_billing_tests.sh
+./run_customers_tests.sh
+./run_inserts_tests.sh
+./run_orders_tests.sh
+./run_products_tests.sh
+./run_rules_tests.sh
+./run_services_tests.sh
+./run_shipping_tests.sh
+./run_customer_services_tests.sh
+./run_bulk_operations_tests.sh
+
+# Run only integration tests
+./run_integration_tests.sh
+```
+
+#### TestContainers Support
+
+Use TestContainers for isolated testing environments outside of Docker:
+
+```bash
+# Run tests with TestContainers
+./run_testcontainers_tests.sh
+
+# Run only TestContainers verification tests
+USE_TESTCONTAINERS=True python -m pytest materials/tests/test_testcontainers.py -v
+
+# Run all tests with TestContainers
+USE_TESTCONTAINERS=True python -m pytest
+
+# Run specific app tests with TestContainers
+USE_TESTCONTAINERS=True python -m pytest materials/
+```
+
+For more details on the testing environment, see [DOCKER_TESTING_SOLUTION.md](DOCKER_TESTING_SOLUTION.md) and `/tests/testcontainers.md`.
+
+### Test Implementation Guide
+
+For implementing new tests, refer to:
+- `/tests/test_implementation_guide.md`: Step-by-step guide for testing
+- `/tests/materials_testing_improvements.md`: Examples of comprehensive tests
+- `/tests/docker_testing_issues.md`: Solutions for Docker testing issues
+- `/tests/testcontainers.md`: Using TestContainers for isolated database testing
+
 ## Development Best Practices
 - Run linting in watch mode during active development
 - Always run tests before committing changes

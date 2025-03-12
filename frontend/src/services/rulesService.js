@@ -98,6 +98,10 @@ const rulesService = {
       return result;
     } catch (error) {
       logError('getRuleGroups', 'Error fetching rule groups:', error);
+      // Detect if the error is due to connection refused and provide a more helpful message
+      if (error?.originalError?.message?.includes('ECONNREFUSED')) {
+        throw new Error('Cannot connect to the server. Please make sure the backend is running.');
+      }
       throw handleApiError(error);
     }
   },
@@ -211,6 +215,17 @@ const rulesService = {
       return result;
     } catch (error) {
       logError('getAdvancedRules', `Error fetching advanced rules for group ${groupId}:`, error);
+      
+      // Add more detailed diagnostics for troubleshooting
+      console.error('API URL used:', `/api/v1/rules/group/${groupId}/advanced-rules/`);
+      console.error('Full error object:', error);
+      
+      // Detect connection issues with more informative message
+      if (error?.originalError?.message?.includes('ECONNREFUSED') || 
+          error?.message?.includes('Failed to fetch')) {
+        throw new Error('Cannot connect to the server. Please make sure the backend is running at the correct URL.');
+      }
+      
       throw handleApiError(error);
     }
   },

@@ -1,0 +1,278 @@
+name: LedgerLink CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  schedule:
+    # Run performance tests weekly (Sunday at 1 AM)
+    - cron: '0 1 * * 0'
+
+jobs:
+  code-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 black isort
+          pip install -r requirements.txt
+          cd frontend && npm ci
+      
+      - name: Check Python code quality
+        run: |
+          flake8 .
+          black --check .
+          isort --check .
+      
+      - name: Check JavaScript code quality
+        run: |
+          cd frontend && npm run lint
+
+  backend-tests:
+    runs-on: ubuntu-latest
+    needs: [code-quality]
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: test_ledgerlink
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-django pytest-cov
+      
+      - name: Run database migrations
+        run: |
+          python manage.py migrate --settings=tests.settings
+      
+      - name: Run unit tests
+        run: |
+          python manage.py test --settings=tests.settings
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_ledgerlink
+      
+      - name: Generate coverage report
+        run: |
+          python -m pytest --cov=. --cov-report=xml
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_ledgerlink
+      
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: false
+
+  frontend-tests:
+    runs-on: ubuntu-latest
+    needs: [code-quality]
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      
+      - name: Install dependencies
+        run: |
+          cd frontend && npm ci
+      
+      - name: Run frontend tests
+        run: |
+          cd frontend && npm test -- --coverage --watchAll=false
+      
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./frontend/coverage/coverage-final.json
+          fail_ci_if_error: false
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-tests]
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: test_ledgerlink
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-django pytest-xdist
+      
+      - name: Run database migrations
+        run: |
+          python manage.py migrate --settings=tests.settings
+      
+      - name: Run integration tests
+        run: |
+          python -m pytest tests/integration/ -v
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_ledgerlink
+
+  contract-tests:
+    runs-on: ubuntu-latest
+    needs: [backend-tests]
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: test_ledgerlink
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pact-python
+      
+      - name: Generate Pact contracts
+        run: |
+          python tests/integration/pact-contract-setup.py
+      
+      - name: Start Django server
+        run: |
+          python manage.py runserver &
+          sleep 5
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_ledgerlink
+      
+      - name: Verify Pact contracts
+        run: |
+          python tests/integration/pact-provider-verify.py
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_ledgerlink
+      
+      - name: Upload Pact files
+        uses: actions/upload-artifact@v3
+        with:
+          name: pact-contracts
+          path: tests/integration/pacts/
+
+  performance-tests:
+    runs-on: ubuntu-latest
+    # Only run performance tests on schedule or when specifically requested
+    if: github.event_name == 'schedule' || contains(github.event.head_commit.message, '[run-perf]')
+    needs: [integration-tests]
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: test_ledgerlink
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-django pytest-benchmark
+      
+      - name: Run database migrations
+        run: |
+          python manage.py migrate --settings=tests.settings
+      
+      - name: Run performance tests
+        run: |
+          python -m pytest tests/integration/test_performance.py -v
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_ledgerlink
+      
+      - name: Generate performance report
+        run: |
+          python tests/performance/generate_report.py
+      
+      - name: Upload performance results
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-report
+          path: tests/performance/results/

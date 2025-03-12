@@ -62,6 +62,7 @@ import BoxPriceForm from './components/materials/BoxPriceForm';
 import BulkOperations from './components/bulk-operations/BulkOperations';
 import BillingList from './components/billing/BillingList';
 import BillingForm from './components/billing/BillingForm';
+import { BillingPage as BillingV2Page } from './components/billing_v2';
 
 // Create theme
 const theme = createTheme({
@@ -111,9 +112,16 @@ function App() {
               {authenticated && (
                 <Tooltip title="View Console Logs">
                   <IconButton 
-                    color="inherit" 
+                    color="secondary" 
                     onClick={() => setLogViewerOpen(true)}
                     edge="end"
+                    sx={{ 
+                      backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 0.25)',
+                      },
+                      ml: 1,
+                    }}
                   >
                     <BugReportIcon />
                   </IconButton>
@@ -222,6 +230,12 @@ function App() {
                     </ListItemIcon>
                     <ListItemText primary="Billing" />
                   </ListItem>
+                  <ListItem button component={Link} to="/billing-v2">
+                    <ListItemIcon>
+                      <DescriptionIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Billing V2" />
+                  </ListItem>
                 </List>
               </Box>
             </Drawer>
@@ -288,6 +302,7 @@ function App() {
                 <Route path="/billing" element={<ProtectedRoute><BillingList /></ProtectedRoute>} />
                 <Route path="/billing/new" element={<ProtectedRoute><BillingForm /></ProtectedRoute>} />
                 <Route path="/billing/:id/edit" element={<ProtectedRoute><BillingForm /></ProtectedRoute>} />
+                <Route path="/billing-v2" element={<ProtectedRoute><BillingV2Page /></ProtectedRoute>} />
               </Routes>
             </Container>
           </Box>

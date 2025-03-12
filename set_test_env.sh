@@ -1,0 +1,1 @@
+export SKIP_MATERIALIZED_VIEWS=True

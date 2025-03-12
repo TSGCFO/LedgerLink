@@ -1,0 +1,1 @@
+# Mock migrations for testing with SQLite

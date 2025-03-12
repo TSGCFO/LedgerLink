@@ -2,42 +2,27 @@
 
 **Based on the analysis, here are the key findings:**
 
-FILENAME: frontend/src/utils/apiClient.js
-ISSUE: URL mismatch between frontend calls and backend endpoints
-FIX: Standardize on `/api/v1/<resource>/` pattern across frontend and backend
-SEVERITY: Medium
+FRONTEND/SRC/UTILS/APICLIENT.JS:153
+ISSUE: Incorrect URL for getting a rule group
+FIX: Update URL to match backend route definition
+SEVERITY: Critical
 
-FILENAME: rules/models.py
-ISSUE: N+1 query in RuleEvaluator.evaluate_rule_group method
-FIX: Use select_related() and prefetch_related() to optimize queries
-SEVERITY: Medium
+FRONTEND/SRC/UTILS/APICLIENT.JS:157
+ISSUE: Incorrect URL for updating a rule group
+FIX: Change to correct endpoint format with pk parameter
+SEVERITY: Critical
 
-FILENAME: frontend/src/components/rules/constants.js:67
-ISSUE: Missing `sku_name` and `case_based_tier` options that exist in backend models
-FIX: Sync frontend constants with backend model choices
-SEVERITY: Medium
-
-FILENAME: billing/billing_calculator.py
-ISSUE: Nested loops with database queries causing performance issues
-FIX: Refactor to use Django aggregation and prefetch related data
+BILLING/BILLING_CALCULATOR.PY:447-448
+ISSUE: N+1 query problem with CustomerService lookup
+FIX: Use prefetch_related to optimize related object fetching
 SEVERITY: High
 
-FILENAME: frontend/src/components/orders/OrderList.jsx
-ISSUE: Loading all data without pagination causes performance issues
-FIX: Implement proper pagination with backend support
-SEVERITY: Medium
-
-FILENAME: import_orders.py:77-120
-ISSUE: Missing input validation in JSON parsing could lead to code injection
-FIX: Add proper validation and sanitization of imported data
+PRODUCTS/MODELS.PY:6-52
+ISSUE: Case size constraint validation inconsistency
+FIX: Add equivalent validation in frontend component
 SEVERITY: High
 
-FILENAME: frontend/src/components/orders/OrderForm.jsx
-ISSUE: Doesn't validate transaction_id uniqueness that's required by backend model
-FIX: Add frontend validation matching backend constraints
-SEVERITY: Medium
-
-FILENAME: middleware.py
-ISSUE: Incomplete sensitive data masking in logging middleware
-FIX: Implement recursive masking for nested structures
+ORDERS/MODELS.PY:22
+ISSUE: Missing date-time field in form
+FIX: Add close_date field to OrderForm component
 SEVERITY: High
