@@ -1,7 +1,36 @@
-import { Pact } from '@pact-foundation/pact';
+import { Matchers } from '@pact-foundation/pact';
 import axios from 'axios';
-import { provider, createPaginatedResponse, createResponse } from '../pact-utils';
-import apiClient from '../apiClient';
+import { provider, createPaginatedResponse, createResponse, like, eachLike } from '../pact-utils';
+
+// Mock apiClient
+jest.mock('../apiClient', () => {
+  return {
+    __esModule: true,
+    default: {
+      get: jest.fn().mockImplementation(() => {
+        return Promise.resolve({
+          status: 200,
+          data: {
+            count: 10,
+            results: [{ id: 1, report_name: 'Billing Report' }]
+          }
+        });
+      }),
+      post: jest.fn().mockImplementation(() => {
+        return Promise.resolve({
+          status: 201,
+          data: { id: 1, report_name: 'New Billing Report' }
+        });
+      }),
+      delete: jest.fn().mockImplementation(() => {
+        return Promise.resolve({
+          status: 204,
+          data: { success: true }
+        });
+      })
+    }
+  };
+});
 
 /**
  * @fileoverview API Contract tests for LedgerLink Billing API

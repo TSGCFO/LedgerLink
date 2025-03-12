@@ -100,6 +100,13 @@ The application communicates with the Django backend API. API configuration can 
 
 ## Recent Updates
 
+### Billing V2 Implementation
+- Added new Billing V2 module for improved reporting
+- Fixed import paths and API endpoint URLs
+- Enhanced error handling and user feedback
+- Updated API client to support proper endpoint handling
+- Added defensive coding to handle various API response scenarios
+
 ### Testing Improvements
 - Fixed and improved Cypress E2E tests
 - Made tests more resilient to timing issues and UI changes

@@ -21,7 +21,8 @@ function getCookie(name) {
   return cookieValue;
 }
 
-async function request(endpoint, options = {}, useBaseUrl = true) {
+// Export request function for direct import
+export async function request(endpoint, options = {}, useBaseUrl = true) {
   const url = useBaseUrl ? `${API_BASE_URL}${endpoint}` : endpoint;
   const token = getAccessToken();
   const csrfToken = getCookie('csrftoken');
@@ -584,4 +585,5 @@ export default {
   rulesApi,
   billingApi,
   handleApiError,
+  request,
 };

@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'orders.apps.OrdersConfig',
     'products.apps.ProductsConfig',
     'billing.apps.BillingConfig',
+    'Billing_V2.apps.BillingV2Config',
     'services.apps.ServicesConfig',
     'shipping.apps.ShippingConfig',
     'inserts.apps.InsertsConfig',
@@ -50,7 +51,8 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # Disabled for development - enable in production:
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -139,7 +141,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # REST Framework settings
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [  ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ],
     'DEFAULT_PERMISSION_CLASSES': [    ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
@@ -178,6 +183,9 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5176",
     "http://localhost:5175",
     "http://127.0.0.1:5175",
+    "http://localhost:5177",
+    "http://127.0.0.1:5177",
+    "https://c1f12ec99a87.ngrok.app",
 ]
 
 # CSRF settings - Updated for development
@@ -186,6 +194,9 @@ CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:5176',
     'http://localhost:5175',
     'http://127.0.0.1:5175',
+    'http://localhost:5177',
+    'http://127.0.0.1:5177',
+    'https://c1f12ec99a87.ngrok.app',
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -345,6 +356,12 @@ LOGGING = {
 
 # Add to existing LOGGING configuration
 LOGGING['loggers']['bulk_operations'] = {
+    'handlers': ['console', 'file_debug', 'file_error'],
+    'level': 'DEBUG',
+    'propagate': False,
+}
+
+LOGGING['loggers']['Billing_V2'] = {
     'handlers': ['console', 'file_debug', 'file_error'],
     'level': 'DEBUG',
     'propagate': False,
