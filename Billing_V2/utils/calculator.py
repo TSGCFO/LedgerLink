@@ -37,7 +37,17 @@ class BillingCalculator:
                                  (if None or empty, all services are included)
         """
         self.customer_id = customer_id
-        self.customer_service_ids = customer_service_ids
+        
+        # Handle customer_service_ids properly - treat empty list differently from None
+        if customer_service_ids is not None:
+            # Convert to list of integers to ensure consistent handling
+            self.customer_service_ids = [int(id) for id in customer_service_ids if id]
+            logger.info(f"Using specific services: {self.customer_service_ids}")
+        else:
+            # None means include all services (no filtering)
+            self.customer_service_ids = None
+            logger.info("Using all services (no filtering)")
+        
         self.progress = {
             'status': 'initializing',
             'percent_complete': 0,
@@ -74,9 +84,11 @@ class BillingCalculator:
             service_totals={}
         )
         
-        # Store metadata about customer service selection in report metadata
+        # Store detailed metadata about customer service selection in report metadata
         self.report.metadata = {
-            'selected_services': customer_service_ids
+            'selected_services': self.customer_service_ids,
+            'selection_type': 'all' if self.customer_service_ids is None else 'specific',
+            'service_count': len(self.customer_service_ids) if self.customer_service_ids is not None else None
         }
         
     def update_progress(self, status, current_step, percent_complete=None):
@@ -202,9 +214,16 @@ class BillingCalculator:
             
             # Apply service filter if specified
             if self.customer_service_ids is not None:
-                customer_services_query = customer_services_query.filter(
-                    id__in=self.customer_service_ids
-                )
+                if not self.customer_service_ids:  # Empty list - no services should be included
+                    logger.warning("Empty service ID list provided - no services will be included")
+                    # Create empty QuerySet
+                    customer_services_query = CustomerService.objects.none()
+                else:
+                    # Filter to only the selected services
+                    customer_services_query = customer_services_query.filter(
+                        id__in=self.customer_service_ids
+                    )
+                    logger.info(f"Filtering to only include services with IDs: {self.customer_service_ids}")
                 
             # Get all customer services with related data
             customer_services = list(customer_services_query.select_related('service'))
@@ -389,19 +408,50 @@ class BillingCalculator:
             # Always recalculate and update the total amount at the end to ensure accuracy
             # This addresses issues where reports with filtered services might not show correct totals
             if self.report.service_totals:
-                total = sum(data['amount'] for data in self.report.service_totals.values())
-                if abs(float(self.report.total_amount) - total) > 0.01:  # Allow for small decimal differences
+                try:
+                    # Explicitly log all service totals for debugging
+                    logger.info(f"Service totals before final calculation: {json.dumps(self.report.service_totals)}")
+                    
+                    # Calculate total from service amounts
+                    total = sum(float(data['amount']) for data in self.report.service_totals.values())
+                    logger.info(f"Final calculated total: {total}, Current DB total: {self.report.total_amount}")
+                    
+                    # Always set the total_amount to ensure it's correct, not just when different
                     self.report.total_amount = total
-                    logger.info(f"Final report generation: Updated total amount to {total} based on service totals")
+                    logger.info(f"Final report generation: Set total amount to {total} based on service totals")
+                except Exception as e:
+                    logger.error(f"Error in final total calculation: {str(e)}")
+                    # Try a more robust calculation
+                    try:
+                        total = 0
+                        for service_id, data in self.report.service_totals.items():
+                            service_amount = float(data.get('amount', 0))
+                            logger.info(f"  Service {service_id}: {service_amount}")
+                            total += service_amount
+                        self.report.total_amount = total
+                        logger.info(f"Fallback total calculation: {total}")
+                    except Exception as inner_e:
+                        logger.error(f"Fallback calculation failed: {str(inner_e)}")
             else:
                 # No services - total should be zero
                 self.report.total_amount = 0
                 logger.info("Final report generation: Set total amount to zero (no service totals)")
             
-            # Save the report with final totals using an explicit transaction
+            # Save the report with final totals - first update service_totals
             from django.db import transaction
-            with transaction.atomic():
-                self.report.save()
+            try:
+                with transaction.atomic():
+                    self.report.save(update_fields=['service_totals'])
+                
+                # Then save total_amount separately
+                with transaction.atomic():
+                    self.report.save(update_fields=['total_amount'])
+                
+                # Verify the saved total matches our calculation
+                fresh_report = BillingReport.objects.get(pk=self.report.id)
+                logger.info(f"Verification - DB total after save: {fresh_report.total_amount}, Expected: {self.report.total_amount}")
+            except Exception as save_e:
+                logger.error(f"Error saving final report: {str(save_e)}")
             
             # Log performance metrics
             end_time = time.time()

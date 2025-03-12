@@ -124,11 +124,32 @@ class BillingReportViewSet(viewsets.ModelViewSet):
         try:
             # Initialize calculator
             init_start = time.time()
+            
+            # Handle customer_services parameter explicitly
+            customer_service_ids = data.get('customer_services')
+            if customer_service_ids is not None:
+                logger.info(f"Using customer_service_ids: {customer_service_ids} (type: {type(customer_service_ids)})")
+                # Ensure it's a proper list of integers
+                if isinstance(customer_service_ids, list):
+                    # Already a list
+                    pass
+                elif isinstance(customer_service_ids, str):
+                    # Convert string to list if needed (e.g. '1,2,3')
+                    if ',' in customer_service_ids:
+                        customer_service_ids = [int(id.strip()) for id in customer_service_ids.split(',') if id.strip()]
+                    else:
+                        # Single ID
+                        customer_service_ids = [int(customer_service_ids)]
+                else:
+                    # Unknown format - log and use None (all services)
+                    logger.warning(f"Unrecognized customer_service_ids format: {customer_service_ids}, using None (all services)")
+                    customer_service_ids = None
+            
             calculator = BillingCalculator(
                 customer_id=data['customer_id'],
                 start_date=data['start_date'],
                 end_date=data['end_date'],
-                customer_service_ids=data.get('customer_services')
+                customer_service_ids=customer_service_ids
             )
             init_time = time.time() - init_start
             
