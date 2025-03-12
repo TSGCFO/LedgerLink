@@ -1,12 +1,16 @@
 import json
 import logging
+from functools import lru_cache
 
 logger = logging.getLogger(__name__)
 
+# Global cache for normalized SKUs
+_normalized_sku_cache = {}
 
 def normalize_sku(sku):
     """
     Normalize a SKU by removing hyphens and spaces, and converting to uppercase.
+    With built-in caching to improve performance for repeated SKUs.
     
     Args:
         sku: The SKU to normalize
@@ -14,21 +18,39 @@ def normalize_sku(sku):
     Returns:
         Normalized SKU string
     """
+    # Check cache first
+    if sku in _normalized_sku_cache:
+        return _normalized_sku_cache[sku]
+        
     try:
         if sku is None:
             return ""
         
         # Remove hyphens and spaces, convert to uppercase
         normalized = str(sku).replace("-", "").replace(" ", "").upper()
+        
+        # Cache result
+        _normalized_sku_cache[sku] = normalized
         return normalized
     except Exception as e:
-        logger.error(f"Error normalizing SKU {sku}: {str(e)}")
+        # Only log errors at debug level for performance
+        logger.debug(f"Error normalizing SKU {sku}: {str(e)}")
         return ""
 
+# Set up LRU cache for JSON parsing
+@lru_cache(maxsize=128)
+def _parse_sku_json(sku_json):
+    """Parse JSON string of SKU data with caching"""
+    try:
+        return json.loads(sku_json)
+    except json.JSONDecodeError:
+        logger.error(f"Invalid JSON in SKU data")
+        return []
 
 def convert_sku_format(sku_data):
     """
     Convert SKU data from various formats to a normalized dictionary.
+    Optimized for performance with caching for common patterns.
     
     Args:
         sku_data: SKU data as string or list
@@ -43,43 +65,41 @@ def convert_sku_format(sku_data):
         if sku_data is None:
             return result
         
-        # Parse JSON if string
+        # Parse JSON if string - use cached version for repeated strings
         if isinstance(sku_data, str):
-            try:
-                sku_data = json.loads(sku_data)
-            except json.JSONDecodeError:
-                logger.error(f"Invalid JSON in SKU data: {sku_data}")
-                return result
+            # Use a cache for parsing JSON strings
+            sku_data = _parse_sku_json(sku_data)
         
         # Ensure we have a list
         if not isinstance(sku_data, list):
-            logger.error(f"SKU data is not a list: {sku_data}")
+            logger.debug(f"SKU data is not a list")
             return result
         
-        # Process each item
+        # Pre-allocate dictionary capacity for performance
+        result = {}
+        
+        # Process each item - use fast path for well-formed data
         for item in sku_data:
             if not isinstance(item, dict):
-                logger.error(f"SKU item is not a dictionary: {item}")
                 continue
                 
-            if 'sku' not in item or 'quantity' not in item:
-                logger.error(f"SKU item missing required keys: {item}")
+            sku = item.get('sku')
+            quantity = item.get('quantity')
+            
+            if not sku or not quantity:
                 continue
                 
-            # Normalize SKU
-            normalized_sku = normalize_sku(item['sku'])
+            # Normalize SKU - use cached version
+            normalized_sku = normalize_sku(sku)
             if not normalized_sku:
-                logger.error(f"Empty normalized SKU: {item}")
                 continue
                 
             # Convert quantity to integer
             try:
-                quantity = int(item['quantity'])
+                quantity = int(quantity)
                 if quantity <= 0:
-                    logger.error(f"Invalid quantity {quantity} for SKU {normalized_sku}")
                     continue
             except (ValueError, TypeError):
-                logger.error(f"Invalid quantity {item['quantity']} for SKU {normalized_sku}")
                 continue
                 
             # Add to result, aggregating if duplicate

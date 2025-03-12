@@ -49,6 +49,11 @@ class BillingReportRequestSerializer(serializers.Serializer):
     customer_id = serializers.IntegerField()
     start_date = serializers.DateField(format='%Y-%m-%d')
     end_date = serializers.DateField(format='%Y-%m-%d')
+    customer_services = serializers.ListField(
+        child=serializers.IntegerField(),
+        required=False,
+        help_text="List of customer service IDs to include in report (empty means all services)"
+    )
     output_format = serializers.ChoiceField(
         choices=['json', 'csv', 'pdf', 'dict'],
         default='json'
@@ -58,6 +63,36 @@ class BillingReportRequestSerializer(serializers.Serializer):
         """Validate customer ID exists"""
         if not Customer.objects.filter(id=value).exists():
             raise serializers.ValidationError(f"Customer with ID {value} not found")
+        return value
+    
+    def validate_customer_services(self, value):
+        """Validate customer services exist and belong to the customer"""
+        if not value:  # Empty list means all services, which is valid
+            return value
+            
+        from customer_services.models import CustomerService
+        
+        # Get customer ID from the data
+        customer_id = self.initial_data.get('customer_id')
+        if not customer_id:
+            return value  # Skip validation if customer_id not provided
+            
+        # Check if services exist and belong to the customer
+        valid_service_ids = CustomerService.objects.filter(
+            customer_id=customer_id
+        ).values_list('id', flat=True)
+        
+        # Convert to set for faster lookup
+        valid_service_ids_set = set(valid_service_ids)
+        
+        # Find invalid services
+        invalid_services = [svc_id for svc_id in value if svc_id not in valid_service_ids_set]
+        
+        if invalid_services:
+            raise serializers.ValidationError(
+                f"Invalid service IDs for customer {customer_id}: {invalid_services}"
+            )
+            
         return value
     
     def validate(self, data):

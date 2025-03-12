@@ -4,6 +4,9 @@ from customers.models import Customer
 from orders.models import Order
 from services.models import Service
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class BillingReport(models.Model):
@@ -18,6 +21,8 @@ class BillingReport(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     service_totals = models.JSONField(default=dict)
+    metadata = models.JSONField(default=dict, blank=True, 
+                              help_text="Additional metadata for the report (customer service selection, etc.)")
     
     class Meta:
         ordering = ['-created_at']
@@ -27,6 +32,28 @@ class BillingReport(models.Model):
     def __str__(self):
         return f"Billing Report #{self.id} - {self.customer.company_name}"
         
+    def update_total_amount(self):
+        """Update the total amount based on service totals."""
+        try:
+            if not self.service_totals:
+                self.total_amount = 0
+                return
+                
+            # Sum all service amounts from service_totals
+            total = sum(data['amount'] for data in self.service_totals.values())
+            self.total_amount = total
+            logger.info(f"Updated report #{self.id} total_amount to {total} based on service totals")
+        except Exception as e:
+            logger.error(f"Error updating total amount: {str(e)}")
+            # Fallback to calculating from order costs
+            try:
+                from django.db.models import Sum
+                total = self.order_costs.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
+                self.total_amount = total
+                logger.info(f"Fallback: Updated report #{self.id} total_amount to {total} based on order costs")
+            except Exception as inner_e:
+                logger.error(f"Fallback failed: {str(inner_e)}")
+        
     def add_order_cost(self, order_cost):
         """
         Add an order cost to this report and update totals.
@@ -34,8 +61,6 @@ class BillingReport(models.Model):
         Args:
             order_cost: OrderCost object to add
         """
-        self.total_amount += order_cost.total_amount
-        
         # Update service totals
         for service_cost in order_cost.service_costs.all():
             service_id = str(service_cost.service_id)
@@ -46,6 +71,9 @@ class BillingReport(models.Model):
                     'service_name': service_cost.service_name,
                     'amount': float(service_cost.amount)
                 }
+        
+        # Update total amount from service totals
+        self.update_total_amount()
         self.save()
     
     def to_dict(self):
@@ -64,7 +92,8 @@ class BillingReport(models.Model):
             'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S'),
             'orders': [order_cost.to_dict() for order_cost in self.order_costs.all()],
             'service_totals': self.service_totals,
-            'total_amount': float(self.total_amount)
+            'total_amount': float(self.total_amount),
+            'metadata': self.metadata
         }
     
     def to_json(self):
