@@ -84,12 +84,10 @@ etc/
 images/
 Main/
 ai_core/
-tests/
 templates/
 Writerside/
 *.pgerd
 github-recovery-codes.txt
-calculator.py
 create_venv.ps1
 requirements_check.py
 script_create_directory.md
@@ -98,17 +96,22 @@ PGSQL_commands.md
 package-lock.json
 node_modules
 
+# Don't ignore Django app test directories and utility packages
+!*/tests/
+!*/tests/**
+!Billing_V2/
+!Billing_V2/**
+!rules/utils/
+!rules/utils/**
+!rules/migrations/
+!rules/migrations/**
+!*/tests/
+!*/tests/**
+!tests/
+!tests/**
+
 
 # Temporary data import and database alignment scripts
-import_orders.py
-import_shipping.py
-import_products.py
-check_order_data.py
-check_shipping_data.py
-check_product_data.py
-fix_db_alignment.py
-fix_url_namespaces.py
-refresh_view.py
 database_schema.txt
 order_sku_view_inspectdb.txt
 db_alignment_results.md
@@ -116,6 +119,17 @@ data_import_summary.md
 shipping_import_errors.log
 product_import_errors.log
 order_import_errors.log
+
+# Don't ignore important import/utility scripts
+!import_orders.py
+!import_shipping.py
+!import_products.py
+!check_order_data.py
+!check_shipping_data.py
+!check_product_data.py
+!fix_db_alignment.py
+!fix_url_namespaces.py
+!refresh_view.py
 
 # Added files to ignore
 .claude-temp-prompt.txt
@@ -129,12 +143,22 @@ frontend/src/components/rules/CalculationBuilder.jsx
 frontend/src/components/rules/ConditionBuilder.jsx
 frontend/src/components/rules/RuleTester.jsx
 frontend/src/utils/validationUtils.js
-rules/migrations/0012_alter_rule_adjustment_amount_alter_rule_field_and_more.py
-rules/utils/
 venv311/
+
+# Make sure we track all Django app code
+!rules/utils/
+!rules/migrations/
 
 # Additional ignores
 logs/
 *.log
 
+# Make sure Django app test files are tracked
+!api/tests/
+!api/tests/**
 
+
+
+# Track new test files based on Django naming convention
+!*/test_*.py
+!*/tests.py
