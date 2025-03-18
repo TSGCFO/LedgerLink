@@ -207,26 +207,31 @@ class BillingCalculator:
             # Update progress
             self.update_progress('processing', 'Loading customer services', 15)
             
-            # Get filtered customer services if specified
+            # Get all customer services first
             customer_services_query = CustomerService.objects.filter(
                 customer_id=self.customer_id
             )
+            all_services = list(customer_services_query.select_related('service'))
+            logger.info(f"Found {len(all_services)} total services for customer {self.customer_id}")
             
-            # Apply service filter if specified
+            # Create a filtered query based on service selection
             if self.customer_service_ids is not None:
-                if not self.customer_service_ids:  # Empty list - no services should be included
-                    logger.warning("Empty service ID list provided - no services will be included")
-                    # Create empty QuerySet
-                    customer_services_query = CustomerService.objects.none()
+                if not self.customer_service_ids:  # Empty list - use all services as a fallback
+                    logger.warning("Empty service ID list provided - falling back to using all services")
+                    # Keep all services (do nothing to the query)
+                    customer_services = all_services
                 else:
-                    # Filter to only the selected services
-                    customer_services_query = customer_services_query.filter(
-                        id__in=self.customer_service_ids
-                    )
+                    # Filter to only include the selected services
                     logger.info(f"Filtering to only include services with IDs: {self.customer_service_ids}")
-                
-            # Get all customer services with related data
-            customer_services = list(customer_services_query.select_related('service'))
+                    customer_services = [
+                        cs for cs in all_services 
+                        if cs.id in self.customer_service_ids
+                    ]
+                    logger.info(f"Filtered to {len(customer_services)} services")
+            else:
+                # Using all services (default behavior)
+                logger.info(f"Using all {len(all_services)} services (no filtering)")
+                customer_services = all_services
             
             # Check if we have any services to process
             if not customer_services:

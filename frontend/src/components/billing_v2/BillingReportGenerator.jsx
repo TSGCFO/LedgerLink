@@ -264,13 +264,17 @@ const BillingReportGenerator = ({ onReportGenerated, customers, loading: custome
     
     // Handle customer service selection explicitly
     if (formData.customerServicesSelectAll) {
-      // Use null to indicate all services (backend will handle this case)
-      apiData.customer_services = null;
-      logger.info('All services selected - using null to indicate no filtering');
-    } else {
-      // Use the specific service IDs selected
+      // Skip adding customer_services parameter to use backend default (all services)
+      // Do NOT set it to null or empty array - omit it entirely
+      logger.info('All services selected - omitting customer_services parameter');
+    } else if (formData.customerServices && formData.customerServices.length > 0) {
+      // Only add parameter when specific services are actually selected
       apiData.customer_services = formData.customerServices;
       logger.info(`Selected specific services: ${formData.customerServices.length} services`, formData.customerServices);
+    } else {
+      // No services selected, but not "All" - this is an error state
+      logger.warning("No services selected but not in 'All services' mode. Using all services as fallback.");
+      // Don't add the parameter to use all services
     }
     
     logger.info('Submitting report generation with data:', apiData);
