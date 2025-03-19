@@ -138,11 +138,6 @@ inserts.csv
 import_customer_services.py
 import_inserts.py
 whatsapp_transaction_bot.json
-frontend/src/components/rules/BasicRuleForm.jsx
-frontend/src/components/rules/CalculationBuilder.jsx
-frontend/src/components/rules/ConditionBuilder.jsx
-frontend/src/components/rules/RuleTester.jsx
-frontend/src/utils/validationUtils.js
 venv311/
 
 # Make sure we track all Django app code
