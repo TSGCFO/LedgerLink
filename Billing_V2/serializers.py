@@ -52,7 +52,7 @@ class BillingReportRequestSerializer(serializers.Serializer):
     customer_services = serializers.ListField(
         child=serializers.IntegerField(),
         required=False,
-        help_text="List of customer service IDs to include in report (empty means all services)"
+        help_text="List of customer service IDs to include in report (omit completely for all services, empty list for no services)"
     )
     output_format = serializers.ChoiceField(
         choices=['json', 'csv', 'pdf', 'dict'],
@@ -67,7 +67,7 @@ class BillingReportRequestSerializer(serializers.Serializer):
     
     def validate_customer_services(self, value):
         """Validate customer services exist and belong to the customer"""
-        if not value:  # Empty list means all services, which is valid
+        if not value:  # Empty list means no services, which is valid
             return value
             
         from customer_services.models import CustomerService

@@ -127,23 +127,37 @@ class BillingReportViewSet(viewsets.ModelViewSet):
             
             # Handle customer_services parameter explicitly
             customer_service_ids = data.get('customer_services')
+            logger.info(f"Raw request data: {request.data}")
+            logger.info(f"Initial customer_service_ids: {customer_service_ids} (type: {type(customer_service_ids)})")
+            
             if customer_service_ids is not None:
-                logger.info(f"Using customer_service_ids: {customer_service_ids} (type: {type(customer_service_ids)})")
                 # Ensure it's a proper list of integers
                 if isinstance(customer_service_ids, list):
-                    # Already a list
-                    pass
+                    # Already a list - convert elements to int if needed
+                    original_ids = customer_service_ids.copy()
+                    customer_service_ids = [int(id) for id in customer_service_ids if id]
+                    logger.info(f"List format - Original: {original_ids}, Converted: {customer_service_ids}")
                 elif isinstance(customer_service_ids, str):
                     # Convert string to list if needed (e.g. '1,2,3')
                     if ',' in customer_service_ids:
+                        original_str = customer_service_ids
                         customer_service_ids = [int(id.strip()) for id in customer_service_ids.split(',') if id.strip()]
+                        logger.info(f"String format with commas - Original: '{original_str}', Converted: {customer_service_ids}")
                     else:
                         # Single ID
+                        original_str = customer_service_ids
                         customer_service_ids = [int(customer_service_ids)]
+                        logger.info(f"Single ID string - Original: '{original_str}', Converted: {customer_service_ids}")
                 else:
                     # Unknown format - log and use None (all services)
                     logger.warning(f"Unrecognized customer_service_ids format: {customer_service_ids}, using None (all services)")
                     customer_service_ids = None
+                
+                # List all CustomerService objects for this customer to help with debugging
+                from customer_services.models import CustomerService
+                all_services = list(CustomerService.objects.filter(customer_id=data['customer_id']).values('id', 'service__id', 'service__service_name'))
+                logger.info(f"All available customer services for customer {data['customer_id']}: {all_services}")
+                logger.info(f"Final customer_service_ids to be used: {customer_service_ids}")
             
             calculator = BillingCalculator(
                 customer_id=data['customer_id'],

@@ -39,9 +39,31 @@ class BillingCalculator:
         self.customer_id = customer_id
         
         # Handle customer_service_ids properly - treat empty list differently from None
+        logger.info(f"BillingCalculator.__init__ - Received customer_service_ids: {customer_service_ids} (type: {type(customer_service_ids)})")
+        
         if customer_service_ids is not None:
-            # Convert to list of integers to ensure consistent handling
-            self.customer_service_ids = [int(id) for id in customer_service_ids if id]
+            # Ensure we have a list of integers
+            if isinstance(customer_service_ids, list):
+                # Make a copy to avoid modifying the original
+                raw_ids = list(customer_service_ids)
+                # Convert to list of integers to ensure consistent handling
+                self.customer_service_ids = [int(id) for id in customer_service_ids if id]
+                logger.info(f"Converted list: {raw_ids} -> {self.customer_service_ids}")
+            else:
+                # Handle non-list values (should not happen normally)
+                logger.warning(f"customer_service_ids is not a list: {customer_service_ids}")
+                if isinstance(customer_service_ids, str):
+                    if ',' in customer_service_ids:
+                        self.customer_service_ids = [int(id.strip()) for id in customer_service_ids.split(',') if id.strip()]
+                    else:
+                        self.customer_service_ids = [int(customer_service_ids)] if customer_service_ids else []
+                else:
+                    # Last resort - try to convert to list
+                    try:
+                        self.customer_service_ids = [int(id) for id in list(customer_service_ids) if id]
+                    except:
+                        self.customer_service_ids = []
+            
             logger.info(f"Using specific services: {self.customer_service_ids}")
         else:
             # None means include all services (no filtering)
@@ -165,6 +187,10 @@ class BillingCalculator:
             BillingReport object
         """
         try:
+            # Log the initial state at the beginning of the method
+            logger.info(f"generate_report - Using customer_id: {self.customer_id}")
+            logger.info(f"generate_report - Current customer_service_ids: {self.customer_service_ids}")
+            
             # Update progress
             self.update_progress('initializing', 'Validating input', 5)
             
@@ -216,17 +242,26 @@ class BillingCalculator:
             
             # Create a filtered query based on service selection
             if self.customer_service_ids is not None:
-                if not self.customer_service_ids:  # Empty list - use all services as a fallback
-                    logger.warning("Empty service ID list provided - falling back to using all services")
-                    # Keep all services (do nothing to the query)
-                    customer_services = all_services
+                if not self.customer_service_ids:  # Empty list - include no services
+                    logger.warning("Empty service ID list provided - including no services (empty report)")
+                    # Empty list means no services (not all services)
+                    customer_services = []
                 else:
                     # Filter to only include the selected services
                     logger.info(f"Filtering to only include services with IDs: {self.customer_service_ids}")
-                    customer_services = [
-                        cs for cs in all_services 
-                        if cs.id in self.customer_service_ids
-                    ]
+                    # Log all customer service IDs for debugging
+                    all_cs_ids = [cs.id for cs in all_services]
+                    logger.info(f"Available customer service IDs: {all_cs_ids}")
+                    
+                    # More detailed filtering with logging
+                    customer_services = []
+                    for cs in all_services:
+                        if cs.id in self.customer_service_ids:
+                            customer_services.append(cs)
+                            logger.info(f"Added service: CS.id={cs.id}, Service.id={cs.service.id}, Service.name={cs.service.service_name}")
+                        else:
+                            logger.info(f"Filtered out service: CS.id={cs.id}, Service.id={cs.service.id}, Service.name={cs.service.service_name}")
+                    
                     logger.info(f"Filtered to {len(customer_services)} services")
             else:
                 # Using all services (default behavior)
@@ -344,12 +379,20 @@ class BillingCalculator:
                                 )
                                 batch_service_costs.append(service_cost)
                                 
-                                # Update report totals
-                                service_id = str(cs.service.id)
-                                if service_id in self.report.service_totals:
-                                    self.report.service_totals[service_id]['amount'] += float(amount)
+                                # Update report totals using customer_service.id instead of service.id
+                                # This ensures each selected customer service is tracked separately
+                                customer_service_id = str(cs.id)
+                                service_id = str(cs.service.id)  # Keep for reference
+                                
+                                # Use a composite key that includes both IDs to ensure uniqueness
+                                totals_key = f"cs_{customer_service_id}"
+                                
+                                if totals_key in self.report.service_totals:
+                                    self.report.service_totals[totals_key]['amount'] += float(amount)
                                 else:
-                                    self.report.service_totals[service_id] = {
+                                    self.report.service_totals[totals_key] = {
+                                        'customer_service_id': customer_service_id,
+                                        'service_id': service_id,
                                         'service_name': cs.service.service_name,
                                         'amount': float(amount)
                                     }
@@ -420,6 +463,10 @@ class BillingCalculator:
                     # Calculate total from service amounts
                     total = sum(float(data['amount']) for data in self.report.service_totals.values())
                     logger.info(f"Final calculated total: {total}, Current DB total: {self.report.total_amount}")
+                    
+                    # Log detailed breakdown of totals by customer service
+                    for key, data in self.report.service_totals.items():
+                        logger.info(f"Service total: key={key}, customer_service_id={data.get('customer_service_id', 'N/A')}, service_name={data.get('service_name', 'N/A')}, amount={data['amount']}")
                     
                     # Always set the total_amount to ensure it's correct, not just when different
                     self.report.total_amount = total

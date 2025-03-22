@@ -40,9 +40,10 @@ class BillingReport(models.Model):
                 return
                 
             # Sum all service amounts from service_totals
-            total = sum(data['amount'] for data in self.service_totals.values())
+            total = sum(float(data['amount']) for data in self.service_totals.values())
             self.total_amount = total
             logger.info(f"Updated report #{self.id} total_amount to {total} based on service totals")
+            logger.info(f"Service totals keys used: {list(self.service_totals.keys())}")
             
             # Force save to ensure the total_amount is persisted
             from django.db import connection
@@ -84,11 +85,30 @@ class BillingReport(models.Model):
         """
         # Update service totals
         for service_cost in order_cost.service_costs.all():
+            # Generate a unique key for this service cost
             service_id = str(service_cost.service_id)
-            if service_id in self.service_totals:
+            
+            # We need to maintain backward compatibility with existing code 
+            # but also support the new naming scheme where keys include customer_service_id
+            # Check if there's already a key with cs_ prefix
+            prefix_key = None
+            for key in self.service_totals.keys():
+                if key.startswith(f"cs_") and self.service_totals[key].get('service_id') == service_id:
+                    prefix_key = key
+                    break
+            
+            if prefix_key:
+                # Use the existing prefixed key
+                self.service_totals[prefix_key]['amount'] += float(service_cost.amount)
+            elif service_id in self.service_totals:
+                # Legacy key - use as is
                 self.service_totals[service_id]['amount'] += float(service_cost.amount)
             else:
-                self.service_totals[service_id] = {
+                # No existing key - create new prefixed key
+                # In this case we don't have customer_service_id, so we'll just use service_id
+                new_key = f"cs_service_{service_id}"
+                self.service_totals[new_key] = {
+                    'service_id': service_id,
                     'service_name': service_cost.service_name,
                     'amount': float(service_cost.amount)
                 }
@@ -111,9 +131,10 @@ class BillingReport(models.Model):
         # Ensure total_amount is correct before returning
         if self.service_totals:
             # Double-check the total amount matches service_totals
-            calculated_total = sum(data['amount'] for data in self.service_totals.values())
+            calculated_total = sum(float(data['amount']) for data in self.service_totals.values())
             if abs(float(self.total_amount) - calculated_total) > 0.01:  # Allow for small decimal differences
                 logger.warning(f"Total amount discrepancy detected: DB={self.total_amount}, calculated={calculated_total}")
+                logger.info(f"Service totals used for calculation: {json.dumps(self.service_totals)}")
                 # Update the total_amount to match service_totals
                 self.total_amount = calculated_total
                 try:
