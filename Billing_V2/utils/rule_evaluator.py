@@ -21,6 +21,7 @@ class RuleEvaluator:
         Returns:
             Boolean indicating if rule applies
         """
+        logger.info(f"Evaluating rule: Field={rule.field}, Operator={rule.operator}, Value={(rule.value if hasattr(rule, 'value') else rule.values)}")
         try:
             # Get field value from order
             field = rule.field
@@ -59,24 +60,76 @@ class RuleEvaluator:
                 except (ValueError, IndexError) as e:
                     logger.error(f"Error evaluating numeric rule: {str(e)}")
                     return False
-            
             # Handle string fields
-            elif field in ['reference_number', 'ship_to_name', 'ship_to_address', 'ship_to_city']:
+            elif field in ['reference_number', 'ship_to_name', 'ship_to_address', 'ship_to_city', 'notes']:
                 field_value = str(field_value or "")
+                rule_value = str(rule.value or "") if hasattr(rule, 'value') else ""
                 operator = rule.operator
                 
+                # Make all string comparisons case-insensitive for reference_number and notes
+                case_insensitive_fields = ['reference_number', 'notes']
+                use_case_insensitive = field in case_insensitive_fields
+                
+                # Log the field being evaluated
+                logger.info(f"Evaluating string field: {field}, Operator: {operator}, Value: '{field_value}', Rule Value: '{rule_value}'")
+                
                 if operator == 'eq':
-                    return field_value == rule_values[0] if rule_values else False
+                    if use_case_insensitive:
+                        if field_value is None:
+                            return rule_value is None
+                        result = field_value.lower() == rule_value.lower()
+                        logger.info(f"Case-insensitive EQ: {field_value.lower()} == {rule_value.lower()} = {result}")
+                        return result
+                    return field_value == rule_value
+                    
                 elif operator == 'ne':
-                    return field_value != rule_values[0] if rule_values else True
+                    if use_case_insensitive:
+                        if field_value is None:
+                            return rule_value is not None
+                        result = field_value.lower() != rule_value.lower()
+                        logger.info(f"Case-insensitive NE: {field_value.lower()} != {rule_value.lower()} = {result}")
+                        return result
+                    return field_value != rule_value
+                    
                 elif operator == 'in':
+                    if use_case_insensitive:
+                        lower_values = [str(v).lower() for v in rule_values]
+                        result = field_value.lower() in lower_values
+                        logger.info(f"Case-insensitive IN: {field_value.lower()} in {lower_values} = {result}")
+                        return result
                     return field_value in rule_values
+                    
                 elif operator == 'ni':
+                    if use_case_insensitive:
+                        lower_values = [str(v).lower() for v in rule_values]
+                        result = field_value.lower() not in lower_values
+                        logger.info(f"Case-insensitive NOT IN: {field_value.lower()} not in {lower_values} = {result}")
+                        return result
                     return field_value not in rule_values
+                    
                 elif operator == 'contains':
+                    if use_case_insensitive:
+                        lower_field = field_value.lower()
+                        result = any(str(val).lower() in lower_field for val in rule_values)
+                        logger.info(f"Case-insensitive CONTAINS = {result}")
+                        return result
                     return any(val in field_value for val in rule_values)
+                    
                 elif operator == 'not_contains':
+                    if use_case_insensitive:
+                        lower_field = field_value.lower()
+                        result = not any(str(val).lower() in lower_field for val in rule_values)
+                        logger.info(f"Case-insensitive NOT CONTAINS = {result}")
+                        return result
                     return not any(val in field_value for val in rule_values)
+                    
+                elif operator == 'startswith':
+                    if use_case_insensitive:
+                        result = field_value.lower().startswith(rule_value.lower())
+                        logger.info(f"Case-insensitive STARTSWITH: {field_value.lower()} startswith {rule_value.lower()} = {result}")
+                        return result
+                    return field_value.startswith(rule_value)
+                    
                 else:
                     logger.warning(f"Unknown operator {operator} for string field {field}")
                     return False
@@ -135,16 +188,36 @@ class RuleEvaluator:
                 logger.warning(f"No rules found for rule group {rule_group.id}")
                 return False
                 
-            # Evaluate each rule
-            results = [RuleEvaluator.evaluate_rule(rule, order) for rule in rules]
+            # Add detailed logging for debugging
+            logger.info(f"Evaluating rule group {rule_group.id} with logic '{rule_group.logic_operator}' for order {order.transaction_id}")
+            
+            # Evaluate each rule with detailed logging
+            results = []
+            for rule in rules:
+                rule_result = RuleEvaluator.evaluate_rule(rule, order)
+                results.append(rule_result)
+                logger.info(f"Rule result for {rule.field} {rule.operator} '{rule.value if hasattr(rule, 'value') else rule.values}': {rule_result}")
+                
+                # For reference_number with startswith, add extra debug info
+                if rule.field == 'reference_number' and rule.operator == 'startswith':
+                    field_value = getattr(order, 'reference_number', None)
+                    rule_value = getattr(rule, 'value', None)
+                    if field_value and rule_value:
+                        logger.info(f"DEBUG - reference_number: '{field_value}', rule value: '{rule_value}', " +
+                                   f"lowercase check: '{field_value.lower()}' startswith '{rule_value.lower()}' = {field_value.lower().startswith(rule_value.lower())}")
             
             # Apply logic operator
             logic_operator = rule_group.logic_operator.upper()
+            final_result = False
             
             if logic_operator == 'AND':
-                return all(results)
+                final_result = all(results)
+                logger.info(f"Rule group {rule_group.id} with AND logic: {results} = {final_result}")
+                return final_result
             elif logic_operator == 'OR':
-                return any(results)
+                final_result = any(results)
+                logger.info(f"Rule group {rule_group.id} with OR logic: {results} = {final_result}")
+                return final_result
             elif logic_operator == 'NOT':
                 return not any(results)
             elif logic_operator == 'XOR':

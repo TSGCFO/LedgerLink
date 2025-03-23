@@ -1,3 +1,4 @@
+
 import logging
 import json
 from datetime import datetime
@@ -223,10 +224,16 @@ class BillingCalculator:
                 else:
                     # Filter to only include the selected services
                     logger.info(f"Filtering to only include services with IDs: {self.customer_service_ids}")
-                    customer_services = [
-                        cs for cs in all_services 
-                        if cs.id in self.customer_service_ids
-                    ]
+                    # Create a normalized set of IDs for efficient lookup
+                    customer_service_id_set = set(int(cs_id) for cs_id in self.customer_service_ids)
+                    customer_services = []
+                    
+                    for cs in all_services:
+                        cs_id = int(cs.id)
+                        if cs_id in customer_service_id_set:
+                            customer_services.append(cs)
+                            logger.info(f"Selected service ID {cs_id}: {cs.service.service_name}")
+                    
                     logger.info(f"Filtered to {len(customer_services)} services")
             else:
                 # Using all services (default behavior)
@@ -244,8 +251,10 @@ class BillingCalculator:
             
             # Get rule groups for each customer service in a single query
             from django.db.models import Prefetch
+            # This is the corrected query that properly filters by customer service ID
+            # The previous version used customer_service__in which does not work correctly with IDs
             rule_groups = RuleGroup.objects.filter(
-                customer_service__in=[cs.id for cs in customer_services]
+                customer_service_id__in=[cs.id for cs in customer_services]
             ).select_related('customer_service')
             
             # Group rule groups by customer service

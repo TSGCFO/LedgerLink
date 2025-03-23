@@ -1,184 +1,125 @@
-#!/usr/bin/env python
-"""
-Fix the billing calculator implementation directly to resolve test failures.
-"""
+# Fix for billing calculator service filter issue
+
 import os
-
-def fix_billing_calculator_direct():
-    """
-    Creates a new fixed version of the billing calculator file
-    """
-    # Original and fixed paths
-    original_path = "billing/billing_calculator.py"
-    fixed_path = "billing/billing_calculator.py"
-    
-    # Check if the original file exists
-    if not os.path.exists(original_path):
-        print(f"Error: {original_path} not found!")
-        return False
-    
-    # Create the fixed content
-    fixed_content = """from decimal import Decimal
+import django
 import json
-import re
+from datetime import datetime, date
+from decimal import Decimal
+import logging
 
-def normalize_sku(sku):
-    """Normalize SKU by removing hyphens and spaces, and converting to uppercase."""
-    if sku is None:
-        return ""
-    # Remove hyphens and spaces, convert to uppercase
-    return re.sub(r'[-\\s]', '', sku.upper())
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-def convert_sku_format(sku_data):
+# Set up Django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'LedgerLink.settings')
+django.setup()
+
+from customers.models import Customer
+from Billing_V2.utils.calculator import BillingCalculator
+from customer_services.models import CustomerService
+from services.models import Service
+from Billing_V2.models import BillingReport
+from rules.models import RuleGroup
+
+def test_billing_calculator_fix():
     """
-    Convert SKU data from various formats to a normalized dictionary.
+    Test that the billing calculator correctly filters by specific service when selected
     
-    Args:
-        sku_data: String JSON or list of dictionaries with SKU info
-        
-    Returns:
-        Dictionary with normalized SKUs as keys and quantities as values
+    The issue was in the BillingCalculator class where rule groups were filtered
+    using customer_service__in instead of customer_service_id__in when specific
+    services are selected. This caused the filter to look for rule groups where
+    the entire customer_service object was in the list, rather than filtering by ID.
     """
-    result = {}
+    logger.info("Testing the billing calculator fix...")
     
-    if sku_data is None:
-        return result
-        
-    try:
-        if isinstance(sku_data, str):
-            data = json.loads(sku_data)
-        else:
-            data = sku_data
-            
-        for item in data:
-            sku = normalize_sku(item.get('sku'))
-            quantity = item.get('quantity')
-            if sku and quantity is not None:
-                result[sku] = int(quantity)  # Convert to integer
-    except (json.JSONDecodeError, TypeError, ValueError):
-        pass
-        
-    return result
-
-class RuleEvaluator:
-    """Evaluates rule conditions against orders."""
+    # Get Abokichi customer
+    customer = Customer.objects.filter(company_name='Abokichi').first()
+    if not customer:
+        logger.error("Abokichi customer not found")
+        return
     
-    @staticmethod
-    def evaluate_rule(rule, order):
-        """
-        Evaluate a rule against an order.
-        
-        Args:
-            rule: Rule object with field, operator, and value attributes
-            order: Order object to evaluate against
-            
-        Returns:
-            True if rule condition is met, False otherwise
-        """
-        field = rule.field
-        operator = rule.operator
-        values = rule.get_values_as_list()
-        
-        # Get order attribute value
-        if not hasattr(order, field):
-            return False
-        
-        order_value = getattr(order, field)
-        
-        # Handle different operators
-        if operator in ['eq', '==']:
-            return str(order_value) == str(values[0])
-            
-        elif operator in ['ne', 'neq', '!=']:
-            return str(order_value) != str(values[0])
-            
-        elif operator in ['gt', '>']:
-            try:
-                return Decimal(order_value) > Decimal(values[0])
-            except (ValueError, TypeError):
-                return False
-                
-        elif operator in ['lt', '<']:
-            try:
-                return Decimal(order_value) < Decimal(values[0])
-            except (ValueError, TypeError):
-                return False
-                
-        elif operator in ['gte', '>=']:
-            try:
-                return Decimal(order_value) >= Decimal(values[0])
-            except (ValueError, TypeError):
-                return False
-                
-        elif operator in ['lte', '<=']:
-            try:
-                return Decimal(order_value) <= Decimal(values[0])
-            except (ValueError, TypeError):
-                return False
-                
-        elif operator in ['contains', 'in']:
-            if field == 'sku_quantity':
-                try:
-                    # Handle SKU quantity field specially
-                    if isinstance(order_value, str):
-                        skus = json.loads(order_value)
-                        for value in values:
-                            normalized_value = normalize_sku(value)
-                            for sku in skus.keys():
-                                normalized_sku = normalize_sku(sku)
-                                if normalized_value in normalized_sku:
-                                    return True
-                    return False
-                except (json.JSONDecodeError, AttributeError):
-                    return False
-            else:
-                # Standard contains operation
-                return any(value in str(order_value) for value in values)
-                
-        elif operator in ['ncontains', 'not_contains']:
-            if field == 'sku_quantity':
-                try:
-                    # Handle SKU quantity field specially
-                    if isinstance(order_value, str):
-                        skus = json.loads(order_value)
-                        for value in values:
-                            normalized_value = normalize_sku(value)
-                            contains_flag = False
-                            for sku in skus.keys():
-                                normalized_sku = normalize_sku(sku)
-                                if normalized_value in normalized_sku:
-                                    contains_flag = True
-                                    break
-                            if contains_flag:
-                                return False
-                        return True
-                    return True
-                except (json.JSONDecodeError, AttributeError):
-                    return True
-            else:
-                # Standard not contains operation
-                return not any(value in str(order_value) for value in values)
-                
-        return False
-
-class BillingCalculator:
-    """Placeholder for BillingCalculator class"""
-    def __init__(self, customer_id=None, start_date=None, end_date=None):
-        self.customer_id = customer_id
-        self.start_date = start_date
-        self.end_date = end_date
-        
-    def generate_report(self):
-        """Placeholder for generate_report method"""
-        return None
-"""
+    # Get B2B Base service
+    b2b_base_service = Service.objects.filter(service_name='B2B Base').first()
+    if not b2b_base_service:
+        logger.error("B2B Base service not found")
+        return
     
-    # Write the fixed content to the file
-    with open(fixed_path, 'w') as f:
-        f.write(fixed_content)
+    # Get B2B Base customer service for Abokichi
+    b2b_base_cs = CustomerService.objects.filter(
+        customer=customer,
+        service=b2b_base_service
+    ).first()
     
-    print(f"Successfully created fixed {fixed_path}!")
-    return True
+    if not b2b_base_cs:
+        logger.error("B2B Base customer service not found for Abokichi")
+        return
+    
+    logger.info(f"Found B2B Base customer service ID: {b2b_base_cs.id}")
+    
+    # Verify rule groups for B2B Base service with correct filter
+    rule_groups = RuleGroup.objects.filter(customer_service_id__in=[b2b_base_cs.id])
+    logger.info(f"Found {rule_groups.count()} rule groups for B2B Base service using customer_service_id__in")
+    
+    # Also check the old incorrect filter method for comparison
+    rule_groups_old_method = RuleGroup.objects.filter(customer_service__in=[b2b_base_cs.id])
+    logger.info(f"Found {rule_groups_old_method.count()} rule groups using incorrect customer_service__in")
+    
+    # Create dates for test
+    start_date = date(2024, 2, 16)
+    end_date = date(2024, 3, 6)
+    
+    # Test with all services
+    logger.info("\nTEST 1: Creating report with ALL SERVICES")
+    all_services_calc = BillingCalculator(
+        customer_id=customer.id,
+        start_date=start_date,
+        end_date=end_date,
+        customer_service_ids=None  # None = all services
+    )
+    
+    all_services_report = all_services_calc.generate_report()
+    logger.info(f"All services report total: {all_services_report.total_amount}")
+    
+    # Test with B2B Base service only
+    logger.info("\nTEST 2: Creating report with ONLY B2B BASE SERVICE")
+    specific_service_calc = BillingCalculator(
+        customer_id=customer.id,
+        start_date=start_date,
+        end_date=end_date,
+        customer_service_ids=[b2b_base_cs.id]  # Just B2B Base service
+    )
+    
+    specific_service_report = specific_service_calc.generate_report()
+    logger.info(f"B2B Base only report total: {specific_service_report.total_amount}")
+    
+    # Get B2B Base amount in all services report
+    b2b_base_service_id = str(b2b_base_service.id)
+    b2b_base_amount_in_all = 0
+    
+    if b2b_base_service_id in all_services_report.service_totals:
+        b2b_base_amount_in_all = float(all_services_report.service_totals[b2b_base_service_id]['amount'])
+    
+    logger.info(f"\nCOMPARISON:")
+    logger.info(f"B2B Base amount in All services report: {b2b_base_amount_in_all}")
+    logger.info(f"B2B Base amount in B2B Base only report: {float(specific_service_report.total_amount) if specific_service_report.total_amount else 0}")
+    
+    # Explain what the fix did
+    logger.info("\nEXPLANATION OF THE FIX:")
+    logger.info("The issue was in the BillingCalculator class in calculator.py line 246-247:")
+    logger.info("Original code was using: customer_service__in=[cs.id for cs in customer_services]")
+    logger.info("Fixed code now uses: customer_service_id__in=[cs.id for cs in customer_services]")
+    logger.info("The fix ensures that the filter correctly matches rule groups by customer service IDs")
+    
+    # Check if the fix worked
+    if specific_service_report.total_amount > 0:
+        logger.info("SUCCESS: B2B Base service now shows a total when selected individually")
+        logger.info("The billing calculator fix is working correctly!")
+    elif b2b_base_amount_in_all == 0:
+        logger.info("TEST INCONCLUSIVE: No billable amount for B2B Base service in this period for either method")
+    else:
+        logger.error(f"ISSUE REMAINS: B2B Base has value {b2b_base_amount_in_all} in all services but {specific_service_report.total_amount} when selected individually")
 
 if __name__ == "__main__":
-    fix_billing_calculator_direct()
+    logger.info("Testing the billing calculator service filter fix")
+    test_billing_calculator_fix()
