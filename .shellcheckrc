@@ -1,0 +1,4 @@
+shell=bash
+disable=SC2059,SC2086
+enable=require-variable-braces
+severity=style
