@@ -154,7 +154,7 @@ if [[ "$1" == "-us" ]]; then
   echo "----------------------------------------"
   
   # Array to store problematic files
-  declare -a problematic_files
+  declare -a problematic_files=()
 
   # Find files and check for unsupported characters
   found=false
@@ -162,6 +162,7 @@ if [[ "$1" == "-us" ]]; then
     result=$(check_unsupported_characters "${file}")
     if [[ -n "${result}" ]]; then
       echo "${result}"
+      problematic_files+=("${result}")
       found=true
     fi
   done < <(find "${local_dir}" -maxdepth "${depth}" -type f 2>/dev/null)
@@ -177,6 +178,7 @@ if [[ "$1" == "-us" ]]; then
   files_count=${#problematic_files[@]}
   echo "Found ${files_count} file(s) with unsupported windows characters."
   read -r -p "Do you want to delete these files? (y/n): " answer
+  
   if [[ "${answer}" == "y" || "${answer}" == "Y" ]]; then
     echo "Deleting files..."
     deleted_count=0
