@@ -128,7 +128,8 @@ class USShippingSerializer(serializers.ModelSerializer):
         if obj.days_to_first_deliver is not None:
             return obj.days_to_first_deliver
         elif obj.delivery_date and obj.ship_date:
-            return (obj.delivery_date - obj.ship_date.date()).days
+            # ship_date is stored as a DateField, so it's already a date object
+            return (obj.delivery_date - obj.ship_date).days
         return None
 
     def validate(self, data):
