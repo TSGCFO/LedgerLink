@@ -3,8 +3,11 @@ set -e
 
 echo "=== Running Billing Tests ==="
 
+# Ensure dependencies are installed in a virtual environment
+# python -m venv venv && source venv/bin/activate && pip install -r requirements.txt
+
 # Use the Docker environment but run tests locally
-source venv311/bin/activate
+source venv/bin/activate
 
 # Set environment variables for test execution
 export SKIP_MATERIALIZED_VIEWS=True

@@ -1,6 +1,8 @@
 #!/bin/bash
 
 # Script to run the reorganized billing tests
+# Ensure you have a virtual environment with dependencies installed:
+# python -m venv venv && source venv/bin/activate && pip install -r requirements.txt
 
 set -e
 
@@ -15,10 +17,8 @@ if [ -z "$IN_DOCKER" ]; then
   # Activate virtual environment if it exists
   if [ -d "venv" ] && [ -f "venv/bin/activate" ]; then
     source venv/bin/activate
-  elif [ -d "venv311" ] && [ -f "venv311/bin/activate" ]; then
-    source venv311/bin/activate
   else
-    echo "No virtual environment found, using system Python"
+    echo "No virtual environment found. Run: python -m venv venv && source venv/bin/activate && pip install -r requirements.txt"
   fi
   
   # Set environment variables

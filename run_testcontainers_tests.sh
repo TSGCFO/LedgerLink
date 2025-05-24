@@ -3,6 +3,8 @@ set -e
 
 echo "Running tests using TestContainers..."
 echo "This script will use TestContainers to create and manage PostgreSQL containers for testing."
+# Setup a virtual environment if needed:
+# python -m venv venv && source venv/bin/activate && pip install -r requirements.txt
 
 # Set environment variable to ensure we use TestContainers
 export USE_TESTCONTAINERS=True
