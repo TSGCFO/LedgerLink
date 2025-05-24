@@ -61,6 +61,13 @@ python manage.py test --verbosity=2
 python manage.py test --keepdb
 ```
 
+For a Docker-based environment, use the convenience scripts:
+
+```bash
+./run_docker_tests.sh              # Run the full test suite
+./run_orders_tests.sh              # Example: run tests for the orders app
+```
+
 ### Standalone Test Scripts
 
 For testing specific functionality without requiring a full Django test environment, use the standalone test scripts in the `test_scripts` directory:
