@@ -36,6 +36,10 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+Alternatively, run `./setup_unix.sh` to automatically create the virtual
+environment, install both Python and Node dependencies, and prepare the
+test scripts.
+
 3. Apply migrations:
 ```bash
 python manage.py migrate
