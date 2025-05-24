@@ -710,7 +710,8 @@ def generate_billing_report(customer_id, start_date, end_date, output_format='js
         customer_id: ID of the customer
         start_date: Start date for billing period (string or datetime)
         end_date: End date for billing period (string or datetime)
-        output_format: Format for output (json, csv, dict)
+        output_format: Format for output (json, csv, dict). The CSV option was
+            added to support spreadsheet exports.
         
     Returns:
         Report data in the specified format
